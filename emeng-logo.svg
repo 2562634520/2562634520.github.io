@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">恶梦 AI</title>
+  <defs><linearGradient id="g" x1="8" y1="4" x2="55" y2="61"><stop stop-color="#e7ded2"/><stop offset=".48" stop-color="#9d4a43"/><stop offset="1" stop-color="#4d1718"/></linearGradient></defs>
+  <path fill="#0b090b" stroke="#7f3735" stroke-width="2" d="M32 3 47 11l10 15-4 19-15 15H26L11 45 7 26l10-15Z"/>
+  <path fill="none" stroke="url(#g)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M18 42 24 17l8 10 8-10 6 25-14 9Z"/>
+  <path fill="#b94a42" d="m25 34 7-5 7 5-7 4Z"/>
+  <path fill="none" stroke="#d8c9b8" stroke-width="1.6" stroke-linecap="round" d="m14 18 7 4M50 18l-7 4M18 49l7-4M46 49l-7-4" opacity=".7"/>
+</svg>
