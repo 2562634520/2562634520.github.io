@@ -1,0 +1,1091 @@
+{
+  "assets": [
+    {
+      "contentType": "",
+      "id": "1e9663147a46d207",
+      "kind": "stylesheet",
+      "name": "index-Co0c2OU3.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/1e9663147a46d207.css",
+      "url": "https://meimengai.cn/assets/index-Co0c2OU3.css"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "f3121b5a80236c1a",
+      "kind": "image",
+      "name": "meimeng-logo.svg",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/f3121b5a80236c1a.svg",
+      "url": "https://meimengai.cn/meimeng-logo.svg"
+    },
+    {
+      "contentType": "",
+      "id": "99cd91ad65c6ba2d",
+      "kind": "stylesheet",
+      "name": "GenerateButton-IZfZ5ue9.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/99cd91ad65c6ba2d.css",
+      "url": "https://meimengai.cn/assets/GenerateButton-IZfZ5ue9.css"
+    },
+    {
+      "contentType": "",
+      "id": "b4374d0d04a3e6a5",
+      "kind": "stylesheet",
+      "name": "WechatQrPanel-Cz9-otod.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/b4374d0d04a3e6a5.css",
+      "url": "https://meimengai.cn/assets/WechatQrPanel-Cz9-otod.css"
+    },
+    {
+      "contentType": "",
+      "id": "57acca29dc2d4a46",
+      "kind": "stylesheet",
+      "name": "el-overlay-BKLuON5C.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/57acca29dc2d4a46.css",
+      "url": "https://meimengai.cn/assets/el-overlay-BKLuON5C.css"
+    },
+    {
+      "contentType": "",
+      "id": "501875d5eee9b472",
+      "kind": "stylesheet",
+      "name": "el-dialog-DdHdkgt4.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/501875d5eee9b472.css",
+      "url": "https://meimengai.cn/assets/el-dialog-DdHdkgt4.css"
+    },
+    {
+      "contentType": "",
+      "id": "409d5fd237d5152d",
+      "kind": "stylesheet",
+      "name": "InvoiceApplicationModal-C2HOT1i4.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/409d5fd237d5152d.css",
+      "url": "https://meimengai.cn/assets/InvoiceApplicationModal-C2HOT1i4.css"
+    },
+    {
+      "contentType": "",
+      "id": "7bed46d7ff781201",
+      "kind": "stylesheet",
+      "name": "el-input-xaztPnzw.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/7bed46d7ff781201.css",
+      "url": "https://meimengai.cn/assets/el-input-xaztPnzw.css"
+    },
+    {
+      "contentType": "",
+      "id": "d0da2761c2796bb1",
+      "kind": "stylesheet",
+      "name": "el-button-DITZ5HsB.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/d0da2761c2796bb1.css",
+      "url": "https://meimengai.cn/assets/el-button-DITZ5HsB.css"
+    },
+    {
+      "contentType": "",
+      "id": "3356fe10a91b258c",
+      "kind": "stylesheet",
+      "name": "freshCanvasProjectRoute-BfvAXnwI.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/3356fe10a91b258c.css",
+      "url": "https://meimengai.cn/assets/freshCanvasProjectRoute-BfvAXnwI.css"
+    },
+    {
+      "contentType": "",
+      "id": "b06104a555798613",
+      "kind": "stylesheet",
+      "name": "ChangePasswordModal-_ZS9KbyZ.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/b06104a555798613.css",
+      "url": "https://meimengai.cn/assets/ChangePasswordModal-_ZS9KbyZ.css"
+    },
+    {
+      "contentType": "",
+      "id": "fb561817afb03376",
+      "kind": "stylesheet",
+      "name": "TemplateCoverMedia-DfWptM2F.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/fb561817afb03376.css",
+      "url": "https://meimengai.cn/assets/TemplateCoverMedia-DfWptM2F.css"
+    },
+    {
+      "contentType": "",
+      "id": "5ab60f4667d7a292",
+      "kind": "stylesheet",
+      "name": "el-scrollbar-Bom-PV3T.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/5ab60f4667d7a292.css",
+      "url": "https://meimengai.cn/assets/el-scrollbar-Bom-PV3T.css"
+    },
+    {
+      "contentType": "",
+      "id": "7b0a02c1b655ae09",
+      "kind": "stylesheet",
+      "name": "el-date-picker-CwXc3eov.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/7b0a02c1b655ae09.css",
+      "url": "https://meimengai.cn/assets/el-date-picker-CwXc3eov.css"
+    },
+    {
+      "contentType": "",
+      "id": "30951e9cc66aeddd",
+      "kind": "stylesheet",
+      "name": "CanvasDatePicker-x06RkwBq.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/30951e9cc66aeddd.css",
+      "url": "https://meimengai.cn/assets/CanvasDatePicker-x06RkwBq.css"
+    },
+    {
+      "contentType": "",
+      "id": "a4d601ac8d01d388",
+      "kind": "stylesheet",
+      "name": "OutpaintRatioModal-PWZSuSUu.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/a4d601ac8d01d388.css",
+      "url": "https://meimengai.cn/assets/OutpaintRatioModal-PWZSuSUu.css"
+    },
+    {
+      "contentType": "",
+      "id": "5d55bbb519c4e829",
+      "kind": "stylesheet",
+      "name": "ImageDetailModal-BkScuJe3.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/5d55bbb519c4e829.css",
+      "url": "https://meimengai.cn/assets/ImageDetailModal-BkScuJe3.css"
+    },
+    {
+      "contentType": "",
+      "id": "14550a95e086495f",
+      "kind": "stylesheet",
+      "name": "GenerationLoadingCopy-CLJRq-zO.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/14550a95e086495f.css",
+      "url": "https://meimengai.cn/assets/GenerationLoadingCopy-CLJRq-zO.css"
+    },
+    {
+      "contentType": "",
+      "id": "9b3aa6da92e603bf",
+      "kind": "stylesheet",
+      "name": "CanvasDashboard-CZbp2j_u.css",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/9b3aa6da92e603bf.css",
+      "url": "https://meimengai.cn/assets/CanvasDashboard-CZbp2j_u.css"
+    },
+    {
+      "contentType": "image/x-icon",
+      "id": "78c79066c05e5af5",
+      "kind": "image",
+      "name": "favicon.ico",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/78c79066c05e5af5.ico",
+      "url": "https://meimengai.cn/favicon.ico"
+    },
+    {
+      "contentType": "image/png",
+      "id": "546a84df1dad85d9",
+      "kind": "image",
+      "name": "ef9a82890fbf4b628359b7cc24d7529d.png",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/546a84df1dad85d9.png",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260706/ef9a82890fbf4b628359b7cc24d7529d.png"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "90bdfee95bc713ab",
+      "kind": "image",
+      "name": "e851ecc209f64f57b5b4e36887df322f.png",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/90bdfee95bc713ab.png",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260703/e851ecc209f64f57b5b4e36887df322f.png?x-oss-process=image%2Fresize%2Cw_1280%2Cm_lfit%2Climit_1%2Fformat%2Cwebp%2Fquality%2Cq_72%2Fauto-orient%2C1"
+    },
+    {
+      "contentType": "image/png",
+      "id": "d5df2a182a56c6f0",
+      "kind": "image",
+      "name": "pod-image-cutout-c05a395e.png",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/d5df2a182a56c6f0.png",
+      "url": "https://cs-c1.yiketu.com/assets/pod-image-cutout-c05a395e.png"
+    },
+    {
+      "contentType": "image/png",
+      "id": "6f4ec6852c39d34e",
+      "kind": "image",
+      "name": "batch-watermark-demo1-2f992209.png",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/6f4ec6852c39d34e.png",
+      "url": "https://cs-c1.yiketu.com/assets/batch-watermark-demo1-2f992209.png"
+    },
+    {
+      "contentType": "image/png",
+      "id": "cf0a781674ffc377",
+      "kind": "image",
+      "name": "copywriting-cover-f7834af3.png",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/cf0a781674ffc377.png",
+      "url": "https://cs-c2.yiketu.com/assets/copywriting-cover-f7834af3.png"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "b7a1689d8f351ff3",
+      "kind": "image",
+      "name": "ComfyUI_00001_crpcf_1782369045.png",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/b7a1689d8f351ff3.png",
+      "url": "https://cdn.meimengai.cn/uploads/mirror/tencent-cos/ecb0ffb4e546a2210f18e4812937cd74/output/ComfyUI_00001_crpcf_1782369045.png?x-oss-process=image%2Fresize%2Cw_768%2Cm_lfit%2Climit_1%2Fformat%2Cwebp%2Fquality%2Cq_72%2Fauto-orient%2C1"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "5cb0cf514ab490e2",
+      "kind": "image",
+      "name": "ComfyUI_00003_hqyjc_1782369266.png",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/5cb0cf514ab490e2.png",
+      "url": "https://cdn.meimengai.cn/uploads/mirror/tencent-cos/ecb0ffb4e546a2210f18e4812937cd74/output/ComfyUI_00003_hqyjc_1782369266.png?x-oss-process=image%2Fresize%2Cw_768%2Cm_lfit%2Climit_1%2Fformat%2Cwebp%2Fquality%2Cq_72%2Fauto-orient%2C1"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "adf549e78410a4d8",
+      "kind": "image",
+      "name": "d9027287eb0b49609d7723ade4c1dc13.png",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/adf549e78410a4d8.png",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260625/d9027287eb0b49609d7723ade4c1dc13.png?x-oss-process=image%2Fresize%2Cw_768%2Cm_lfit%2Climit_1%2Fformat%2Cwebp%2Fquality%2Cq_72%2Fauto-orient%2C1"
+    },
+    {
+      "contentType": "image/png",
+      "id": "50363fa44f2a425a",
+      "kind": "image",
+      "name": "gift-70f5196e.png",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/50363fa44f2a425a.png",
+      "url": "https://cs-c2.yiketu.com/assets/gift-70f5196e.png"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "22a48d001f689f85",
+      "kind": "image",
+      "name": "sku-image-cover.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/22a48d001f689f85.webp",
+      "url": "https://meimengai.cn/images/ecommerce/sku-image-cover.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "96c4c4b06d29d604",
+      "kind": "image",
+      "name": "batch-image-creation-cover.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/96c4c4b06d29d604.webp",
+      "url": "https://meimengai.cn/images/ai-tools/batch-image-creation-cover.webp"
+    },
+    {
+      "contentType": "image/png",
+      "id": "6a546852c0134f44",
+      "kind": "image",
+      "name": "ee9a3fcdef3d4701a604df164cee099a.png",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/6a546852c0134f44.png",
+      "url": "https://jh-prod-data.oss-cn-hangzhou.aliyuncs.com/uploads/media/20260617/ee9a3fcdef3d4701a604df164cee099a.png?x-oss-process=image%2Fresize%2Cw_1280%2Cm_lfit%2Fauto-orient%2C1"
+    },
+    {
+      "contentType": "image/png",
+      "id": "be4c065a867d1ffa",
+      "kind": "image",
+      "name": "816bd1d87e5740da8490ab2cd9ae5837.png",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/be4c065a867d1ffa.png",
+      "url": "https://jh-prod-data.oss-cn-hangzhou.aliyuncs.com/uploads/media/20260617/816bd1d87e5740da8490ab2cd9ae5837.png?x-oss-process=image%2Fresize%2Cw_1280%2Cm_lfit%2Fauto-orient%2C1"
+    },
+    {
+      "contentType": "image/jpeg",
+      "id": "2d208bd81f00e648",
+      "kind": "image",
+      "name": "abc510d2557c4b42b89ef17501a0adfd.jpg",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/2d208bd81f00e648.jpg",
+      "url": "https://jh-prod-data.oss-cn-hangzhou.aliyuncs.com/uploads/media/20260703/abc510d2557c4b42b89ef17501a0adfd.jpg?x-oss-process=image%2Fresize%2Cw_2048%2Cm_lfit%2Climit_1%2Fauto-orient%2C1"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "d5c4826a2aa02b02",
+      "kind": "image",
+      "name": "47973fecaa801f19b263eeb486557057.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/d5c4826a2aa02b02.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/47973fecaa801f19b263eeb486557057.webp"
+    },
+    {
+      "contentType": "image/png",
+      "id": "c8a249873e916b4d",
+      "kind": "image",
+      "name": "ee9a3fcdef3d4701a604df164cee099a.png",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/c8a249873e916b4d.png",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260617/ee9a3fcdef3d4701a604df164cee099a.png?x-oss-process=image%2Fresize%2Cw_640%2Cm_lfit%2Fauto-orient%2C1"
+    },
+    {
+      "contentType": "image/png",
+      "id": "27f870fd07a2f5a0",
+      "kind": "image",
+      "name": "816bd1d87e5740da8490ab2cd9ae5837.png",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/27f870fd07a2f5a0.png",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260617/816bd1d87e5740da8490ab2cd9ae5837.png?x-oss-process=image%2Fresize%2Cw_640%2Cm_lfit%2Fauto-orient%2C1"
+    },
+    {
+      "contentType": "image/jpeg",
+      "id": "c0cc364212cc529b",
+      "kind": "image",
+      "name": "abc510d2557c4b42b89ef17501a0adfd.jpg",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/c0cc364212cc529b.jpg",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260703/abc510d2557c4b42b89ef17501a0adfd.jpg?x-oss-process=image%2Fresize%2Cw_2048%2Cm_lfit%2Climit_1%2Fauto-orient%2C1"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "4e488c279dc6fbdf",
+      "kind": "image",
+      "name": "7eaa15d81bcb6632dd45d32a7f6952d8.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/4e488c279dc6fbdf.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260728/7eaa15d81bcb6632dd45d32a7f6952d8.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "a9f684fc9d26e2b8",
+      "kind": "image",
+      "name": "f636f33db8b7d2451e779c8a3b6783f9.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/a9f684fc9d26e2b8.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260728/f636f33db8b7d2451e779c8a3b6783f9.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "43aa3bdeeefde9db",
+      "kind": "image",
+      "name": "7e5c003b2e721e27ca0887b85be6275c.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/43aa3bdeeefde9db.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260728/7e5c003b2e721e27ca0887b85be6275c.webp"
+    },
+    {
+      "contentType": "image/png",
+      "id": "1e3d8f9dddf495b9",
+      "kind": "image",
+      "name": "72ce6bcd9c80d81216d2a0fbd39feea5.png",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/1e3d8f9dddf495b9.png",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260801/72ce6bcd9c80d81216d2a0fbd39feea5.png"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "f9da4edc37bd7f42",
+      "kind": "image",
+      "name": "c362b5c079c7bbc69ebd91620e3504c3.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/f9da4edc37bd7f42.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/c362b5c079c7bbc69ebd91620e3504c3.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "de029b122280e8bc",
+      "kind": "image",
+      "name": "0dcae99cdd5d287e826fd8e791ec5133.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/de029b122280e8bc.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/0dcae99cdd5d287e826fd8e791ec5133.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "e20e7884cb6c84f1",
+      "kind": "image",
+      "name": "089bdc680ea81ee893ef2c55ffb9f136.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/e20e7884cb6c84f1.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/089bdc680ea81ee893ef2c55ffb9f136.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "ae0f687fba3d01de",
+      "kind": "image",
+      "name": "182be7e1f43853ff37fe869b709686e6.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/ae0f687fba3d01de.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/182be7e1f43853ff37fe869b709686e6.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "7e2aaf21b578a140",
+      "kind": "image",
+      "name": "86ee90e5f20a994429a68615df32ffd9.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/7e2aaf21b578a140.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/86ee90e5f20a994429a68615df32ffd9.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "d0abab343a0a2e09",
+      "kind": "image",
+      "name": "858db15155f9e3075b7df449e6703877.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/d0abab343a0a2e09.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/858db15155f9e3075b7df449e6703877.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "1bbb6766b3ae319c",
+      "kind": "image",
+      "name": "52fa152293dcc4ec29d30462038a6f23.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/1bbb6766b3ae319c.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/52fa152293dcc4ec29d30462038a6f23.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "063bcfa5ac9f5bc6",
+      "kind": "image",
+      "name": "175a8273799759b4f687f71a09ff6a79.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/063bcfa5ac9f5bc6.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/175a8273799759b4f687f71a09ff6a79.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "8ae38a45cc248ae8",
+      "kind": "image",
+      "name": "8c378d77f0a84ba885f7758097d0112c.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/8ae38a45cc248ae8.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/8c378d77f0a84ba885f7758097d0112c.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "bc9c183d4f4f2c0d",
+      "kind": "image",
+      "name": "7d7e4d0335d893d49531efa2c3265856.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/bc9c183d4f4f2c0d.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/7d7e4d0335d893d49531efa2c3265856.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "3c5e735e47dd8968",
+      "kind": "image",
+      "name": "ab4273658df5f7172657114cb5189900.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/3c5e735e47dd8968.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/ab4273658df5f7172657114cb5189900.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "f1e40ec1592fc41d",
+      "kind": "image",
+      "name": "f9a3f68de263926f93e8f8b510856422.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/f1e40ec1592fc41d.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/f9a3f68de263926f93e8f8b510856422.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "1498fc1f8c621080",
+      "kind": "image",
+      "name": "87bfb1589eef22ac065225718b88ae5b.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/1498fc1f8c621080.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/87bfb1589eef22ac065225718b88ae5b.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "51778eec083626ba",
+      "kind": "image",
+      "name": "8d13bb7f071f6fd04e59bf79b925cb31.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/51778eec083626ba.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/8d13bb7f071f6fd04e59bf79b925cb31.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "7cd3f440ff72c3d7",
+      "kind": "image",
+      "name": "6809405a91b20bb492a0eba1d5d303fd.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/7cd3f440ff72c3d7.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/6809405a91b20bb492a0eba1d5d303fd.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "4063803d99b19a00",
+      "kind": "image",
+      "name": "4a8f2fa1945d1154342701f0d0e50643.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/4063803d99b19a00.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/4a8f2fa1945d1154342701f0d0e50643.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "83f93f6c905a474d",
+      "kind": "image",
+      "name": "a0220d48cc17f5a5ae2a196865355fc6.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/83f93f6c905a474d.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/a0220d48cc17f5a5ae2a196865355fc6.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "385c764d9adc6801",
+      "kind": "image",
+      "name": "c76caea6cd254abee614c2aa733012c3.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/385c764d9adc6801.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/c76caea6cd254abee614c2aa733012c3.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "3591279a23e11571",
+      "kind": "image",
+      "name": "ba0b40c75a58a6a0fb6a60e45f5d9df7.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/3591279a23e11571.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/ba0b40c75a58a6a0fb6a60e45f5d9df7.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "b677ac13746733bb",
+      "kind": "image",
+      "name": "ca6544276d9cf3c1968766fe470738de.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/b677ac13746733bb.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/ca6544276d9cf3c1968766fe470738de.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "74e4ea24bd8e1bd1",
+      "kind": "image",
+      "name": "1d00dcd15e132b719f2e8c069cb25a56.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/74e4ea24bd8e1bd1.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/1d00dcd15e132b719f2e8c069cb25a56.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "756c0f28956ed73b",
+      "kind": "image",
+      "name": "13670ee3e536a6c88d666699ec7a3cd9.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/756c0f28956ed73b.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/13670ee3e536a6c88d666699ec7a3cd9.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "536293c8e32b508f",
+      "kind": "image",
+      "name": "2eb71a3101ed4c0d55f775b1fa2cd546.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/536293c8e32b508f.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/2eb71a3101ed4c0d55f775b1fa2cd546.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "46fada78f4309082",
+      "kind": "image",
+      "name": "6c0ec6b0acebb098e59a880e58a9dbde.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/46fada78f4309082.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/6c0ec6b0acebb098e59a880e58a9dbde.webp"
+    },
+    {
+      "contentType": "image/png",
+      "id": "242f875b763c78ac",
+      "kind": "image",
+      "name": "a9d7ae9f0b70968584318503b4a17582.png",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/242f875b763c78ac.png",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260720/a9d7ae9f0b70968584318503b4a17582.png"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "22d135fab24524a4",
+      "kind": "image",
+      "name": "caa00a137168ac815c466e12de47b6c5.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/22d135fab24524a4.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/caa00a137168ac815c466e12de47b6c5.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "b647a1fc441115b0",
+      "kind": "image",
+      "name": "aef5e27761a855f2b670635c305d6673.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/b647a1fc441115b0.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/aef5e27761a855f2b670635c305d6673.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "25de04319bd240ae",
+      "kind": "image",
+      "name": "a58f124637d40ee5a3d4c92e318c6d55.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/25de04319bd240ae.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/a58f124637d40ee5a3d4c92e318c6d55.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "f29d382709210d02",
+      "kind": "image",
+      "name": "f26c21225b5a441f48743d4d66268b0d.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/f29d382709210d02.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/f26c21225b5a441f48743d4d66268b0d.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "7b169eca9653e628",
+      "kind": "image",
+      "name": "9a1e6df83b2f16a720f0ee7dec9802bc.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/7b169eca9653e628.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/9a1e6df83b2f16a720f0ee7dec9802bc.webp"
+    },
+    {
+      "contentType": "image/png",
+      "id": "65d64f9221b273e5",
+      "kind": "image",
+      "name": "8afd8510b8dd4ffa72976231e7622fec.png",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/65d64f9221b273e5.png",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260720/8afd8510b8dd4ffa72976231e7622fec.png"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "c948f85f0d728b84",
+      "kind": "image",
+      "name": "0a06c8c65004aaa87f61c39ba863dc4a.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/c948f85f0d728b84.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/0a06c8c65004aaa87f61c39ba863dc4a.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "7760dcb7c6a2311d",
+      "kind": "image",
+      "name": "2e2599b5e3ca88083c0a3692f752f6d2.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/7760dcb7c6a2311d.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/2e2599b5e3ca88083c0a3692f752f6d2.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "443e48a8ed401e8b",
+      "kind": "image",
+      "name": "947559046f8f6a49aa8ccea2016f8768.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/443e48a8ed401e8b.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/947559046f8f6a49aa8ccea2016f8768.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "a24253d9f019ec15",
+      "kind": "image",
+      "name": "a3b93a4c3993b2aab94ecfefa3aaf728.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/a24253d9f019ec15.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/a3b93a4c3993b2aab94ecfefa3aaf728.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "fb30bc81b7749c94",
+      "kind": "image",
+      "name": "e40df7b975a5d8480adf2ee6629561b8.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/fb30bc81b7749c94.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/e40df7b975a5d8480adf2ee6629561b8.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "d2271f5becceb89d",
+      "kind": "image",
+      "name": "78d16975cac247117e7b234be5d5b48e.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/d2271f5becceb89d.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/78d16975cac247117e7b234be5d5b48e.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "6e4d74d126ce76a8",
+      "kind": "image",
+      "name": "acaa662b8fd908416fbc406e6184e2c4.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/6e4d74d126ce76a8.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/acaa662b8fd908416fbc406e6184e2c4.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "b38a5c303674d992",
+      "kind": "image",
+      "name": "79115ba259d5f09259b4a8835f71dede.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/b38a5c303674d992.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/79115ba259d5f09259b4a8835f71dede.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "bfa9c65e12d76530",
+      "kind": "image",
+      "name": "a8302c05c16d3ee1b2fd0432aa6ca31a.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/bfa9c65e12d76530.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/a8302c05c16d3ee1b2fd0432aa6ca31a.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "d2feb5adf8b02233",
+      "kind": "image",
+      "name": "47478c7f129eef0a2d90e25a54f25c5d.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/d2feb5adf8b02233.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/47478c7f129eef0a2d90e25a54f25c5d.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "c7c32e5edb30d3a4",
+      "kind": "image",
+      "name": "19d595e5f371b52a5f93d9a0ea744ede.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/c7c32e5edb30d3a4.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/19d595e5f371b52a5f93d9a0ea744ede.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "5c98227a057f6ed9",
+      "kind": "image",
+      "name": "7daedc9bf0721026b556efe81e1da51e.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/5c98227a057f6ed9.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/7daedc9bf0721026b556efe81e1da51e.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "5a1e060c7a38f2be",
+      "kind": "image",
+      "name": "c812c484ed8d34ea4bf6080a6385b080.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/5a1e060c7a38f2be.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/c812c484ed8d34ea4bf6080a6385b080.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "00c5d51b85dded55",
+      "kind": "image",
+      "name": "bb3e9c92a07fceb2ca4e71da6b8f704e.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/00c5d51b85dded55.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/bb3e9c92a07fceb2ca4e71da6b8f704e.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "36fe59c578d339b0",
+      "kind": "image",
+      "name": "3ae0ef01dcdd99970dfa61ecfb25e996.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/36fe59c578d339b0.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/3ae0ef01dcdd99970dfa61ecfb25e996.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "9c65214e67b4bfc6",
+      "kind": "image",
+      "name": "894e773214fef208387bff6373913cb0.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/9c65214e67b4bfc6.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/894e773214fef208387bff6373913cb0.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "b98fd52cdbf30403",
+      "kind": "image",
+      "name": "266e4a8b94550d20f0bc351b3dc13ab2.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/b98fd52cdbf30403.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/266e4a8b94550d20f0bc351b3dc13ab2.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "093beb756f9c007b",
+      "kind": "image",
+      "name": "4579afbf0f62e0a45891a726a23a16e2.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/093beb756f9c007b.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/4579afbf0f62e0a45891a726a23a16e2.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "id": "c70bb4a4c6d0addb",
+      "kind": "image",
+      "name": "bf3963a47673002b261fc782477e8e50.webp",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/c70bb4a4c6d0addb.webp",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260723/bf3963a47673002b261fc782477e8e50.webp"
+    },
+    {
+      "contentType": "image/png",
+      "id": "ce90b42ba94553a5",
+      "kind": "image",
+      "name": "694cb8a0746f0def5ab5577819e9a334.png",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/ce90b42ba94553a5.png",
+      "url": "https://cdn.meimengai.cn/uploads/media/20260720/694cb8a0746f0def5ab5577819e9a334.png"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "833b1c5b069aa560",
+      "kind": "image",
+      "name": "svg-1",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/833b1c5b069aa560.svg",
+      "url": "inline-svg:833b1c5b069aa560"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "14266037044911ba",
+      "kind": "image",
+      "name": "svg-2",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/14266037044911ba.svg",
+      "url": "inline-svg:14266037044911ba"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "ceec0f012f0754ae",
+      "kind": "image",
+      "name": "svg-3",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/ceec0f012f0754ae.svg",
+      "url": "inline-svg:ceec0f012f0754ae"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "9a5939df62bcc8d1",
+      "kind": "image",
+      "name": "svg-4",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/9a5939df62bcc8d1.svg",
+      "url": "inline-svg:9a5939df62bcc8d1"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "606114626def666d",
+      "kind": "image",
+      "name": "svg-5",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/606114626def666d.svg",
+      "url": "inline-svg:606114626def666d"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "874158e038a7e85e",
+      "kind": "image",
+      "name": "svg-6",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/874158e038a7e85e.svg",
+      "url": "inline-svg:874158e038a7e85e"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "3a2a462513c196ea",
+      "kind": "image",
+      "name": "svg-7",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/3a2a462513c196ea.svg",
+      "url": "inline-svg:3a2a462513c196ea"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "a466739b935743e6",
+      "kind": "image",
+      "name": "svg-8",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/a466739b935743e6.svg",
+      "url": "inline-svg:a466739b935743e6"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "91b67b9ff80900da",
+      "kind": "image",
+      "name": "svg-9",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/91b67b9ff80900da.svg",
+      "url": "inline-svg:91b67b9ff80900da"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "1106d55136ed32f5",
+      "kind": "image",
+      "name": "svg-10",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/1106d55136ed32f5.svg",
+      "url": "inline-svg:1106d55136ed32f5"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "105222402e1c0589",
+      "kind": "image",
+      "name": "svg-11",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/105222402e1c0589.svg",
+      "url": "inline-svg:105222402e1c0589"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "b2dcd0acb5dfb276",
+      "kind": "image",
+      "name": "svg-12",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/b2dcd0acb5dfb276.svg",
+      "url": "inline-svg:b2dcd0acb5dfb276"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "364b1c6d7a850d11",
+      "kind": "image",
+      "name": "svg-13",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/364b1c6d7a850d11.svg",
+      "url": "inline-svg:364b1c6d7a850d11"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "dbeb4ead8c2b3ace",
+      "kind": "image",
+      "name": "svg-14",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/dbeb4ead8c2b3ace.svg",
+      "url": "inline-svg:dbeb4ead8c2b3ace"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "9baeda16c4e083fd",
+      "kind": "image",
+      "name": "svg-15",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/9baeda16c4e083fd.svg",
+      "url": "inline-svg:9baeda16c4e083fd"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "933a2bb23052851c",
+      "kind": "image",
+      "name": "svg-16",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/933a2bb23052851c.svg",
+      "url": "inline-svg:933a2bb23052851c"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "c5c030700e4c14a4",
+      "kind": "image",
+      "name": "svg-17",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/c5c030700e4c14a4.svg",
+      "url": "inline-svg:c5c030700e4c14a4"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "fe29f0349221f842",
+      "kind": "image",
+      "name": "svg-18",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/fe29f0349221f842.svg",
+      "url": "inline-svg:fe29f0349221f842"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "2dd265bf873b6820",
+      "kind": "image",
+      "name": "svg-19",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/2dd265bf873b6820.svg",
+      "url": "inline-svg:2dd265bf873b6820"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "8a9e625f2dc71308",
+      "kind": "image",
+      "name": "svg-20",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/8a9e625f2dc71308.svg",
+      "url": "inline-svg:8a9e625f2dc71308"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "4708d0660adb71df",
+      "kind": "image",
+      "name": "svg-21",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/4708d0660adb71df.svg",
+      "url": "inline-svg:4708d0660adb71df"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "5f6def61d44c77de",
+      "kind": "image",
+      "name": "svg-22",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/5f6def61d44c77de.svg",
+      "url": "inline-svg:5f6def61d44c77de"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "5ac0c116a57248fe",
+      "kind": "image",
+      "name": "svg-23",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/5ac0c116a57248fe.svg",
+      "url": "inline-svg:5ac0c116a57248fe"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "f5acc79924b0864f",
+      "kind": "image",
+      "name": "svg-24",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/f5acc79924b0864f.svg",
+      "url": "inline-svg:f5acc79924b0864f"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "697569967fc29f8d",
+      "kind": "image",
+      "name": "svg-25",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/697569967fc29f8d.svg",
+      "url": "inline-svg:697569967fc29f8d"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "44a970f4d0db38a9",
+      "kind": "image",
+      "name": "svg-26",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/44a970f4d0db38a9.svg",
+      "url": "inline-svg:44a970f4d0db38a9"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "bd2338895b773809",
+      "kind": "image",
+      "name": "svg-27",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/bd2338895b773809.svg",
+      "url": "inline-svg:bd2338895b773809"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "4b971c5222c0e60d",
+      "kind": "image",
+      "name": "svg-28",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/4b971c5222c0e60d.svg",
+      "url": "inline-svg:4b971c5222c0e60d"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "9d6c753ca1d214b7",
+      "kind": "image",
+      "name": "svg-29",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/9d6c753ca1d214b7.svg",
+      "url": "inline-svg:9d6c753ca1d214b7"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "6613ce9a144ae5b4",
+      "kind": "image",
+      "name": "svg-30",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/6613ce9a144ae5b4.svg",
+      "url": "inline-svg:6613ce9a144ae5b4"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "63509574a69bf718",
+      "kind": "image",
+      "name": "svg-31",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/63509574a69bf718.svg",
+      "url": "inline-svg:63509574a69bf718"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "396f84e4954ecb9d",
+      "kind": "image",
+      "name": "svg-32",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/396f84e4954ecb9d.svg",
+      "url": "inline-svg:396f84e4954ecb9d"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "cfa7697b803915c1",
+      "kind": "image",
+      "name": "svg-33",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/cfa7697b803915c1.svg",
+      "url": "inline-svg:cfa7697b803915c1"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "de09403298c2a895",
+      "kind": "image",
+      "name": "svg-34",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/de09403298c2a895.svg",
+      "url": "inline-svg:de09403298c2a895"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "95da1f9809f8d792",
+      "kind": "image",
+      "name": "svg-35",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/95da1f9809f8d792.svg",
+      "url": "inline-svg:95da1f9809f8d792"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "c1a2e2ea35ca187d",
+      "kind": "image",
+      "name": "svg-36",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/c1a2e2ea35ca187d.svg",
+      "url": "inline-svg:c1a2e2ea35ca187d"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "60bf8c820e32d20f",
+      "kind": "image",
+      "name": "svg-37",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/60bf8c820e32d20f.svg",
+      "url": "inline-svg:60bf8c820e32d20f"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "dfd10740007c0880",
+      "kind": "image",
+      "name": "svg-38",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/dfd10740007c0880.svg",
+      "url": "inline-svg:dfd10740007c0880"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "76d20c64823ba7e4",
+      "kind": "image",
+      "name": "svg-39",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/76d20c64823ba7e4.svg",
+      "url": "inline-svg:76d20c64823ba7e4"
+    },
+    {
+      "contentType": "image/svg+xml",
+      "id": "5fae0300a218df86",
+      "kind": "image",
+      "name": "svg-40",
+      "path": "/var/folders/xw/5y69xty12w5_gjqwxzm_029h0000gn/T/browser-use/assets/b1ab32d1-23f3-4316-8a8f-7b51913fce09/5fae0300a218df86.svg",
+      "url": "inline-svg:5fae0300a218df86"
+    }
+  ],
+  "failures": [
+    {
+      "contentType": null,
+      "id": "88908d455a0ff3f3",
+      "name": "cc9f41bd-e103-49c7-ab84-acfcb71d0143.png",
+      "reason": "Loaded resource fetch failed: Asset bundling failed; page fetch failed: Asset bundling failed",
+      "url": "https://cdn.meimengai.cn/uploads/mirror/rh-hk-image/ecb0ffb4e546a2210f18e4812937cd74/output/cc9f41bd-e103-49c7-ab84-acfcb71d0143.png"
+    },
+    {
+      "contentType": null,
+      "id": "92f5d26153656c14",
+      "name": "hm.gif",
+      "reason": "Loaded resource fetch failed: Asset bundling failed; page fetch failed: Browser Use encountered an error interacting with this webpage: TypeError: Failed to fetch\n    at d (https://meimengai.cn/assets/index-Dda0Mzbg.js:32:13621)\n    at NT.window.fetch (https://meimengai.cn/assets/index-Dda0Mzbg.js:32:7267)\n    at r$ (<anonymous>:1:41)\n    at <anonymous>:1:354",
+      "url": "https://hm.baidu.com/hm.gif?hca=9735A2858C3D8AEF&cc=1&ck=1&cl=30-bit&ds=1512x982&vl=1000&ep=15222%2C15220&et=3&ja=0&ln=zh-cn&lo=0&lt=1786639986&rnd=743397064&si=094b3ee3ef2bde001314a2ac4e29de44&v=1.3.2&lv=2&sn=25526&r=0&ww=1440&u=https%3A%2F%2Fmeimengai.cn%2F"
+    },
+    {
+      "contentType": null,
+      "id": "3687523e11ad73c0",
+      "name": "hm.gif",
+      "reason": "Loaded resource fetch failed: Asset bundling failed; page fetch failed: Browser Use encountered an error interacting with this webpage: TypeError: Failed to fetch\n    at d (https://meimengai.cn/assets/index-Dda0Mzbg.js:32:13621)\n    at NT.window.fetch (https://meimengai.cn/assets/index-Dda0Mzbg.js:32:7267)\n    at r$ (<anonymous>:1:41)\n    at <anonymous>:1:354",
+      "url": "https://hm.baidu.com/hm.gif?hca=9735A2858C3D8AEF&cc=1&ck=1&cl=30-bit&ds=1512x982&vl=844&et=0&ja=0&ln=zh-cn&lo=0&lt=1786639986&rnd=1216561628&si=094b3ee3ef2bde001314a2ac4e29de44&v=1.3.2&lv=2&sn=25541&r=0&ww=390&u=https%3A%2F%2Fmeimengai.cn%2F&tt=%E7%BE%8E%E6%A2%A6AI%EF%BC%8C%E6%96%B0%E4%B8%80%E4%BB%A3%20AI%20%E7%94%B5%E5%95%86%E8%A7%86%E8%A7%89%E5%86%85%E5%AE%B9%E5%88%9B%E4%BD%9C%E5%B9%B3%E5%8F%B0"
+    }
+  ]
+}
