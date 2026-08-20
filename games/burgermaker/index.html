@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🍔 做汉堡</title><style>*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.score{font-size:13px;color:#d9a08f}.score b{color:#ffd9c8}
+canvas{background:#0c0a0d;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px}.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:16px auto 0;padding:10px 30px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}</style></head><body>
+<div class="wrap"><h1>🍔 做汉堡</h1><div class="score">层数 <b id="sc">0</b></div><canvas id="cv"></canvas><div class="hint">点击/触屏操作</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');const dpr=Math.min(devicePixelRatio||1,2);cv.width=360*dpr;cv.height=420*dpr;cv.style.width=Math.min(360,innerWidth-24)+'px';cv.style.height='auto';ctx.setTransform(dpr,0,0,dpr,0,0);
+let layers,score,alive,raf,timer,target;
+const items=['🍞','🥬','🍅','🧀','🥩','🥒','🧅','🍞'];
+const colors=['#d9a06a','#7aaa55','#d64545','#f0d090','#8a4a2a','#7aaa55','#d9a08f','#d9a06a'];
+function rset(){layers=[];score=0;timer=0;target=5+Math.floor(Math.random()*3);alive=true;document.getElementById('sc').textContent=0;document.querySelector('.over').classList.remove('show');cancelAnimationFrame(raf);requestAnimationFrame(loop)}
+function loop(){ctx.fillStyle='#0c0a0d';ctx.fillRect(0,0,360,420);layers.forEach((l,i)=>{ctx.fillStyle=l.c;ctx.fillRect(80,360-i*30,200,28);ctx.fillStyle='#0c0a0d';ctx.font='20px sans-serif';ctx.fillText(l.e,170,360-i*30+22)});ctx.fillStyle='#ffd9c8';ctx.font='12px sans-serif';ctx.fillText('目标：'+target+' 层',15,30);ctx.fillText('剩余时间：'+Math.max(0,30-Math.floor(timer/60)),15,46);timer++;if(timer>1800){alive=false;{document.getElementById('msg').textContent='做了 '+layers.length;document.getElementById('bs').textContent=Math.max(parseInt(document.getElementById('bs').textContent||0),layers.length);localStorage.setItem('burgermakerBest',Math.max(parseInt(localStorage.getItem('burgermakerBest')||0),layers.length));document.querySelector('.over').classList.add('show');alive=false}层;return}
+raf=requestAnimationFrame(loop)}
+function addL(){if(!alive)return;const i=layers.length%items.length;layers.push({e:items[i],c:colors[i]});score++;document.getElementById('sc').textContent=layers.length;if(layers.length>=target)target=5+Math.floor(Math.random()*5)}
+function restart(){rset()}
+cv.addEventListener('pointerdown',addL);
+rset();
+</script></body></html>

@@ -1,0 +1,41 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>一笔画</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.score{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;height:auto;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:block;margin:16px auto 0;padding:10px 30px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>✏️ 一笔画</h1><div class="score">已连 <b id="cn">1</b> / 9 点 · 关卡 <span id="lv">1</span></div><canvas id="cv"></canvas><div class="hint">点击相邻的点连线，一笔连完所有点（不可重复）</div></div>
+<div class="over"><div class="panel"><b id="msg">完成！</b><button class="btn" onclick="start()">下一关</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let S=0,dpr=Math.min(devicePixelRatio||1,2);
+function size(){S=Math.min(innerWidth-24,innerHeight-190,420);cv.style.width=S+'px';cv.style.height=S+'px';cv.width=S*dpr;cv.height=S*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+size();addEventListener('resize',size);
+const N=3,M=3;let pts=[],path=[],lv=1;
+function start(){pts=[];for(let r=0;r<M;r++)for(let c=0;c<N;c++)pts.push({x:(c+1)*S/(N+1),y:(r+1)*S/(M+1)});
+path=[Math.random()*pts.length|0];sync();document.querySelector('.over').classList.remove('show');draw()}
+function sync(){document.getElementById('cn').textContent=path.length;document.getElementById('lv').textContent=lv}
+function draw(){ctx.clearRect(0,0,S,S);ctx.fillStyle='#120e11';ctx.fillRect(0,0,S,S);
+if(path.length>1){ctx.strokeStyle='#d64545';ctx.lineWidth=4;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(pts[path[0]].x,pts[path[0]].y);for(let i=1;i<path.length;i++)ctx.lineTo(pts[path[i]].x,pts[path[i]].y);ctx.stroke()}
+pts.forEach((p,i)=>{ctx.beginPath();ctx.arc(p.x,p.y,path.includes(i)?10:12,0,7);ctx.fillStyle=path[path.length-1]===i?'#ffd9c8':(path.includes(i)?'#d64545':'#8f7f7b');ctx.fill();ctx.strokeStyle='#ffffff22';ctx.lineWidth=2;ctx.stroke()})}
+function tap(e){const r=cv.getBoundingClientRect();const x=e.clientX-r.left,y=e.clientY-r.top;
+let best=-1,bd=1e9;pts.forEach((p,i)=>{const d=Math.hypot(p.x-x,p.y-y);if(d<bd){bd=d;best=i}});
+const last=path[path.length-1];
+if(bd>40)return;
+if(best===last)return;
+if(path.includes(best)){path=[best];sync();draw();return}
+const lp=pts[last],np=pts[best];
+if(Math.abs(lp.x-np.x)<S/(N+1)+2&&Math.abs(lp.y-np.y)<S/(M+1)+2){path.push(best);sync();draw();
+if(path.length===pts.length){document.getElementById('msg').textContent='第 '+lv+' 关完成！';document.querySelector('.over').classList.add('show');lv++}}}
+cv.addEventListener('click',tap);
+start();
+</script></body></html>

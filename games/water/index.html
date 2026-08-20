@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>水上漂</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#123548;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:68vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🏊 水上漂</h1><div class="hint">点击跳跃 · 踩着浮板过河 · 掉水里就输</div>
+<canvas id="c" width="360" height="460"></canvas>
+<div class="bar">距离 <b id="ds">0</b> 米 · 连跳 <b id="cb">0</b></div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=360,H=460;
+let fx=180,fy=H-60,vy=0,jumping=false,dist=0,combo=0,boards=[],run=true,best=+(localStorage.getItem('waterBest')||0);
+document.getElementById('best')?document.getElementById('best').textContent=best:0;
+function setup(){fx=180;fy=H-60;vy=0;jumping=false;dist=0;combo=0;boards=[];run=true;for(let i=0;i<5;i++)spawnBoard()}
+function spawnBoard(){boards.push({x:Math.random()*(W-70)+10,y:-40,w:64+Math.random()*26,sp:1+Math.random()*1.5})}
+function jump(){
+  if(!run)return;
+  if(!jumping){jumping=true;vy=-10}
+}
+function tick(){
+  if(!run)return;
+  dist+=boards.length*.2;document.getElementById('ds').textContent=dist|0;
+  boards.forEach(b=>{b.y+=b.sp});
+  if(boards.length&&boards[boards.length-1].y>80)spawnBoard();
+  boards=boards.filter(b=>b.y<H+40);
+  if(jumping){
+    vy+=.45;fy+=vy;
+    if(fy>H-30){run=false;show('💦 掉进水里','跳了 '+dist|0+' 米 · 连跳 '+combo)}
+  }else{
+    let onBoard=false;
+    boards.forEach(b=>{
+      if(fx>b.x-18&&fx<b.x+b.w+18&&fy>H-80&&fy<H-60+10&&!onBoard){onBoard=true;fy=H-74;combo++;document.getElementById('cb').textContent=combo}
+    });
+    if(!onBoard){fy+=4;if(fy>H-30){run=false;show('💦 掉进水里','跳了 '+dist|0+' 米 · 连跳 '+combo)}}
+  }
+  if(fy<40){jumping=false;vy=0;combo=0;document.getElementById('cb').textContent=0;if(boards[0]&&boards[0].y>H-100){boards[0].y=H-80;fx=boards[0].x+boards[0].w/2;fy=H-74}}
+  draw();
+}
+function draw(){
+  ctx.fillStyle='#123548';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#1b5a7a';for(let i=0;i<W;i+=28){ctx.beginPath();ctx.moveTo(i+(dist*2)%28,0);ctx.lineTo(i-10+(dist*2)%28,H);ctx.stroke()}
+  ctx.fillStyle='#3a2a3a';ctx.fillRect(0,H-30,W,30);
+  boards.forEach(b=>{ctx.fillStyle='#7a5a2a';ctx.fillRect(b.x,b.y,b.w,12);ctx.fillStyle='#8a7a3a';ctx.fillRect(b.x-3,b.y-4,b.w+6,5)});
+  ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(fx,fy-10,10,0,7);ctx.fill();
+  ctx.fillStyle='#b02a2a';ctx.fillRect(fx-12,fy,24,10);
+  ctx.fillStyle='#ffd9c8';ctx.fillRect(fx-6,fy+8,5,10);ctx.fillRect(fx+1,fy+8,5,10);
+  ctx.fillStyle='#ffd9c8';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText('← 点击跳跃 →',180,H-4);
+}
+cv.addEventListener('pointerdown',jump);
+window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();jump()}});
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup()}
+setup();setInterval(tick,16);
+</script></body></html>

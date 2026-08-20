@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>国际象棋</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#171421;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:70vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>♞ 国际象棋</h1><div class="hint">红方先手 · 点击棋子选目标 · 吃掉对方王即胜</div>
+<canvas id="c" width="368" height="368"></canvas>
+<div class="bar"><b id="turn">红方走棋</b> · 点击选子后可看到可走位置</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),N=8,S=46;
+let board=[],turn=0,sel=null,legal=[],run=true;
+function empty(){let b=[];for(let i=0;i<N;i++)b.push(Array(N).fill(0));
+b[0]=['R','N','B','Q','K','B','N','R'].map(t=>({t,s:1}));b[1]=Array(N).fill({t:'P',s:1});
+b[6]=Array(N).fill({t:'P',s:0});b[7]=['R','N','B','Q','K','B','N','R'].map(t=>({t,s:0}));return b}
+function inb(r,c){return r>=0&&r<8&&c>=0&&c<8}
+function clear(r,c,dr,dc){let rr=r+dr,cc=c+dc;while(inb(rr,cc)){if(board[rr][cc])return false;rr+=dr;cc+=dc}return true}
+function moves(r,c){let p=board[r][c],out=[];
+if(p.t==='P'){let d=p.s?1:-1,s=p.s?1:6;
+if(inb(r+d,c)&&!board[r+d][c])out.push([r+d,c]);
+if(r===s&&!board[r+2*d][c]&&!board[r+d][c])out.push([r+2*d,c]);
+for(let dc of[-1,1])if(inb(r+d,c+dc)&&board[r+d][c+dc]&&board[r+d][c+dc].s!==p.s)out.push([r+d,c+dc])}
+if(p.t==='N')for(let d of[[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]){let rr=r+d[0],cc=c+d[1];if(inb(rr,cc)&&(!board[rr][cc]||board[rr][cc].s!==p.s))out.push([rr,cc])}
+if(p.t==='K')for(let dr of[-1,0,1])for(let dc of[-1,0,1]){if(!dr&&!dc)continue;let rr=r+dr,cc=c+dc;if(inb(rr,cc)&&(!board[rr][cc]||board[rr][cc].s!==p.s))out.push([rr,cc])}
+if(p.t==='R'||p.t==='Q')for(let d of[[1,0],[-1,0],[0,1],[0,-1]]){let rr=r+d[0],cc=c+d[1];while(inb(rr,cc)){if(board[rr][cc]){if(board[rr][cc].s!==p.s)out.push([rr,cc]);break}out.push([rr,cc]);rr+=d[0];cc+=d[1]}}
+if(p.t==='B'||p.t==='Q')for(let d of[[1,1],[1,-1],[-1,1],[-1,-1]]){let rr=r+d[0],cc=c+d[1];while(inb(rr,cc)){if(board[rr][cc]){if(board[rr][cc].s!==p.s)out.push([rr,cc]);break}out.push([rr,cc]);rr+=d[0];cc+=d[1]}}
+return out}
+function click(e){if(!run)return;let r=Math.floor((e.clientY-cv.getBoundingClientRect().top)/S),c=Math.floor((e.clientX-cv.getBoundingClientRect().left)/S);
+if(!inb(r,c))return;
+for(let m of legal)if(m[0]===r&&m[1]===c){board[r][c]=board[sel[0]][sel[1]];board[sel[0]][sel[1]]=0;
+if(board[r][c].t==='P'&&(r===0||r===7))board[r][c].t='Q';
+if(board[r][c].t==='K'){end(turn?1:0);return}
+turn=1-turn;sel=null;legal=[];draw();return}
+if(board[r][c]&&board[r][c].s===turn){sel=[r,c];legal=moves(r,c);draw()}
+else{sel=null;legal=[];draw()}}
+function end(w){run=false;show(w?'🔴 红方胜利':'🔵 蓝方胜利','吃掉对方王，本局结束')}
+function draw(){ctx.fillStyle='#171421';ctx.fillRect(0,0,368,368);
+for(let r=0;r<N;r++)for(let c=0;c<N;c++){ctx.fillStyle=(r+c)%2?'#4a2020':'#2b1a1d';ctx.fillRect(c*S,r*S,S,S)}
+if(sel){ctx.fillStyle='rgba(255,214,150,.45)';ctx.fillRect(sel[1]*S,sel[0]*S,S,S)}
+for(let m of legal){ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(m[1]*S+S/2,m[0]*S+S/2,6,0,7);ctx.fill()}
+for(let r=0;r<N;r++)for(let c=0;c<N;c++){let p=board[r][c];if(!p)continue;
+ctx.font='28px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+ctx.fillStyle=p.s?'#ff6b6b':'#8fb7ff';ctx.fillText({K:'♚',Q:'♛',R:'♜',B:'♝',N:'♞',P:'♟'}[p.t],c*S+S/2,r*S+S/2+2)}
+document.getElementById('turn').textContent=turn?'蓝方走棋':'红方走棋'}
+cv.addEventListener('pointerdown',click);
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');board=empty();turn=0;sel=null;legal=[];run=true;draw()}
+again();draw();
+</script></body></html>

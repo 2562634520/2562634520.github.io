@@ -1,0 +1,42 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>星际战机</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.score{font-size:13px;color:#d9a08f}.score b{color:#ffd9c8}
+canvas{background:#0c0a0d;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px}.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:16px auto 0;padding:10px 30px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>✈️ 星际战机</h1><div class="score">得分 <b id="sc">0</b></div><canvas id="cv"></canvas><div class="hint">拖动 / 方向键移动，自动开火</div></div>
+<div class="over"><div class="panel"><b id="msg">战机坠毁</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');const dpr=Math.min(devicePixelRatio||1,2);
+const W=320,H=460;cv.width=W*dpr;cv.height=H*dpr;cv.style.width=Math.min(W,innerWidth-24)+'px';cv.style.height='auto';ctx.setTransform(dpr,0,0,dpr,0,0);
+let player,enemies,bullets,stars,score,alive,raf,t,lastFire;
+function restart(){player={x:W/2,y:H-70,w:34,h:30};enemies=[];bullets=[];stars=Array.from({length:40},()=>({x:Math.random()*W,y:Math.random()*H,s:Math.random()*2+1}));score=0;alive=true;lastFire=0;document.getElementById('sc').textContent=0;document.querySelector('.over').classList.remove('show');cancelAnimationFrame(raf);requestAnimationFrame(loop)}
+function fire(){bullets.push({x:player.x,y:player.y-18,vy:-7})}
+function spawn(){const side=Math.random()<.5;enemies.push({x:side?Math.random()*W*.35:W*.65+Math.random()*W*.35,y:-30,w:26,h:22,vx:(Math.random()-.5)*2,vy:Math.random()*1.6+1.2})}
+function loop(now){if(!alive)return;t=now/1000;if(t-lastFire>.18){fire();lastFire=t}
+if(Math.random()<.035)spawn();
+stars.forEach(s=>{s.y+=s.s;if(s.y>H)s.y=0});
+player.x+=(keyR?2.4:0)-(keyL?2.4:0);player.x=Math.max(12,Math.min(W-12,player.x));
+bullets=bullets.filter(b=>{b.y+=b.vy;return b.y>-10});
+enemies.forEach(e=>{e.x+=e.vx;e.y+=e.vy;e.x=Math.max(0,Math.min(W,e.x))});
+for(const b of bullets)for(const e of enemies){if(Math.abs(b.x-e.x)<16&&Math.abs(b.y-e.y)<16){e.hp=(e.hp||1)-1;b.dead=true;if(e.hp<=0){score+=10;e.dead=true}}}
+bullets=bullets.filter(b=>!b.dead);enemies=enemies.filter(e=>!e.dead);
+for(const e of enemies)if(Math.abs(e.x-player.x)<20&&Math.abs(e.y-player.y)<20){alive=false;document.getElementById('msg').textContent='得分 '+score;document.querySelector('.over').classList.add('show');return}
+document.getElementById('sc').textContent=score;draw();raf=requestAnimationFrame(loop)}
+function draw(){ctx.fillStyle='#0c0a0d';ctx.fillRect(0,0,W,H);
+stars.forEach(s=>{ctx.fillStyle='#6b5555';ctx.fillRect(s.x,s.y,1.6,1.6)});
+bullets.forEach(b=>{ctx.fillStyle='#ff8060';ctx.fillRect(b.x-1.5,b.y-6,3,10)});
+enemies.forEach(e=>{ctx.fillStyle='#b02a2a';ctx.beginPath();ctx.moveTo(e.x,e.y+14);ctx.lineTo(e.x-13,e.y-12);ctx.lineTo(e.x+13,e.y-12);ctx.closePath();ctx.fill()});
+ctx.fillStyle='#e05a4e';ctx.beginPath();ctx.moveTo(player.x,player.y-18);ctx.lineTo(player.x-17,player.y+15);ctx.lineTo(player.x,player.y+7);ctx.lineTo(player.x+17,player.y+15);ctx.closePath();ctx.fill();ctx.fillStyle='#ffd9c8';ctx.fillRect(player.x-3,player.y-24,6,9)}
+let keyL=false,keyR=false;document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){keyL=true;e.preventDefault()}if(e.key==='ArrowRight'){keyR=true;e.preventDefault()}});document.addEventListener('keyup',e=>{if(e.key==='ArrowLeft')keyL=false;if(e.key==='ArrowRight')keyR=false});
+cv.addEventListener('touchmove',e=>{e.preventDefault();const r=cv.getBoundingClientRect();player.x=(e.touches[0].clientX-r.left)*W/r.width},{passive:false});
+cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();player.x=(e.clientX-r.left)*W/r.width});
+restart();
+</script></body></html>

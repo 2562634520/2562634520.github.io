@@ -1,0 +1,51 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>打砖块</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.score{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;height:auto;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:block;margin:16px auto 0;padding:10px 30px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🧱 打砖块</h1><div class="score">得分 <b id="sc">0</b> · 关卡 <span id="lv">1</span> · 生命 <span id="life">3</span></div><canvas id="cv"></canvas><div class="hint">鼠标 / 手指拖动挡板 · 左右方向键也可以</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0,dpr=Math.min(devicePixelRatio||1,2);
+function size(){W=Math.min(innerWidth-24,innerHeight-210,460);H=Math.floor(W*1.25);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+size();addEventListener('resize',size);
+let pad={w:84,h:12,y:0},ball={x:0,y:0,vx:0,vy:0,r:6},bricks=[],score=0,lv=1,lives=3,run=false,timer,keys={};
+const COLS=8,ROWS=5,TOP=44;
+function build(){bricks=[];const bw=(W-24)/COLS,bh=20;
+for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)bricks.push({x:12+c*bw,y:TOP+r*(bh+6),w:bw-3,h:bh,hp:r<1?2:1,color:['#c0392b','#b8553a','#a0522d','#b8860b','#2e8b57'][r]})}
+function resetBall(){ball.x=pad.x+pad.w/2;ball.y=pad.y-ball.r-1;ball.vx=(Math.random()<.5?-1:1)*2.6;ball.vy=-3.4;run=false}
+function restart(){lv=1;score=0;lives=3;pad.y=H-36;pad.x=(W-pad.w)/2;build();resetBall();sync();if(timer)clearInterval(timer);timer=setInterval(step,16);document.querySelector('.over').classList.remove('show')}
+function sync(){document.getElementById('sc').textContent=score;document.getElementById('lv').textContent=lv;document.getElementById('life').textContent=lives}
+function step(){if(keys.left)pad.x-=7;if(keys.right)pad.x+=7;pad.x=Math.max(4,Math.min(W-pad.w-4,pad.x));
+if(!run){ball.x=pad.x+pad.w/2;ball.y=pad.y-ball.r-1;draw();return}
+ball.x+=ball.vx;ball.y+=ball.vy;
+if(ball.x<ball.r||ball.x>W-ball.r)ball.vx*=-1;
+if(ball.y<ball.r)ball.vy*=-1;
+if(ball.y+ball.r>pad.y&&ball.y+ball.r<pad.y+14&&ball.x>pad.x-ball.r&&ball.x<pad.x+pad.w+ball.r){ball.vy=-Math.abs(ball.vy);ball.vx=(ball.x-(pad.x+pad.w/2))/(pad.w/2)*3.4;ball.y=pad.y-ball.r}
+for(let i=bricks.length-1;i>=0;i--){const b=bricks[i];if(ball.x+ball.r>b.x&&ball.x-ball.r<b.x+b.w&&ball.y+ball.r>b.y&&ball.y-ball.r<b.y+b.h){b.hp--;ball.vy*=-1;score+=10;if(b.hp<=0){bricks.splice(i,1);score+=20}sync();break}}
+if(ball.y>H+20){lives--;sync();if(lives<=0){clearInterval(timer);document.getElementById('msg').textContent='最终得分 '+score;document.querySelector('.over').classList.add('show');return}resetBall()}
+if(!bricks.length){lv++;build();resetBall();sync()}
+draw()}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#120e11';ctx.fillRect(0,0,W,H);
+bricks.forEach(b=>{ctx.fillStyle=b.color;ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,4);ctx.fill();if(b.hp>1){ctx.fillStyle='#ffffff33';ctx.fillRect(b.x+3,b.y+3,b.w-6,3)}});
+const g=ctx.createLinearGradient(pad.x,pad.y,pad.x,pad.y+pad.h);g.addColorStop(0,'#e05a4e');g.addColorStop(1,'#8e2b28');ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(pad.x,pad.y,pad.w,pad.h,6);ctx.fill();
+ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.fill()}
+addEventListener('keydown',e=>{if(e.key==='ArrowLeft')keys.left=true;if(e.key==='ArrowRight')keys.right=true;if(e.code==='Space'){e.preventDefault();run=true}});
+addEventListener('keyup',e=>{if(e.key==='ArrowLeft')keys.left=false;if(e.key==='ArrowRight')keys.right=false});
+let drag=false,off=0;
+cv.addEventListener('pointerdown',e=>{drag=true;off=e.clientX-pad.x;run=true});
+addEventListener('pointermove',e=>{if(!drag)return;pad.x=e.clientX-off;pad.x=Math.max(4,Math.min(W-pad.w-4,pad.x))});
+addEventListener('pointerup',()=>drag=false);
+restart();
+</script></body></html>

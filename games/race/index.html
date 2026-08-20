@@ -1,0 +1,33 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>极速赛车</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:18px}
+#cv{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 34px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🏎️ 极速赛车</h1><div class="info"><span>分数 <b id="sc">0</b></span><span>最高 <b id="best">0</b></span></div><canvas id="cv"></canvas><div class="hint">左右滑动 / ←→ 键躲避车辆</div></div>
+<div class="over"><div class="panel"><b>撞车了！</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),dpr=Math.min(devicePixelRatio||1,2);
+let W,H,car,obs=[],score,best=+localStorage.getItem('emeng_race')||0,alive,spd,frame=0,tx=0,cur=0;
+function size(){W=Math.min(innerWidth-24,340);H=Math.min(innerHeight-150,560);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+size();addEventListener('resize',size);
+function restart(){score=0;alive=true;spd=3.5;obs=[];frame=0;car={w:34,h:58,x:W/2-17,y:H-90};document.getElementById('sc').textContent=0;document.querySelector('.over').classList.remove('show');requestAnimationFrame(loop)}
+restart();
+function steer(dir){tx=Math.max(8,Math.min(W-car.w-8,car.x+dir))}
+addEventListener('keydown',e=>{if(e.key==='ArrowLeft')steer(-46);if(e.key==='ArrowRight')steer(46)});
+cv.addEventListener('pointerdown',e=>{cur=e.clientX;cv.setPointerCapture(e.pointerId)});
+cv.addEventListener('pointermove',e=>{if(cur!==null){car.x=Math.max(8,Math.min(W-car.w-8,car.x+(e.clientX-cur)*1.15));cur=e.clientX}});
+cv.addEventListener('pointerup',()=>{cur=null});
+function loop(){requestAnimationFrame(loop);if(!alive)return;frame++;spd=Math.min(10,spd+0.002);if(frame%28===0)obs.push({x:Math.random()*(W-36)+8,y:-60,w:30+Math.random()*12,h:54,c:'#'+[0xb02a2a,0xd64545,0x8a1f1f][Math.random()*3|0]});ctx.clearRect(0,0,W,H);ctx.fillStyle='#181214';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#b02a2a33';ctx.lineWidth=4;ctx.setLineDash([22,16]);ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.stroke();ctx.setLineDash([]);car.x+=(tx-car.x)*0.12;ctx.fillStyle='#d64545';ctx.shadowColor='#ff6040';ctx.shadowBlur=14;roundRect(car.x,car.y,car.w,car.h,8);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#1a1416';ctx.fillRect(car.x+6,car.y+8,8,16);ctx.fillRect(car.x+car.w-14,car.y+8,8,16);for(let i=obs.length-1;i>=0;i--){let o=obs[i];o.y+=spd;ctx.fillStyle=o.c;roundRect(o.x,o.y,o.w,o.h,6);ctx.fill();ctx.fillStyle='#221417';ctx.fillRect(o.x+4,o.y+8,o.w-8,10);if(o.y>H+60)obs.splice(i,1);if(o.y+o.h>car.y&&o.y<car.y+car.h&&o.x<car.x+car.w&&o.x+o.w>car.x)return die();}score+=frame%4===0?1:0;document.getElementById('sc').textContent=score;if(score>best){best=score;localStorage.setItem('emeng_race',best);document.getElementById('best').textContent=best}}
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function die(){alive=false;document.querySelector('.over').classList.add('show')}
+</script></body></html>

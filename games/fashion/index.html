@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>时尚换装</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+.wrap{width:96vw;max-width:430px;display:flex;flex-direction:column;gap:8px}
+.theme{background:#1a0f12;border:1px solid #5a2424;border-radius:12px;padding:10px;text-align:center;font-size:14px}
+.sect{background:#141019;border:1px solid #3a2020;border-radius:12px;padding:8px}
+.sect h4{font-size:12px;opacity:.7;margin-bottom:6px;text-align:center}
+.opts{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.opt{width:56px;padding:6px 2px;background:linear-gradient(145deg,#3a2424,#241517);border:1px solid #6a2e2e;border-radius:9px;text-align:center;font-size:22px;cursor:pointer}
+.opt small{display:block;font-size:10px;color:#ffd9c8}
+.opt.on{outline:2px solid #ffd9c8}
+.bar{font-size:13px;text-align:center}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer;margin:3px}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>👗 时尚换装</h1><div class="hint">根据主题挑选上衣、下装、鞋子和配饰</div>
+<div class="wrap">
+  <div class="theme">今日主题：<b id="theme">派对之夜</b> · 得分 <b id="score">0</b></div>
+  <div class="sect"><h4>👕 上衣</h4><div class="opts" id="tops"></div></div>
+  <div class="sect"><h4>👖 下装</h4><div class="opts" id="bottoms"></div></div>
+  <div class="sect"><h4>👟 鞋子</h4><div class="opts" id="shoes"></div></div>
+  <div class="sect"><h4>💍 配饰</h4><div class="opts" id="accs"></div></div>
+  <div class="bar"><button class="btn" onclick="judge()">提交搭配</button><button class="btn" onclick="next()">下一主题</button></div>
+</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const THEMES=[
+{name:'派对之夜',tags:['闪亮','礼服'],items:{top:['👔 闪亮衬衫','👕 T恤','👚 毛线衣'],bottom:['👖 皮裤','👗 短裙','🩳 运动裤'],shoe:['👠 高跟鞋','👟 运动鞋','🥾 靴子'],acc:['💎 项链','🎩 帽子','🕶️ 墨镜']}},
+{name:'户外运动',tags:['运动','舒适'],items:{top:['🎽 运动背心','👚 毛线衣','👔 闪亮衬衫'],bottom:['🩳 运动裤','👖 皮裤','👗 短裙'],shoe:['👟 运动鞋','👠 高跟鞋','🥾 靴子'],acc:['🧢 棒球帽','💎 项链','🎩 帽子']}},
+{name:'商务职场',tags:['正式','干练'],items:{top:['🤵 西装外套','🎽 运动背心','👕 T恤'],bottom:['👖 西裤','🩳 运动裤','👗 短裙'],shoe:['🥾 皮鞋','👟 运动鞋','👠 高跟鞋'],acc:['⌚ 腕表','🧢 棒球帽','🕶️ 墨镜']}},
+{name:'沙滩度假',tags:['清凉','休闲'],items:{top:['👙 泳装','🤵 西装外套','👕 T恤'],bottom:['🩳 沙滩裤','👖 西裤','👖 皮裤'],shoe:['🩴 拖鞋','🥾 皮鞋','👟 运动鞋'],acc:['🕶️ 墨镜','⌚ 腕表','🧢 棒球帽']}}];
+let cur=0,pick={top:0,bottom:0,shoe:0,acc:0},score=0;
+function optHtml(list,key,i){let d=document.createElement('div');d.className='opt'+(pick[key]===i?' on':'');let parts=list[i].split(' ');d.innerHTML=parts[0]+'<small>'+parts[1]+'</small>';
+d.onclick=()=>{pick[key]=i;render()};return d}
+function render(){let t=THEMES[cur];document.getElementById('theme').textContent=t.name;document.getElementById('score').textContent=score;
+let keys=[['tops','top'],['bottoms','bottom'],['shoes','shoe'],['accs','acc']];
+keys.forEach(k=>{let box=document.getElementById(k[0]);box.innerHTML='';t.items[k[1]].forEach((_,i)=>box.appendChild(optHtml(t.items[k[1]],k[1],i)))})}
+function judge(){let t=THEMES[cur],pts=0;
+let goodTop=t.tags.some(tag=>['闪亮','礼服','正式'].includes(tag))&&pick.top===0;
+if(t.name==='派对之夜'&&pick.top===0)pts+=20;if(t.name==='派对之夜'&&pick.bottom===1)pts+=20;if(t.name==='派对之夜'&&pick.shoe===0)pts+=20;if(t.name==='派对之夜'&&pick.acc===0)pts+=20;
+if(t.name==='户外运动'&&pick.top===0)pts+=20;if(t.name==='户外运动'&&pick.bottom===0)pts+=20;if(t.name==='户外运动'&&pick.shoe===1)pts+=20;if(t.name==='户外运动'&&pick.acc===0)pts+=20;
+if(t.name==='商务职场'&&pick.top===0)pts+=20;if(t.name==='商务职场'&&pick.bottom===0)pts+=20;if(t.name==='商务职场'&&pick.shoe===0)pts+=20;if(t.name==='商务职场'&&pick.acc===0)pts+=20;
+if(t.name==='沙滩度假'&&pick.top===0)pts+=20;if(t.name==='沙滩度假'&&pick.bottom===0)pts+=20;if(t.name==='沙滩度假'&&pick.shoe===0)pts+=20;if(t.name==='沙滩度假'&&pick.acc===0)pts+=20;
+score+=pts;show('搭配评分 '+pts+' 分','总得分 '+score+' · 满分 80')}
+function next(){cur=(cur+1)%THEMES.length;pick={top:0,bottom:0,shoe:0,acc:0};render()}
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');score=0;cur=0;pick={top:0,bottom:0,shoe:0,acc:0};render()}
+render();
+</script></body></html>

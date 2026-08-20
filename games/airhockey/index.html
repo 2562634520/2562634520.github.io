@@ -1,0 +1,56 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🏒 空气曲棍球</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🏒 空气曲棍球</h1><canvas id="cv"></canvas>
+<div class="info">比分 <b id="sc">0 : 0</b> · 先到7分胜</div>
+<div class="hint">鼠标/手指控制红色球拍，把冰球打进上方球门</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0;
+function size(){W=Math.min(innerWidth-24,460);H=Math.floor(W*1.35);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W;cv.height=H}
+size();addEventListener('resize',()=>{size();draw()});
+let puck={x:0,y:0,vx:0,vy:0},padP={x:0,y:0},padA={x:0,y:0},scoreP=0,scoreA=0,over=false,goalTimer=0;
+const R=14,PR=24,GW=W*.24,SPEED=7;
+function init(){puck={x:W/2,y:H/2,vx:(Math.random()<.5?1:-1)*2.5,vy:(Math.random()<.5?1:-1)*2.5};padP={x:W/2,y:H-PR-20};padA={x:W/2,y:PR+20};scoreP=0;scoreA=0;over=false;goalTimer=0;document.getElementById('sc').textContent='0 : 0';loop()}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function step(){if(over)return;
+if(padP.x<PR)padP.x=PR;if(padP.x>W-PR)padP.x=W-PR;if(padP.y>H-PR-10)padP.y=H-PR-10;if(padP.y<H*.5)padP.y=Math.max(padP.y,H*.5);
+padA.x+=clamp(puck.x-padA.x,-4,4);padA.y+=clamp(puck.y-padA.y,-3,3);padA.x=clamp(padA.x,PR,W-PR);padA.y=clamp(padA.y,PR+10,H*.5);
+puck.x+=puck.vx;puck.y+=puck.vy;
+if(puck.x<R||puck.x>W-R){puck.vx*=-1;puck.x=clamp(puck.x,R,W-R)}
+if(puck.y<R){if(Math.abs(puck.x-W/2)<GW/2){scoreP++;document.getElementById('sc').textContent=scoreP+' : '+scoreA;resetPuck(1);if(scoreP>=7)end('你赢了！');return}puck.vy*=-1;puck.y=R}
+if(puck.y>H-R){if(Math.abs(puck.x-W/2)<GW/2){scoreA++;document.getElementById('sc').textContent=scoreP+' : '+scoreA;resetPuck(-1);if(scoreA>=7)end('电脑赢了！');return}puck.vy*=-1;puck.y=H-R}
+hit(padP,1);hit(padA,-1);
+puck.vx*=.995;puck.vy*=.995;if(Math.hypot(puck.vx,puck.vy)<.6){puck.vx*=1.08;puck.vy*=1.08}
+draw();requestAnimationFrame(step)}
+function resetPuck(d){puck={x:W/2,y:H/2,vx:d*2.5,vy:(Math.random()<.5?1:-1)*2.5};padP={x:W/2,y:H-PR-20};padA={x:W/2,y:PR+20}}
+function hit(pad,dir){const dx=puck.x-pad.x,dy=puck.y-pad.y,d=Math.hypot(dx,dy);if(d<PR+R){const nx=dx/d||0,ny=dy/d||0;const v=Math.max(6,Math.hypot(puck.vx,puck.vy)*1.15+2.5);puck.vx=nx*v+padP.x*0;if(dir===1)puck.vy=Math.abs(ny)*v*.9-1;else puck.vy=-Math.abs(ny)*v*.9+1;puck.x=pad.x+nx*(PR+R+1);puck.y=pad.y+ny*(PR+R+1)}}
+function end(t){over=true;running=false;msg.textContent=t;document.querySelector('.over').classList.add('show')}
+cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();padP.x=e.clientX-r.left;padP.y=e.clientY-r.top});
+cv.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0],r=cv.getBoundingClientRect();padP.x=t.clientX-r.left;padP.y=t.clientY-r.top},{passive:false});
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#3b1d20';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#8f5a52';ctx.lineWidth=2;ctx.strokeRect(2,2,W-4,H-4);
+ctx.beginPath();ctx.moveTo(0,H/2);ctx.lineTo(W,H/2);ctx.stroke();ctx.beginPath();ctx.arc(W/2,H/2,GW*.55,0,7);ctx.stroke();
+ctx.fillStyle='#7a2b24';ctx.fillRect(W/2-GW/2,0,GW,6);ctx.fillRect(W/2-GW/2,H-6,GW,6);
+const g1=ctx.createRadialGradient(padA.x-4,padA.y-4,4,padA.x,padA.y,PR);g1.addColorStop(0,'#7aa0ff');g1.addColorStop(1,'#2c4a9e');ctx.fillStyle=g1;ctx.beginPath();ctx.arc(padA.x,padA.y,PR,0,7);ctx.fill();
+const g2=ctx.createRadialGradient(padP.x-4,padP.y-4,4,padP.x,padP.y,PR);g2.addColorStop(0,'#ff9b78');g2.addColorStop(1,'#b02a2a');ctx.fillStyle=g2;ctx.beginPath();ctx.arc(padP.x,padP.y,PR,0,7);ctx.fill();
+ctx.fillStyle='#e8dcd5';ctx.beginPath();ctx.arc(puck.x,puck.y,R,0,7);ctx.fill();ctx.strokeStyle='#0005';ctx.stroke()}
+function restart(){document.querySelector('.over').classList.remove('show');init()}
+let running=false;function loop(){if(running)return;running=true;step()}
+init();
+
+</script></body></html>

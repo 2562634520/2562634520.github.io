@@ -1,0 +1,46 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🏀 投篮</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🏀 投篮</h1><canvas id="cv"></canvas>
+<div class="info">得分 <b id="sc">0</b> / 20 · 8次机会</div>
+<div class="hint">从篮球处按住拖动向后拉瞄准，松开投篮进筐</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0;
+function size(){W=Math.min(innerWidth-24,420);H=Math.floor(W*1.15);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W;cv.height=H}
+size();addEventListener('resize',()=>{size();draw()});
+let over=false,score=0,rounds=0,ball={x:0,y:0,vx:0,vy:0,active:false},drag=false,sx=0,sy=0,dx=0,dy=0,swing=0;
+const HOOP={x:0,y:0};
+function init(){over=false;score=0;rounds=0;ball={x:80,y:H-40,vx:0,vy:0,active:false};HOOP.x=W-90;HOOP.y=140;swing=0;document.getElementById('sc').textContent='0';document.querySelector('.over').classList.remove('show');draw()}
+cv.addEventListener('pointerdown',e=>{if(over)return;const r=cv.getBoundingClientRect();sx=e.clientX-r.left;sy=e.clientY-r.top;drag=true;dx=0;dy=0});
+addEventListener('pointermove',e=>{if(!drag)return;const r=cv.getBoundingClientRect();dx=e.clientX-r.left-sx;dy=e.clientY-r.top-sy;draw()});
+addEventListener('pointerup',()=>{if(!drag)return;drag=false;const d=Math.hypot(dx,dy);if(d<8)return;const p=Math.min(1,d/100);ball.vx=-(dx/d)*p*13;ball.vy=-(dy/d)*p*13;ball.active=true;rounds++});
+function step(){if(!ball.active){requestAnimationFrame(step);return}
+ball.x+=ball.vx;ball.y+=ball.vy;ball.vy+=.32;
+if(ball.vy>0&&Math.abs(ball.x-HOOP.x)<20&&Math.abs(ball.y-HOOP.y)<16){score+=2;document.getElementById('sc').textContent=score;ball.active=false;draw();if(score>=20){over=true;msg.textContent='赢了！20分达成';document.querySelector('.over').classList.add('show')}return}
+if(ball.y>H-22||ball.x>W+20||ball.x<-20){if(ball.active){ball.active=false;draw();if(rounds>=8){over=true;msg.textContent='8次机会用完，得分 '+score;document.querySelector('.over').classList.add('show')}}return}
+draw();requestAnimationFrame(step)}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#1c0f12';ctx.fillRect(0,0,W,H);ctx.fillStyle='#7a4a2b';ctx.fillRect(0,H-24,W,24);ctx.strokeStyle='#5a2b2b';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,H-60);ctx.lineTo(W,H-60);ctx.stroke();
+ctx.strokeStyle='#d64545';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(HOOP.x-30,HOOP.y);ctx.lineTo(HOOP.x-30,HOOP.y-50);ctx.lineTo(HOOP.x+30,HOOP.y-50);ctx.lineTo(HOOP.x+30,HOOP.y);ctx.stroke();ctx.strokeStyle='#ffc93c';ctx.lineWidth=3;ctx.beginPath();ctx.arc(HOOP.x,HOOP.y,16,0,7);ctx.stroke();ctx.fillStyle='#8a5a3a';ctx.fillRect(HOOP.x-30,HOOP.y-50,60,8);
+const g=ctx.createRadialGradient(ball.x-4,ball.y-4,3,ball.x,ball.y,13);g.addColorStop(0,'#ff9b78');g.addColorStop(1,'#b02a2a');ctx.fillStyle=g;ctx.beginPath();ctx.arc(ball.x,ball.y,13,0,7);ctx.fill();ctx.strokeStyle='#0b090c';ctx.stroke();
+if(drag){ctx.strokeStyle='#ffd9c855';ctx.lineWidth=2;ctx.setLineDash([6,6]);ctx.beginPath();ctx.moveTo(80,H-40);ctx.lineTo(80-dx*4,H-40-dy*4);ctx.stroke();ctx.setLineDash([])}
+ctx.fillStyle='#ffd9c8';ctx.font='bold 16px sans-serif';ctx.textAlign='left';ctx.fillText('得分 '+score+' / 20',12,24)}
+function restart(){init()}
+init();setInterval(step,16);
+
+</script></body></html>

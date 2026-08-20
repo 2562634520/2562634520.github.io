@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>堆叠大师</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:18px}
+#cv{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 34px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🏗️ 堆叠大师</h1><div class="info"><span>层数 <b id="lv">0</b></span><span>宽度 <b id="wid">100</b>%</span></div><canvas id="cv"></canvas><div class="hint">点击放下当前方块 · 越窄越难</div></div>
+<div class="over"><div class="panel"><b>堆了 <span id="finallv">0</span> 层</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),dpr=Math.min(devicePixelRatio||1,2);
+let W,H,stack=[],cur={x:0,w:0},dir=1,speed=4,lv=0,alive=true,frame=0,groundH=60;
+function size(){W=Math.min(innerWidth-24,300);H=Math.min(innerHeight-150,500);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+size();addEventListener('resize',size);
+function restart(){lv=0;alive=true;stack=[];cur={x:(W-160)/2,w:160};dir=1;speed=4;document.getElementById('lv').textContent=0;document.getElementById('wid').textContent='100%';document.querySelector('.over').classList.remove('show');requestAnimationFrame(loop)}
+restart();
+function drop(){if(!alive)return;let y=H-groundH-stack.length*28;let overlap=Math.min(cur.x+cur.w,stack[stack.length-1]?stack[stack.length-1].x+stack[stack.length-1].w:W)-Math.max(cur.x,stack[stack.length-1]?stack[stack.length-1].x:0);let base=stack[stack.length-1]||{x:0,w:W};let leftOver=Math.max(base.x,cur.x),rightOver=Math.min(base.x+base.w,cur.x+cur.w);let newW=Math.max(0,rightOver-leftOver);if(newW<=0){alive=false;document.getElementById('finallv').textContent=lv;document.querySelector('.over').classList.add('show');return}let dx=cur.x-leftOver;stack.push({x:leftOver,w:newW,dx});lv++;document.getElementById('lv').textContent=lv;document.getElementById('wid').textContent=Math.max(5,Math.round(newW/base.w*100))+'%';let dropOff=cur.x-leftOver;if(dropOff!==0&&cur.x<leftOver||dropOff!==0){stack[stack.length-1].dx=dx}cur={x:(W-newW)/2,w:newW};speed=Math.min(9,4+lv*0.22)}
+cv.addEventListener('pointerdown',drop);
+addEventListener('keydown',e=>{if(e.code==='Space')drop()});
+function loop(){requestAnimationFrame(loop);if(!alive)return;frame++;cur.x+=dir*speed;if(cur.x<0){cur.x=0;dir=1}if(cur.x+cur.w>W){cur.x=W-cur.w;dir=-1}ctx.clearRect(0,0,W,H);ctx.fillStyle='#0b090c';ctx.fillRect(0,0,W,H);for(let i=0;i<stack.length;i++){let s=stack[i],y=H-groundH-i*28;if(s.dx&&s.dx!==0){ctx.save();ctx.translate(s.x+s.w/2,y+14);ctx.scale(1,1);ctx.translate(-(s.x+s.w/2),-(y+14));ctx.globalAlpha=0.25;ctx.fillStyle='#d64545';ctx.fillRect(s.x+s.dx,y,s.w,26);ctx.restore();ctx.globalAlpha=1}ctx.fillStyle='#d64545';ctx.shadowColor='#ff6040';ctx.shadowBlur=8;ctx.fillRect(s.x,y,s.w,26);ctx.shadowBlur=0}let y=H-groundH-stack.length*28;ctx.fillStyle='#ffd9c8';ctx.fillRect(cur.x,y,cur.w,26);ctx.fillStyle='#7a5a32';ctx.fillRect(0,H-groundH,W,groundH)}
+</script></body></html>

@@ -1,0 +1,38 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>2048</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:12px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.score{font-size:13px;color:#d9a08f}.score b{color:#ffd9c8;font-size:18px}
+.board{width:min(88vw,380px);aspect-ratio:1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:#120e11;border:2px solid #b02a2a66;border-radius:14px;padding:8px;box-shadow:0 0 26px #b02a2a2e}
+.tile{border-radius:9px;display:grid;place-items:center;font-size:22px;font-weight:800;background:#1d1416;color:#e8dcd5;transition:transform .08s}
+.tile[data-v="2"]{background:#33201f;color:#ffd9c8}.tile[data-v="4"]{background:#4a2724;color:#ffd9c8}
+.tile[data-v="8"]{background:#7a2a26;color:#fff}.tile[data-v="16"]{background:#9c3129;color:#fff}
+.tile[data-v="32"]{background:#b02a2a;color:#fff}.tile[data-v="64"]{background:#c94236;color:#fff}
+.tile[data-v="128"]{background:#d65a3a;color:#fff;font-size:18px}.tile[data-v="256"]{background:#e07a38;color:#fff;font-size:18px}
+.tile[data-v="512"]{background:#e89a3a;color:#fff;font-size:18px}.tile[data-v="1024"]{background:#f0ba44;color:#3a2010;font-size:16px}
+.tile[data-v="2048"]{background:#ffe066;color:#3a2010;font-size:16px;box-shadow:0 0 20px #ffe06666}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px}.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:16px auto 0;padding:10px 30px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🔢 2048</h1><div class="score">得分 <b id="sc">0</b></div><div class="board" id="bd"></div><div class="hint">滑动 / 方向键合并数字</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const bd=document.getElementById('bd');let g=[],score=0,alive=true;
+function restart(){g=Array.from({length:4},()=>Array(4).fill(0));score=0;alive=true;add();add();render();document.querySelector('.over').classList.remove('show')}
+function add(){const e=[];for(let r=0;r<4;r++)for(let c=0;c<4;c++)if(!g[r][c])e.push([r,c]);if(!e.length)return;const [r,c]=e[Math.random()*e.length|0];g[r][c]=Math.random()<.9?2:4}
+function render(){bd.innerHTML='';for(let r=0;r<4;r++)for(let c=0;c<4;c++){const d=document.createElement('div');d.className='tile';d.dataset.v=g[r][c];d.textContent=g[r][c]||'';bd.appendChild(d)}document.getElementById('sc').textContent=score}
+function slide(row){const a=row.filter(v=>v);for(let i=0;i<a.length-1;i++)if(a[i]===a[i+1]){a[i]*=2;score+=a[i];a.splice(i+1,1)}while(a.length<4)a.push(0);return a}
+function move(dir){const old=JSON.stringify(g);for(let i=0;i<4;i++){let row=[];
+for(let c=0;c<4;c++)row.push(dir==='left'?g[i][c]:dir==='right'?g[i][3-c]:g[c][i]);
+row=slide(row);
+for(let c=0;c<4;c++){const v=row[c];if(dir==='left')g[i][c]=v;else if(dir==='right')g[i][3-c]=v;else g[c][i]=v}}
+if(old!==JSON.stringify(g)){add();render();if(!canMove()){alive=false;document.getElementById('msg').textContent='最终得分 '+score;document.querySelector('.over').classList.add('show')}}}
+function canMove(){for(let r=0;r<4;r++)for(let c=0;c<4;c++){if(!g[r][c])return true;if(c<3&&g[r][c]===g[r][c+1])return true;if(r<3&&g[r][c]===g[r+1][c])return true}return false}
+document.addEventListener('keydown',e=>{const k=e.key;if(k.startsWith('Arrow')){e.preventDefault();move({ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'}[k])}});
+let ts;bd.addEventListener('touchstart',e=>{ts=e.touches[0]},{passive:true});bd.addEventListener('touchend',e=>{if(!ts)return;const dx=e.changedTouches[0].clientX-ts.clientX,dy=e.changedTouches[0].clientY-ts.clientY;if(Math.max(Math.abs(dx),Math.abs(dy))<24)return;move(Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up'))},{passive:true});
+restart();
+</script></body></html>

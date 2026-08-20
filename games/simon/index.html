@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>记忆大师</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
+h1{font-size:22px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:20px}
+#grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:min(88vw,300px)}
+.btn4{aspect-ratio:1;border-radius:16px;border:2px solid #ffffff22;cursor:pointer;opacity:.82;transition:opacity .12s,transform .12s}
+.btn4:active{transform:scale(.92)}
+.btn4.lit{opacity:1;box-shadow:0 0 26px #ffd9c888;transform:scale(1.05)}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 38px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🧠 记忆大师</h1><div class="info"><span>关卡 <b id="lv">1</b></span><span>序列 <b id="seq">0</b></span></div><div id="grid"></div><div class="hint">记住亮灯顺序并复现</div></div>
+<div class="over"><div class="panel"><b>记错啦！</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const COLORS=['#d64545','#d9a05a','#5a8f3a','#3a6fb0'];const grid=document.getElementById('grid');let seq=[],playerIdx=0,playing=false,lv=1,btnEls=[];
+COLORS.forEach(c=>{let b=document.createElement('button');b.className='btn4';b.style.background=c;b.addEventListener('pointerdown',()=>press(b));grid.appendChild(b);btnEls.push(b)});
+function restart(){lv=1;seq=[];playing=false;document.getElementById('lv').textContent=1;document.querySelector('.over').classList.remove('show');nextRound()}
+function nextRound(){seq.push(Math.random()*4|0);playerIdx=0;document.getElementById('seq').textContent=seq.length;document.getElementById('lv').textContent=lv;playing=true;playSeq()}
+function playSeq(){playing=false;let i=0;let iv=setInterval(()=>{if(i>0)btnEls[seq[i-1]].classList.remove('lit');if(i>=seq.length){clearInterval(iv);playing=true;return}btnEls[seq[i]].classList.add('lit');i++},560)}
+function press(b){if(!playing)return;let idx=btnEls.indexOf(b);b.classList.add('lit');setTimeout(()=>b.classList.remove('lit'),220);if(idx!==seq[playerIdx]){playing=false;document.querySelector('.over').classList.add('show');return}playerIdx++;if(playerIdx>=seq.length){lv++;document.getElementById('lv').textContent=lv;setTimeout(nextRound,700)}}
+restart();
+</script></body></html>

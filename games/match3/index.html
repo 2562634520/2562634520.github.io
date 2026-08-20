@@ -1,0 +1,30 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>宝石消消乐</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:18px}
+#bd{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;background:#120e11;border:2px solid #b02a2a66;border-radius:12px;padding:8px;box-shadow:0 0 24px #b02a2a2e;width:min(94vw,360px)}
+.gem{aspect-ratio:1;display:grid;place-items:center;background:#241a1c;border-radius:8px;font-size:22px;cursor:pointer;user-select:none;transition:transform .12s}
+@media(max-width:380px){.gem{font-size:18px}}
+.gem.sel{transform:scale(1.16);box-shadow:0 0 12px #ffd9c8}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 34px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>💎 宝石消消乐</h1><div class="info"><span>得分 <b id="sc">0</b></span><span>目标 200</span></div><div id="bd"></div><div class="hint">交换相邻宝石 · 三个同色消除</div></div>
+<div class="over"><div class="panel"><b id="msg">🎉 达成目标！</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const GEMS=['🔴','🟠','🟡','🟢','🔵','🟣'];const bd=document.getElementById('bd');let grid=[],sel=null,score=0,busy=false;
+function restart(){score=0;sel=null;busy=false;document.getElementById('sc').textContent=0;document.querySelector('.over').classList.remove('show');do{grid=Array.from({length:8},()=>Array.from({length:8},()=>GEMS[Math.random()*GEMS.length|0]))}while(findMatches().length);render()}
+function render(){bd.innerHTML='';for(let r=0;r<8;r++)for(let c=0;c<8;c++){let d=document.createElement('div');d.className='gem'+(sel&&sel.r===r&&sel.c===c?' sel':'');d.textContent=grid[r][c];d.addEventListener('pointerdown',()=>tap(r,c));bd.appendChild(d)}}
+function tap(r,c){if(busy)return;if(!sel){sel={r,c};render();return}if(sel.r===r&&sel.c===c){sel=null;render();return}let dr=Math.abs(sel.r-r),dc=Math.abs(sel.c-c);if(dr+dc!==1){sel={r,c};render();return}swap(sel,{r,c});sel=null}
+function swap(a,b){[grid[a.r][a.c],grid[b.r][b.c]]=[grid[b.r][b.c],grid[a.r][a.c]];let m=findMatches();if(!m.length){[grid[a.r][a.c],grid[b.r][b.c]]=[grid[b.r][b.c],grid[a.r][a.c]];render();return}busy=true;resolve(m)}
+function findMatches(){let found=[];for(let r=0;r<8;r++)for(let c=0;c<6;c++){let g=grid[r][c];if(g&&g===grid[r][c+1]&&g===grid[r][c+2]){found.push({r,c},{r,c:c+1},{r,c:c+2})}}for(let c=0;c<8;c++)for(let r=0;r<6;r++){let g=grid[r][c];if(g&&g===grid[r+1][c]&&g===grid[r+2][c]){found.push({r,c},{r:r+1,c},{r:r+2,c})}}return found}
+function resolve(m){for(let p of m){if(grid[p.r][p.c]){score+=10;grid[p.r][p.c]=null}}document.getElementById('sc').textContent=score;for(let c=0;c<8;c++){for(let r=7;r>=0;r--){if(!grid[r][c]){for(let k=r-1;k>=0;k--){if(grid[k][c]){[grid[r][c],grid[k][c]]=[grid[k][c],grid[r][c]];break}}}}for(let r=0;r<8;r++)if(!grid[r][c])grid[r][c]=GEMS[Math.random()*GEMS.length|0]}render();setTimeout(()=>{let m2=findMatches();if(m2.length)resolve(m2);else{busy=false;if(score>=200){document.getElementById('msg').textContent='🎉 达成目标！';document.querySelector('.over').classList.add('show')}}},280)}
+restart();
+</script></body></html>

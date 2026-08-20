@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>⚓ 海上大战</title><style>*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.score{font-size:13px;color:#d9a08f}.score b{color:#ffd9c8}
+canvas{background:#0c0a0d;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px}.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:16px auto 0;padding:10px 30px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}</style></head><body>
+<div class="wrap"><h1>⚓ 海上大战</h1><div class="score">得点 <b id="sc">0</b></div><canvas id="cv"></canvas><div class="hint">点击/触屏操作</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');const dpr=Math.min(devicePixelRatio||1,2);cv.width=480*dpr;cv.height=360*dpr;cv.style.width=Math.min(480,innerWidth-24)+'px';cv.style.height='auto';ctx.setTransform(dpr,0,0,dpr,0,0);
+let player,enemies,bullets,score,alive,raf,tick;
+function rset(){player={x:240,y:330};enemies=[];bullets=[];score=0;tick=0;alive=true;document.getElementById('sc').textContent=0;document.querySelector('.over').classList.remove('show');cancelAnimationFrame(raf);requestAnimationFrame(loop)}
+function loop(){if(!alive)return;tick++;if(tick%40===0)enemies.push({x:Math.random()*440+20,y:-20,vy:1+Math.random()*2});
+enemies.forEach(e=>{e.y+=e.vy;if(e.y>360)return;if(Math.hypot(player.x-e.x,player.y-e.y)<30){{document.getElementById('msg').textContent='得点 '+score;document.getElementById('bs').textContent=Math.max(parseInt(document.getElementById('bs').textContent||0),score);localStorage.setItem('shipwarBest',Math.max(parseInt(localStorage.getItem('shipwarBest')||0),score));document.querySelector('.over').classList.add('show');alive=false};return}});enemies=enemies.filter(e=>e.y<360);
+bullets.forEach(b=>b.y-=6);bullets=bullets.filter(b=>b.y>0);
+enemies=enemies.filter(e=>{for(let i=bullets.length-1;i>=0;i--){if(Math.hypot(bullets[i].x-e.x,bullets[i].y-e.y)<20){score+=10;bullets.splice(i,1);return false}}return true});
+if(score>=100){{document.getElementById('msg').textContent='得点 '+score;document.getElementById('bs').textContent=Math.max(parseInt(document.getElementById('bs').textContent||0),score);localStorage.setItem('shipwarBest',Math.max(parseInt(localStorage.getItem('shipwarBest')||0),score));document.querySelector('.over').classList.add('show');alive=false};return}
+document.getElementById('sc').textContent=score;
+ctx.fillStyle='#0c0a0d';ctx.fillRect(0,0,480,360);ctx.fillStyle='rgba(180,220,255,.1)';ctx.fillRect(0,0,480,360);ctx.fillStyle='#b02a2a';ctx.fillRect(player.x-25,player.y-15,50,15);ctx.fillStyle='#d9a08f';ctx.fillRect(player.x-20,player.y-25,40,15);enemies.forEach(e=>{ctx.fillStyle='#5a3a35';ctx.fillRect(e.x-20,e.y-10,40,10);ctx.fillStyle='#fff';ctx.fillRect(e.x-15,e.y-15,30,8)});bullets.forEach(b=>{ctx.fillStyle='#ffd9c8';ctx.fillRect(b.x-2,b.y-5,4,10)});raf=requestAnimationFrame(loop)}
+function restart(){rset()}
+cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();player.x=(e.clientX-r.left)*(480/r.width)});
+cv.addEventListener('pointerdown',e=>{if(!alive)return;bullets.push({x:player.x,y:player.y-20})});
+rset();
+</script></body></html>

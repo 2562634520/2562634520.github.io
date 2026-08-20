@@ -1,0 +1,45 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>点球大战</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none;user-select:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.hud{font-size:13px;color:#d9a08f;display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
+canvas{background:#120d10;border:1px solid #33262a;border-radius:12px;touch-action:none;display:block;max-width:96vw;max-height:68vh}
+.btn{display:inline-block;padding:9px 22px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin:4px}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 30px;box-shadow:0 0 40px #b02a2a2e;max-width:86vw}
+.panel b{font-size:24px;color:#ffd9c8;display:block;margin-bottom:8px}
+.panel p{font-size:13px;color:#c9a89b;margin-bottom:12px}
+.tip{font-size:11px;color:#8f7f7b;text-align:center}
+</style></head><body>
+<div class="wrap"><h1>⚽ 点球大战</h1><div class="hud">比分 <b id="sc">0</b> : <span id="ai">0</span> · 第 <span id="n">1</span>/5 球</div><canvas id="cv"></canvas><div class="tip">在球上向后拖动瞄准方向，松手射门</div></div>
+<div class="over"><div class="panel"><b id="msg"></b><p id="sub"></p><button class="btn" id="again">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');cv.width=360;cv.height=460;
+const GOAL={x1:80,x2:280,y:80};let sc=0,ai=0,n=1,run=true,shoot=false,bx=180,by=400,bvx=0,bvy=0,gk={x:180,sp:0,dir:1},drag=null,phase='ready';
+function resetBall(){bx=180;by=400;bvx=0;bvy=0;phase='ready';shoot=false;gk.x=180;gk.sp=2.4;gk.dir=Math.random()<0.5?-1:1}
+function tick(){if(phase==='move'){bx+=bvx;by+=bvy;if(bx<70||bx>290)bvx*=-1;
+if(by<GOAL.y+14){const inGoal=bx>GOAL.x1+8&&bx<GOAL.x2-8;const saved=Math.abs(bx-gk.x)<22&&by>GOAL.y-10;
+if(inGoal&&!saved){sc++;phase='goal'}else if(inGoal){ai++;phase='miss'}else{ai++;phase='out'}
+document.getElementById('sc').textContent=sc;document.getElementById('ai').textContent=ai;
+setTimeout(()=>{if(n>=5){const m=sc>ai?'你赢啦！':(sc<ai?'门将更胜一筹':'平局');document.getElementById('msg').textContent=m;document.getElementById('sub').textContent='最终比分 '+sc+' : '+ai;document.querySelector('.over').classList.add('show');return}n++;document.getElementById('n').textContent=n;resetBall()},900)}}
+if(phase==='ready'&&Math.random()<0.02)gk.x+=gk.dir*4;if(gk.x<100||gk.x>260)gk.dir*=-1;
+if(phase==='goal'){ctx.fillStyle='#7de08a'};draw()}
+function kick(dx,dy){const dd=Math.sqrt(dx*dx+dy*dy);if(dd<12||phase!=='ready')return;const p=Math.min(16,dd/7);bvx=-dx/dd*p;bvy=-dy/dd*p;phase='move'}
+function pos(e){const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)*(cv.width/r.width),y:(e.clientY-r.top)*(cv.height/r.height)}}
+function draw(){ctx.fillStyle='#120d10';ctx.fillRect(0,0,cv.width,cv.height);
+ctx.fillStyle='#1c4433';ctx.fillRect(70,60,220,120);ctx.fillStyle='#120d10';ctx.strokeStyle='#d9a08f';ctx.strokeRect(80,80,200,90);
+ctx.fillStyle='#2a6b4a';ctx.fillRect(70,180,220,220);ctx.strokeStyle='#d9a08f';ctx.beginPath();ctx.arc(180,300,34,0,7);ctx.stroke();
+ctx.fillStyle='#e8dcd5';ctx.fillRect(gk.x-16,84,32,44);ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(gk.x,80,9,0,7);ctx.fill();
+ctx.fillStyle='#e8dcd5';ctx.beginPath();ctx.arc(bx,by,11,0,7);ctx.fill();
+if(drag&&phase==='ready'){ctx.strokeStyle='#ffd84a';ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx+(bx-drag.x)*0.8,by+(by-drag.y)*0.8);ctx.stroke();ctx.setLineDash([])}}
+cv.addEventListener('touchstart',e=>{drag=pos(e.touches[0])},{passive:true});
+cv.addEventListener('touchmove',e=>{drag=pos(e.touches[0])},{passive:true});
+cv.addEventListener('touchend',e=>{if(drag){kick(bx-drag.x,by-drag.y);drag=null}},{passive:true});
+cv.addEventListener('mousedown',e=>{drag=pos(e)});
+cv.addEventListener('mousemove',e=>{if(drag)drag=pos(e)});
+cv.addEventListener('mouseup',e=>{if(drag){kick(bx-drag.x,by-drag.y);drag=null}});
+document.getElementById('again').onclick=()=>{sc=0;ai=0;n=1;document.getElementById('sc').textContent='0';document.getElementById('ai').textContent='0';document.getElementById('n').textContent='1';resetBall();document.querySelector('.over').classList.remove('show')};
+resetBall();setInterval(tick,33);
+</script></body></html>

@@ -1,0 +1,42 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>漂移赛车</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none;user-select:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.hud{font-size:13px;color:#d9a08f;display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
+canvas{background:#120d10;border:1px solid #33262a;border-radius:12px;touch-action:none;display:block;max-width:96vw;max-height:68vh}
+.btn{display:inline-block;padding:9px 22px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin:4px}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 30px;box-shadow:0 0 40px #b02a2a2e;max-width:86vw}
+.panel b{font-size:24px;color:#ffd9c8;display:block;margin-bottom:8px}
+.panel p{font-size:13px;color:#c9a89b;margin-bottom:12px}
+.tip{font-size:11px;color:#8f7f7b;text-align:center}
+</style></head><body>
+<div class="wrap"><h1>🏎️ 漂移赛车</h1><div class="hud">得分 <b id="sc">0</b> · 漂移 <span id="dr">0</span></div><canvas id="cv"></canvas><div class="tip">←→ 变道 · 急转漂移加分 · 别撞车</div></div>
+<div class="over"><div class="panel"><b id="msg"></b><p id="sub"></p><button class="btn" id="again">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');cv.width=360;cv.height=480;
+let px=180,py=420,run=false,sc=0,drift=0,driftOn=0,spd=5,cars=[],frame=0;
+function start(){px=180;py=420;sc=0;drift=0;driftOn=0;cars=[];spd=5;run=true;document.querySelector('.over').classList.remove('show')}
+function tick(){if(!run)return;sc+=2;document.getElementById('sc').textContent=sc;
+if(frame%24===0&&Math.random()<0.8){const lane=Math.random()*3|0;cars.push({x:110+lane*70,y:-70})}
+cars.forEach(c=>c.y+=spd);cars=cars.filter(c=>c.y<cv.height+80);
+cars.forEach(c=>{if(Math.abs(c.x-px)<44&&Math.abs(c.y-py)<58){over('撞车了','得分 '+sc)}});
+driftOn=Math.max(0,driftOn-1);frame++;draw()}
+function draw(){ctx.fillStyle='#16141d';ctx.fillRect(0,0,cv.width,cv.height);
+ctx.fillStyle='#24202a';ctx.fillRect(70,0,220,cv.height);
+ctx.strokeStyle='#8f7f7b';ctx.setLineDash([12,10]);for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(140+i*70,0);ctx.lineTo(140+i*70,cv.height);ctx.stroke()}ctx.setLineDash([]);
+cars.forEach(c=>{ctx.fillStyle='#d64545';ctx.fillRect(c.x-30,c.y-42,60,84);ctx.fillStyle='#ffd9c8';ctx.fillRect(c.x-18,c.y-26,10,10);ctx.fillRect(c.x+8,c.y-26,10,10)});
+const tilt=driftOn>0?0.08*Math.min(4,driftOn):0;
+ctx.save();ctx.translate(px,py);ctx.rotate(tilt);
+ctx.fillStyle='#7de08a';ctx.fillRect(-30,-42,60,84);
+ctx.fillStyle='#16141d';ctx.fillRect(-18,-26,10,10);ctx.fillRect(8,-26,10,10);
+ctx.restore()}
+function steer(d){if(!run)return;const old=px;px=Math.max(100,Math.min(260,px+d*34));if(Math.abs(px-old)>0&&spd>4){drift+=Math.abs(px-old)*2;driftOn=8;document.getElementById('dr').textContent=Math.floor(drift)}}
+function over(m,s){run=false;document.getElementById('msg').textContent=m;document.getElementById('sub').textContent=s+' · 漂移 '+Math.floor(drift);document.querySelector('.over').classList.add('show')}
+addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A')steer(-1);if(e.key==='ArrowRight'||e.key==='d'||e.key==='D')steer(1)});
+let tx=0;cv.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+cv.addEventListener('touchmove',e=>{const t=e.touches[0];const dx=t.clientX-tx;if(Math.abs(dx)>18){steer(dx>0?1:-1);tx=t.clientX}},{passive:true});
+document.getElementById('again').onclick=start;start();setInterval(tick,33);
+</script></body></html>

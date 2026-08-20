@@ -1,0 +1,42 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>⚽ 足球颠球</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>⚽ 足球颠球</h1><canvas id="cv"></canvas>
+<div class="info">颠球 <b id="sc">0</b> · 最高 <b id="best">0</b></div>
+<div class="hint">球下落时点击它 · 保持不落地，连续颠球得分</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0;
+function size(){W=Math.min(innerWidth-24,400);H=Math.floor(W*.95);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W;cv.height=H}
+size();addEventListener('resize',()=>{size();draw()});
+let over=false,score=0,best=0,ball={x:0,y:0,vy:0},combo=0;
+function init(){over=false;score=0;ball={x:W/2,y:H-100,vy:-7};combo=0;document.getElementById('sc').textContent='0';document.querySelector('.over').classList.remove('show');loop()}
+cv.addEventListener('pointerdown',e=>{if(over)return;const r=cv.getBoundingClientRect();const x=e.clientX-r.left,y=e.clientY-r.top;if(Math.hypot(x-ball.x,y-ball.y)<55&&ball.vy>0){ball.vy=-10.5;score++;combo++;document.getElementById('sc').textContent=score;if(score>best)best=score}else{combo=0}});
+function step(){if(over)return;ball.vy+=.5;ball.y+=ball.vy;
+if(ball.y>H-70&&ball.vy>0){if(Math.abs(ball.x-W/2)<28){ball.vy=-7;ball.x=W/2}else{over=true;msg.textContent='球掉了！颠球 '+score+' 次';document.querySelector('.over').classList.add('show');return}}
+if(ball.y<30){ball.y=30;ball.vy=Math.abs(ball.vy)*.85}
+draw();requestAnimationFrame(step)}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#10160f';ctx.fillRect(0,0,W,H);ctx.fillStyle='#2a4a2a';ctx.fillRect(0,H-70,W,70);ctx.strokeStyle='#8a9a8a';ctx.beginPath();ctx.moveTo(0,H-70);ctx.lineTo(W,H-70);ctx.stroke();
+ctx.fillStyle='#ffd9c8';ctx.font='bold 15px sans-serif';ctx.textAlign='center';ctx.fillText('点击球反弹',W/2,40);
+const g=ctx.createRadialGradient(ball.x-4,ball.y-4,3,ball.x,ball.y,16);g.addColorStop(0,'#fff');g.addColorStop(.5,'#e8dcd5');g.addColorStop(1,'#8a8a8a');ctx.fillStyle=g;ctx.beginPath();ctx.arc(ball.x,ball.y,16,0,7);ctx.fill();ctx.strokeStyle='#222';ctx.lineWidth=2;ctx.beginPath();ctx.arc(ball.x,ball.y,16,0,7);ctx.stroke();
+ctx.fillStyle='#ffd9c8';ctx.font='bold 18px sans-serif';ctx.textAlign='left';ctx.fillText('颠球 '+score,12,24);ctx.textAlign='right';ctx.fillText('最高 '+best,W-12,24)}
+function restart(){init()}
+let running=false;function loop(){if(running)return;running=true;step()}
+init();
+
+</script></body></html>

@@ -1,0 +1,27 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>打地鼠</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:18px}
+#board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px;background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:92vw}
+.hole{position:relative;width:84px;height:84px;background:radial-gradient(#2a1a1a,#171215);border-radius:50%;border:3px solid #b02a2a44;display:grid;place-items:center;font-size:40px;cursor:pointer;user-select:none;transition:transform .08s}
+.hole:active{transform:scale(.92)}
+@media(max-width:420px){.hole{width:76px;height:76px;font-size:36px}}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 34px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🐹 打地鼠</h1><div class="info"><span>得分 <b id="sc">0</b></span><span>时间 <b id="tm">30</b>s</span></div><div id="board"></div><div class="hint">点中地鼠 +1 · 炸弹 -2</div></div>
+<div class="over"><div class="panel"><b>时间到！</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const board=document.getElementById('board');let holes=[],score=0,time=30,timer=null,spawner=null;
+for(let i=0;i<9;i++){let h=document.createElement('div');h.className='hole';h.dataset.i=i;h.textContent='';h.addEventListener('pointerdown',()=>hit(i));board.appendChild(h);holes.push(h)}
+function restart(){score=0;time=30;document.getElementById('sc').textContent=0;document.getElementById('tm').textContent=30;holes.forEach(h=>h.textContent='');document.querySelector('.over').classList.remove('show');clearInterval(timer);clearInterval(spawner);timer=setInterval(()=>{time--;document.getElementById('tm').textContent=time;if(time<=0){clearInterval(timer);clearInterval(spawner);holes.forEach(h=>h.textContent='');document.querySelector('.over').classList.add('show')}},1000);spawner=setInterval(()=>{holes.forEach(h=>{if(h.textContent===''&&Math.random()<0.18)h.textContent=Math.random()<0.15?'💣':'🐹'});setTimeout(()=>{holes.forEach(h=>h.textContent='')},1100)},650)}
+function hit(i){let h=holes[i],t=h.textContent;if(!t)return;if(t==='🐹'){score++;h.textContent='💥'}else if(t==='💣'){score=Math.max(0,score-2);h.textContent='💥'}document.getElementById('sc').textContent=score;setTimeout(()=>{h.textContent=''},90)}
+restart();
+</script></body></html>

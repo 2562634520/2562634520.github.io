@@ -1,0 +1,47 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>吃豆人</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.hud{font-size:13px;color:#d9a08f;display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
+canvas{background:#120d10;border:1px solid #33262a;border-radius:12px;touch-action:none;display:block;max-width:96vw;max-height:68vh}
+.btn{display:inline-block;padding:9px 22px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin:4px}
+.btn.ghost{background:transparent;border:1px solid #b02a2a;color:#ffd9c8}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 30px;box-shadow:0 0 40px #b02a2a2e;max-width:86vw}
+.panel b{font-size:24px;color:#ffd9c8;display:block;margin-bottom:8px}
+.panel p{font-size:13px;color:#c9a89b;margin-bottom:12px}
+.tip{font-size:11px;color:#8f7f7b;text-align:center}
+</style></head><body>
+<div class="wrap"><h1>🟡 吃豆人</h1><div class="hud">分数 <b id="sc">0</b> · 生命 <span id="lv">3</span></div><canvas id="cv"></canvas><div class="tip">方向键 / WASD 移动，手机上滑动控制</div></div>
+<div class="over"><div class="panel"><b id="msg"></b><p id="sub"></p><button class="btn" id="again">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),S=22,COLS=15,ROWS=15;
+cv.width=COLS*S;cv.height=ROWS*S;
+const M=['##############','#............#','#.####.##.##.#','#o#.. #  #.. #','#.####.##.##.#','#............#','#.##.######.##','#....#GG#....#','#.##.######.##','#............#','#.####.##.##.#','#.. #.. #... #','#.##.####.##.#','#............#','##############'];
+let dots=0,sc=0,lives=3,dir={x:0,y:0},pd={x:0,y:0},run=false;
+const P={x:7,y:7},gh=[{x:7,y:6},{x:6,y:6},{x:8,y:6}];
+const grid=M.map(r=>r.split(''));
+grid.forEach((r,y)=>r.forEach((c,x)=>{if(c==='.')dots++;if(c==='o')dots++}));
+function cell(x,y){return x<0||y<0||x>=COLS||y>=ROWS?'#':grid[y][x]}
+function reset(){P.x=7;P.y=7;dir={x:0,y:0};pd={x:0,y:0};gh[0]={x:7,y:6};gh[1]={x:6,y:6};gh[2]={x:8,y:6}}
+function step(){if(!run)return;if(cell(P.x+dir.x,P.y+dir.y)!=='#'){P.x+=dir.x;P.y+=dir.y}
+const c=cell(P.x,P.y);if(c==='.'){sc+=10;grid[P.y][P.x]=' ';dots--}else if(c==='o'){sc+=50;grid[P.y][P.x]=' ';dots--}
+gh.forEach(g=>{const opts=[];[[1,0],[-1,0],[0,1],[0,-1]].forEach(d=>{const nx=g.x+d[0],ny=g.y+d[1];if(cell(nx,ny)!=='#'&&Math.abs(nx-P.x)+Math.abs(ny-P.y)<Math.abs(g.x-P.x)+Math.abs(g.y-P.y))opts.push(d)});
+const d=opts.length?opts[Math.random()*opts.length|0]:[[1,0],[-1,0],[0,1],[0,-1]][Math.random()*4|0];
+if(cell(g.x+d[0],g.y+d[1])!=='#'){g.x+=d[0];g.y+=d[1]}});
+if(gh.some(g=>g.x===P.x&&g.y===P.y)){lives--;document.getElementById('lv').textContent=lives;if(lives<=0){over('游戏结束','最终得分 '+sc);return}reset()}
+if(dots<=0){over('通关啦！','得分 '+sc);return}
+document.getElementById('sc').textContent=sc;draw()}
+function draw(){ctx.fillStyle='#120d10';ctx.fillRect(0,0,cv.width,cv.height);
+grid.forEach((r,y)=>r.forEach((c,x)=>{if(c==='#'){ctx.fillStyle='#2a1b1e';ctx.fillRect(x*S+1,y*S+1,S-2,S-2)}else if(c==='.'){ctx.fillStyle='#e8b28a';ctx.beginPath();ctx.arc(x*S+S/2,y*S+S/2,3,0,7);ctx.fill()}else if(c==='o'){ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(x*S+S/2,y*S+S/2,6,0,7);ctx.fill()}}));
+ctx.fillStyle='#ffd84a';ctx.beginPath();ctx.arc(P.x*S+S/2,P.y*S+S/2,S/2-3,0,7);ctx.fill();
+gh.forEach((g,i)=>{ctx.fillStyle=i?'#d64545':'#d9a52b';ctx.beginPath();ctx.arc(g.x*S+S/2,g.y*S+S/2,S/2-3,0,7);ctx.fill()})}
+function over(m,s){run=false;document.getElementById('msg').textContent=m;document.getElementById('sub').textContent=s;document.querySelector('.over').classList.add('show')}
+function start(){grid.forEach((r,y)=>r.forEach((c,x)=>{if(c!=='#')grid[y][x]=' '}));dots=0;M.forEach((r,y)=>r.split('').forEach((c,x)=>{if(c==='.'||c==='o'){grid[y][x]=c;dots++}}));sc=0;lives=3;run=true;reset();document.getElementById('sc').textContent='0';document.getElementById('lv').textContent='3';document.querySelector('.over').classList.remove('show');draw()}
+addEventListener('keydown',e=>{const k=e.key;if(k==='ArrowLeft'||k==='a'||k==='A')pd={x:-1,y:0};if(k==='ArrowRight'||k==='d'||k==='D')pd={x:1,y:0};if(k==='ArrowUp'||k==='w'||k==='W')pd={x:0,y:-1};if(k==='ArrowDown'||k==='s'||k==='S')pd={x:0,y:1};dir=pd});
+let tx=0,ty=0;cv.addEventListener('touchstart',e=>{const t=e.touches[0];tx=t.clientX;ty=t.clientY},{passive:true});
+cv.addEventListener('touchend',e=>{const t=e.changedTouches[0];const dx=t.clientX-tx,dy=t.clientY-ty;if(Math.abs(dx)>Math.abs(dy))pd={x:dx>0?1:-1,y:0};else pd={x:0,y:dy>0?1:-1};dir=pd},{passive:true});
+document.getElementById('again').onclick=start;start();setInterval(step,140);
+</script></body></html>

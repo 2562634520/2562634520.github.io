@@ -1,0 +1,54 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>太空入侵者</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none;user-select:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.hud{font-size:13px;color:#d9a08f;display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
+canvas{background:#120d10;border:1px solid #33262a;border-radius:12px;touch-action:none;display:block;max-width:96vw;max-height:62vh}
+.btn{display:inline-block;padding:8px 18px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin:4px}
+.btn.ghost{background:transparent;border:1px solid #b02a2a;color:#ffd9c8}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 30px;box-shadow:0 0 40px #b02a2a2e;max-width:86vw}
+.panel b{font-size:24px;color:#ffd9c8;display:block;margin-bottom:8px}
+.panel p{font-size:13px;color:#c9a89b;margin-bottom:12px}
+.tip{font-size:11px;color:#8f7f7b;text-align:center}
+</style></head><body>
+<div class="wrap"><h1>👾 太空入侵者</h1><div class="hud">分数 <b id="sc">0</b> · 生命 <span id="lv">3</span></div><canvas id="cv"></canvas><div class="hud"><button class="btn ghost" id="bl">◀</button><button class="btn ghost" id="br">▶</button><button class="btn" id="fire">发射</button></div><div class="tip">←→ 移动 · 空格 / 发射键开火</div></div>
+<div class="over"><div class="panel"><b id="msg"></b><p id="sub"></p><button class="btn" id="again">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');cv.width=340;cv.height=420;
+let sc=0,lives=3,run=false,px=150,dir=1,step=0,aliens=[],shots=[],es=[],cd=0;
+function mk(){aliens=[];for(let r=0;r<4;r++)for(let c=0;c<8;c++)aliens.push({x:30+c*38,y:34+r*28,w:26,h:18,alive:true})}
+function reset(){px=150;shots=[];es=[];cd=0;dir=1;step=0}
+function start(){sc=0;lives=3;mk();reset();run=true;document.querySelector('.over').classList.remove('show');document.getElementById('sc').textContent='0';document.getElementById('lv').textContent='3'}
+function tick(){if(!run)return;const alive=aliens.filter(a=>a.alive);
+let edge=false;alive.forEach(a=>{a.x+=dir*0.8;if(a.x<8||a.x>cv.width-34)edge=true});
+if(edge){dir*=-1;alive.forEach(a=>a.y+=16)}
+if(++step%16===0&&alive.length){const a=alive[Math.random()*alive.length|0];es.push({x:a.x+13,y:a.y+18,speed:2.2})}
+shots=shots.filter(s=>{s.y-=5;return s.y>0});
+es=es.filter(e=>{e.y+=e.speed;return e.y<cv.height});
+if(cd>0)cd--;
+if(Math.random()<0.006&&cd===0){shots.push({x:px+13,y:382});cd=18}
+aliens.forEach(a=>{if(!a.alive)return;const bx=a.x+13,by=a.y+9;
+shots.forEach(s=>{if(Math.abs(s.x-bx)<13&&Math.abs(s.y-by)<10){a.alive=false;sc+=10;document.getElementById('sc').textContent=sc;s.dead=true}})});
+shots=shots.filter(s=>!s.dead);
+es.forEach(e=>{if(Math.abs(e.x-(px+13))<16&&Math.abs(e.y-374)<14){lives--;document.getElementById('lv').textContent=lives;e.dead=true;if(lives<=0){over('游戏结束','得分 '+sc);return}}});
+es=es.filter(e=>!e.dead);
+if(!aliens.some(a=>a.alive)){sc+=100;document.getElementById('sc').textContent=sc;mk();reset()}
+if(alive.some(a=>a.y>360)){over('防线被突破','得分 '+sc);return}
+draw()}
+function draw(){ctx.fillStyle='#120d10';ctx.fillRect(0,0,cv.width,cv.height);
+aliens.forEach(a=>{if(!a.alive)return;ctx.fillStyle='#d64545';ctx.fillRect(a.x,a.y,a.w,a.h);ctx.fillStyle='#ffd9c8';ctx.fillRect(a.x+4,a.y+3,4,4);ctx.fillRect(a.x+18,a.y+3,4,4)});
+ctx.fillStyle='#7de08a';ctx.fillRect(px,380,26,16);ctx.fillRect(px+8,368,10,12);
+shots.forEach(s=>{ctx.fillStyle='#ffd84a';ctx.fillRect(s.x-2,s.y,4,10)});
+es.forEach(e=>{ctx.fillStyle='#ff8a5c';ctx.fillRect(e.x-3,e.y,6,12)});
+ctx.strokeStyle='#3a2a2e';ctx.beginPath();ctx.moveTo(0,404);ctx.lineTo(cv.width,404);ctx.stroke()}
+function over(m,s){run=false;document.getElementById('msg').textContent=m;document.getElementById('sub').textContent=s;document.querySelector('.over').classList.add('show')}
+addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A')px=Math.max(0,px-24);if(e.key==='ArrowRight'||e.key==='d'||e.key==='D')px=Math.min(cv.width-26,px+24);if(e.key===' '){e.preventDefault();if(!run)start();else shots.push({x:px+13,y:370})}});
+let hold='';setInterval(()=>{if(!run)return;if(hold==='l')px=Math.max(0,px-24);if(hold==='r')px=Math.min(cv.width-26,px+24)},60);
+const bind=function(id,v){const el=document.getElementById(id);el.onmousedown=()=>hold=v;el.onmouseup=()=>hold='';el.onmouseleave=()=>hold='';el.ontouchstart=e=>{e.preventDefault();hold=v};el.ontouchend=()=>hold=''};
+bind('bl','l');bind('br','r');
+document.getElementById('fire').onclick=()=>{if(!run)start();else shots.push({x:px+13,y:370})};
+document.getElementById('again').onclick=start;start();setInterval(tick,20);
+</script></body></html>

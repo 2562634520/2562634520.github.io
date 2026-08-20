@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>喷气背包</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#0d1420;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:68vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🚀 喷气背包</h1><div class="hint">按住上升 · 松开下降 · 吃金币避障碍</div>
+<canvas id="c" width="360" height="480"></canvas>
+<div class="bar">距离 <b id="ds">0</b> 米 · 金币 <b id="cn">0</b></div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=360,H=480;
+let y=200,vy=0,dist=0,coins=0,thrust=false,objs=[],run=true;
+function setup(){y=200;vy=0;dist=0;coins=0;thrust=false;objs=[];run=true}
+function tick(){
+  if(!run)return;
+  dist+=2.2;document.getElementById('ds').textContent=dist|0;
+  vy+=thrust?-.3:.45;y+=vy;
+  if(y<18){y=18;vy=0}if(y>H-24){y=H-24;vy=0}
+  if(Math.random()<.02)objs.push({x:W+20,kind:Math.random()<.45?'coin':Math.random()<.5?'wall':'spike',y:30+Math.random()*(H-90),r:12});
+  objs.forEach(o=>o.x-=3.4);
+  objs=objs.filter(o=>o.x>-30);
+  objs.forEach(o=>{
+    if(Math.hypot(o.x-60,o.y-y)<28){
+      if(o.kind==='coin'){coins++;document.getElementById('cn').textContent=coins;o.x=-99}
+      else end();
+    }
+  });
+  draw();
+}
+function end(){run=false;show('💥 坠机了','飞了 '+dist|0+' 米 · 金币 '+coins)}
+function draw(){
+  ctx.fillStyle='#0d1420';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#223';for(let i=0;i<W;i+=34){const x=(i-dist*2)%(W+34)-17;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+  objs.forEach(o=>{
+    if(o.kind==='coin'){ctx.fillStyle='#ffd700';ctx.beginPath();ctx.arc(o.x,o.y,8,0,7);ctx.fill()}
+    else if(o.kind==='wall'){ctx.fillStyle='#8a4a2a';ctx.fillRect(o.x-8,o.y-28,16,56)}
+    else{ctx.fillStyle='#b0b8c8';ctx.beginPath();ctx.moveTo(o.x,o.y-12);ctx.lineTo(o.x+10,o.y+12);ctx.lineTo(o.x-10,o.y+12);ctx.closePath();ctx.fill()}
+  });
+  ctx.fillStyle='#ffd9c8';ctx.fillRect(44,y-18,30,30);
+  ctx.fillStyle='#b02a2a';ctx.fillRect(44,y-18,30,10);
+  ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(59,y-22,10,0,7);ctx.fill();
+  if(thrust){ctx.fillStyle='rgba(255,150,60,.8)';ctx.beginPath();ctx.moveTo(52,y+12);ctx.lineTo(66,y+12);ctx.lineTo(59,y+34);ctx.closePath();ctx.fill()}
+}
+cv.addEventListener('pointerdown',()=>{thrust=true});
+cv.addEventListener('pointerup',()=>{thrust=false});
+cv.addEventListener('pointerleave',()=>{thrust=false});
+window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();thrust=true}});
+window.addEventListener('keyup',e=>{if(e.code==='Space')thrust=false});
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup()}
+setup();setInterval(tick,16);
+</script></body></html>

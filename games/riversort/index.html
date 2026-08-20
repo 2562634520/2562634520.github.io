@@ -1,0 +1,51 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🧪 水排序</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🧪 水排序</h1><canvas id="cv"></canvas>
+<div class="info">步数 <b id="sc">0</b></div>
+<div class="hint">点击瓶子选中，再点另一瓶倒水 · 同色可叠，每瓶最多 4 层</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const COLORS=['#d64545','#e8a13c','#57c96e','#4a9ede','#9b6be0'];
+let bottles=[],sel=-1,moves=0;
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,BH=0,BT=0,BX=0;
+function size(){W=Math.min(innerWidth-24,420);BH=Math.min(300,W*.62);BT=Math.floor(W*.12);BX=Math.floor(W*.16);cv.style.width=W+'px';cv.style.height=(BH+90)+'px';cv.width=W;cv.height=BH+90}
+size();addEventListener('resize',()=>{size();draw()});
+function init(){moves=0;sel=-1;bottles=[];
+const segs=[];for(let c=0;c<5;c++)for(let i=0;i<4;i++)segs.push(c);
+for(let i=segs.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[segs[i],segs[j]]=[segs[j],segs[i]]}
+for(let i=0;i<5;i++)bottles.push(segs.slice(i*4,i*4+4));
+for(let i=0;i<3;i++)bottles.push([]);
+document.getElementById('sc').textContent='0';document.querySelector('.over').classList.remove('show');draw()}
+cv.addEventListener('pointerdown',e=>{if(document.querySelector('.over').classList.contains('show'))return;const r=cv.getBoundingClientRect();const x=e.clientX-r.left;const i=Math.floor(x/BX);if(i<0||i>=bottles.length)return;
+if(sel===-1){if(bottles[i].length){sel=i;draw();return}}
+if(sel===i){sel=-1;draw();return}
+const from=bottles[sel],to=bottles[i];
+if(to.length>=4){sel=-1;draw();return}
+const top=from[from.length-1];if(to.length&&to[to.length-1]!==top){sel=-1;draw();return}
+let n=0;while(from.length&&from[from.length-1]===top&&n<4-to.length){to.push(from.pop());n++}
+moves++;document.getElementById('sc').textContent=moves;sel=-1;
+if(bottles.every(b=>b.length===0||b.every(v=>v===b[0])&&b.length===4)){document.querySelector('.over').classList.add('show');msg.textContent='全部排序完成！用了 '+moves+' 步'}
+draw()});
+function draw(){ctx.clearRect(0,0,cv.width,cv.height);for(let i=0;i<bottles.length;i++){const x=i*BX;ctx.strokeStyle=sel===i?'#ffd9c8':'#8a5a5a';ctx.lineWidth=sel===i?3:2;ctx.strokeRect(x+6,10,BT,BH);ctx.fillStyle='#1c1214';ctx.fillRect(x+8,12,BT-4,BH-4);
+const b=bottles[i];for(let j=0;j<b.length;j++){ctx.fillStyle=COLORS[b[j]];ctx.fillRect(x+8,BH+12-(j+1)*(BH-8)/4-2,BT-4,(BH-8)/4)}}
+ctx.fillStyle='#ffd9c8';ctx.font='bold 15px sans-serif';ctx.textAlign='left';ctx.fillText('步数 '+moves,cv.width/2-30,cv.height-14)}
+function restart(){init()}
+init();
+
+</script></body></html>

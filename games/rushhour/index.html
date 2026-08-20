@@ -1,0 +1,23 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🚗 华容道</title><style>*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.score{font-size:13px;color:#d9a08f}.score b{color:#ffd9c8}
+canvas{background:#0c0a0d;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px}.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:16px auto 0;padding:10px 30px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}</style></head><body>
+<div class="wrap"><h1>🚗 华容道</h1><div class="score">步数 <b id="sc">0</b></div><canvas id="cv"></canvas><div class="hint">点击/触屏操作</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');const dpr=Math.min(devicePixelRatio||1,2);cv.width=360*dpr;cv.height=360*dpr;cv.style.width=Math.min(360,innerWidth-24)+'px';cv.style.height='auto';ctx.setTransform(dpr,0,0,dpr,0,0);
+let cars,score,alive,raf,sel;
+function rset(){cars=[{x:0,y:0,l:3,h:1,c:'#b02a2a',dir:'h'},{x:0,y:2,l:2,h:1,c:'#5a8faf',dir:'h'},{x:3,y:1,l:1,h:2,c:'#d9a08f',dir:'v'},{x:4,y:0,l:1,h:2,c:'#8b0000',dir:'v'},{x:4,y:3,l:1,h:2,c:'#ffd9c8',dir:'v'}];score=0;alive=true;sel=-1;document.getElementById('sc').textContent=0;document.querySelector('.over').classList.remove('show');cancelAnimationFrame(raf);requestAnimationFrame(loop)}
+function canMove(c,dx,dy){for(let i=0;i<c.l;i++){const nx=c.x+(c.dir==='h'?i:0)+dx,ny=c.y+(c.dir==='v'?i:0)+dy;if(nx<0||nx+(c.dir==='h'?1:0)>6||ny<0||ny+(c.dir==='v'?1:0)>6)return false;for(const o of cars){if(o===c)continue;for(let j=0;j<o.l;j++){const ox=o.x+(o.dir==='h'?j:0),oy=o.y+(o.dir==='v'?j:0);if(ox===nx&&oy===ny)return false}}}return true}
+function loop(){ctx.fillStyle='#0c0a0d';ctx.fillRect(0,0,360,360);for(let i=0;i<6;i++)for(let j=0;j<6;j++){ctx.strokeStyle='#2a1414';ctx.strokeRect(30+i*50,30+j*50,50,50)}cars.forEach((c,i)=>{ctx.fillStyle=c.col;ctx.fillRect(30+c.x*50+2,30+c.y*50+2,c.dir==='h'?c.l*50-4:46,c.dir==='v'?c.h*50-4:46);if(sel===i){ctx.strokeStyle='#ffd9c8';ctx.lineWidth=2;ctx.strokeRect(30+c.x*50,30+c.y*50,c.dir==='h'?c.l*50:c.h*50,c.dir==='h'?c.h*50:c.l*50)};if(c.col==='#b02a2a'&&c.x+c.l>=5){{document.getElementById('msg').textContent='通关 '+score;document.getElementById('bs').textContent=Math.max(parseInt(document.getElementById('bs').textContent||0),score);localStorage.setItem('rushhourBest',Math.max(parseInt(localStorage.getItem('rushhourBest')||0),score));document.querySelector('.over').classList.add('show');alive=false};return}});ctx.fillStyle='#ffd9c8';ctx.font='14px sans-serif';ctx.fillText('步 '+score,20,350);raf=requestAnimationFrame(loop)}
+function restart(){rset()}
+cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect();const x=(e.clientX-r.left)*(360/r.width);const y=(e.clientY-r.top)*(360/r.height);const c=Math.floor((x-30)/50),rr=Math.floor((y-30)/50);if(c>=0&&c<6&&rr>=0&&rr<6){for(let i=0;i<cars.length;i++){const cc=cars[i];if(c>=cc.x&&c<(cc.dir==='h'?cc.x+cc.l:cc.x+1)&&rr>=cc.y&&rr<(cc.dir==='v'?cc.y+cc.l:cc.y+1)){sel=i;return}}if(sel>=0){const dc=cars[sel];if(canMove(dc,c,rr)){dc.x=c;dc.y=rr;score++};sel=-1}}});
+rset();
+</script></body></html>

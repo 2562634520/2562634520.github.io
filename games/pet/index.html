@@ -1,0 +1,66 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>云养萌宠</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+.wrap{width:96vw;max-width:380px;display:flex;flex-direction:column;gap:10px}
+.petbox{background:#1a0f12;border:1px solid #5a2424;border-radius:14px;padding:18px;text-align:center}
+.pet{font-size:72px;line-height:1;filter:drop-shadow(0 4px 14px rgba(214,69,69,.35))}
+.mood{font-size:13px;margin-top:8px;opacity:.85}
+.stats{display:flex;flex-direction:column;gap:8px}
+.stat{font-size:12px}
+.track{height:12px;background:#2b1a1d;border-radius:999px;overflow:hidden;margin-top:4px}
+.fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#b02a2a,#d64545);transition:width .4s}
+.acts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.act{width:88px;padding:10px 4px;background:linear-gradient(145deg,#3a2424,#241517);border:1px solid #6a2e2e;border-radius:12px;text-align:center;font-size:12px;cursor:pointer}
+.act b{display:block;font-size:24px;margin-bottom:4px}
+.act:active{transform:scale(.95)}
+.bar{font-size:13px;text-align:center}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🐱 云养萌宠</h1><div class="hint">喂养、陪玩、哄睡 · 保持三项状态在 50 以上 60 秒</div>
+<div class="wrap">
+  <div class="petbox"><div class="pet" id="pet">🐱</div><div class="mood" id="mood">你好呀，主人！</div></div>
+  <div class="stats">
+    <div class="stat">🍗 饱食度 <div class="track"><div class="fill" id="hunger" style="width:80%"></div></div></div>
+    <div class="stat">😊 心情 <div class="track"><div class="fill" id="happy" style="width:80%"></div></div></div>
+    <div class="stat">😴 精力 <div class="track"><div class="fill" id="energy" style="width:80%"></div></div></div>
+  </div>
+  <div class="acts">
+    <div class="act" onclick="feed()"><b>🍗</b>喂食</div>
+    <div class="act" onclick="play()"><b>🧶</b>陪玩</div>
+    <div class="act" onclick="sleep()"><b>🛏️</b>哄睡</div>
+    <div class="act" onclick="wash()"><b>🛁</b>洗澡</div>
+  </div>
+  <div class="bar">持续 <b id="keep">0</b>s / 60s</div>
+</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+let hunger=80,happy=80,energy=80,keep=0,run=true,tickN=0;
+function feed(){hunger=Math.min(100,hunger+22);energy=Math.max(0,energy-8);mood('🍗 好好吃！')}
+function play(){happy=Math.min(100,happy+20);energy=Math.max(0,energy-16);hunger=Math.max(0,hunger-5);mood('🧶 玩得好开心！')}
+function sleep(){energy=Math.min(100,energy+30);happy=Math.max(0,happy-5);mood('🛏️ 呼噜呼噜…')}
+function wash(){happy=Math.min(100,happy+12);mood('🛁 香喷喷的！')}
+function mood(s){document.getElementById('mood').textContent=s;render()}
+function render(){
+let h=document.getElementById('hunger'),p=document.getElementById('happy'),e=document.getElementById('energy');
+h.style.width=hunger+'%';p.style.width=happy+'%';e.style.width=energy+'%';
+let pet=document.getElementById('pet');
+if(hunger<30)pet.textContent='😿';else if(energy<25)pet.textContent='😴';else if(happy<30)pet.textContent='😢';else pet.textContent='🐱';
+document.getElementById('keep').textContent=keep}
+function tick(){tickN++;
+hunger=Math.max(0,hunger-.35);happy=Math.max(0,happy-.3);energy=Math.max(0,energy-.2);
+if(hunger>50&&happy>50&&energy>50){keep++;document.getElementById('keep').textContent=keep;
+if(keep>=60){run=false;show('🏆 合格铲屎官','60 秒内三围全部达标！')}}
+else keep=Math.max(0,keep-2);
+render()}
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');hunger=80;happy=80;energy=80;keep=0;run=true}
+render();setInterval(tick,1000);
+</script></body></html>

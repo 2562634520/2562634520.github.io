@@ -1,0 +1,48 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>像素飞鸟</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.score{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;height:auto;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:block;margin:16px auto 0;padding:10px 30px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🐤 像素飞鸟</h1><div class="score">得分 <b id="sc">0</b> · 记录 <span id="best">0</span></div><canvas id="cv"></canvas><div class="hint">点击 / 空格 / 触屏扇翅</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0,dpr=Math.min(devicePixelRatio||1,2);
+function size(){W=Math.min(innerWidth-24,innerHeight-210,430);H=Math.floor(W*1.45);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+size();addEventListener('resize',size);
+let bird,vy,pipes,score,best=+localStorage.getItem('emeng_flappy')||0,timer,alive;
+const G=0.42,FLAP=-7.2,SPEED=2.5,GAP=W*0.28;
+function restart(){bird={x:W*0.28,y:H*0.45,r:13};vy=0;pipes=[];score=0;alive=true;clearInterval(timer);timer=setInterval(step,16);document.getElementById('sc').textContent=0;document.querySelector('.over').classList.remove('show');draw()}
+function step(){vy+=G;bird.y+=vy;
+if(bird.y<0)bird.y=0;
+if(pipes.length&&pipes[0].x<-50)pipes.shift();
+if(!pipes.length||pipes[pipes.length-1].x<W-230)pipes.push({x:W+40,y:70+Math.random()*(H-230),scored:false});
+pipes.forEach(p=>p.x-=SPEED);
+const p=pipes[0];
+if(p&&!p.scored&&p.x+42<bird.x){p.scored=true;score++;document.getElementById('sc').textContent=score;if(score>best){best=score;localStorage.setItem('emeng_flappy',best);document.getElementById('best').textContent=best}}
+if(bird.y+bird.r>H||pipes.some(p=>bird.x+bird.r>p.x&&bird.x-bird.r<p.x+56&&(bird.y-bird.r<p.y||bird.y+bird.r>p.y+GAP)))return die();
+draw()}
+function flap(){if(!alive)return;vy=FLAP}
+function die(){alive=false;clearInterval(timer);document.getElementById('msg').textContent='得分 '+score;document.querySelector('.over').classList.add('show')}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#120e11';ctx.fillRect(0,0,W,H);
+for(let i=0;i<4;i++){ctx.fillStyle='#2a1c1e';ctx.fillRect((i*120+30)%W,(i*80)%H,2,2)}
+pipes.forEach(p=>{const g=ctx.createLinearGradient(p.x,0,p.x+56,0);g.addColorStop(0,'#1f5c36');g.addColorStop(1,'#2e8b57');ctx.fillStyle=g;ctx.fillRect(p.x,0,56,p.y);ctx.fillRect(p.x,p.y+GAP,56,H-p.y-GAP);ctx.fillStyle='#1a4429';ctx.fillRect(p.x,0,56,14);ctx.fillRect(p.x,p.y+GAP,56,14)});
+ctx.save();ctx.translate(bird.x,bird.y);ctx.rotate(Math.max(-0.5,Math.min(0.9,vy*0.055)));
+ctx.fillStyle='#e8c14a';ctx.beginPath();ctx.arc(0,0,bird.r,0,7);ctx.fill();
+ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(5,-5,4,0,7);ctx.fill();ctx.fillStyle='#111';ctx.beginPath();ctx.arc(6.5,-5,2,0,7);ctx.fill();
+ctx.fillStyle='#e07030';ctx.beginPath();ctx.moveTo(bird.r-2,3);ctx.lineTo(bird.r+10,0);ctx.lineTo(bird.r-2,-3);ctx.fill();
+ctx.restore()}
+addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();flap()}});
+cv.addEventListener('pointerdown',flap);
+restart();
+</script></body></html>

@@ -1,0 +1,32 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>疯狂切水果</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:18px}
+#cv{background:linear-gradient(#1a1113,#120e11);border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none;cursor:crosshair}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 34px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🍉 疯狂切水果</h1><div class="info"><span>得分 <b id="sc">0</b></span><span>生命 <b id="hp">3</b></span></div><canvas id="cv"></canvas><div class="hint">手指滑动切水果 · 别切炸弹</div></div>
+<div class="over"><div class="panel"><b>游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),dpr=Math.min(devicePixelRatio||1,2);
+let W,H,items=[],slices=[],score,hp,alive,frame=0,lastX=0,lastY=0,drawing=false;
+const FRUITS=['🍎','🍊','🍉','🍓','🍌','🥝','🍑','🍒'];
+function size(){W=Math.min(innerWidth-24,340);H=Math.min(innerHeight-150,560);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+size();addEventListener('resize',size);
+function restart(){score=0;hp=3;alive=true;items=[];slices=[];frame=0;document.getElementById('sc').textContent=0;document.getElementById('hp').textContent=3;document.querySelector('.over').classList.remove('show');requestAnimationFrame(loop)}
+restart();
+cv.addEventListener('pointerdown',e=>{drawing=true;lastX=e.offsetX;lastY=e.offsetY});
+cv.addEventListener('pointermove',e=>{if(!drawing)return;let x=e.offsetX,y=e.offsetY;slices.push({x,y,life:18});let mx=(lastX+x)/2,my=(lastY+y)/2;for(let i=items.length-1;i>=0;i--){let it=items[i];if(it.bomb){if(Math.hypot(it.x-mx,it.y-my)<it.r+14){items.splice(i,1);hp--;document.getElementById('hp').textContent=hp;if(hp<=0)return die();continue}}else if(Math.hypot(it.x-mx,it.y-my)<it.r+14){items.splice(i,1);score+=10;document.getElementById('sc').textContent=score}}lastX=x;lastY=y});
+cv.addEventListener('pointerup',()=>{drawing=false});
+cv.addEventListener('pointerleave',()=>{drawing=false});
+function loop(){requestAnimationFrame(loop);if(!alive)return;frame++;if(frame%22===0){let bomb=Math.random()<0.16;items.push({x:20+Math.random()*(W-40),y:H+20,vx:(Math.random()-0.5)*1.6,vy:-(7+Math.random()*4),r:bomb?15:20,text:bomb?'💣':FRUITS[Math.random()*FRUITS.length|0],bomb})}ctx.clearRect(0,0,W,H);ctx.strokeStyle='#ffd9c8';ctx.lineWidth=3;ctx.lineCap='round';for(let i=slices.length-1;i>=0;i--){let s=slices[i];ctx.globalAlpha=s.life/18*0.75;ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(s.x+6,s.y+4);ctx.stroke();ctx.globalAlpha=1;if(--s.life<=0)slices.splice(i,1)}for(let i=items.length-1;i>=0;i--){let it=items[i];it.x+=it.vx;it.y+=it.vy;it.vy+=0.22;ctx.font=(it.r*2)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(it.text,it.x,it.y);if(it.y>H+30){items.splice(i,1);if(!it.bomb){hp--;document.getElementById('hp').textContent=hp;if(hp<=0)return die()}}}}
+function die(){alive=false;document.querySelector('.over').classList.add('show')}
+</script></body></html>

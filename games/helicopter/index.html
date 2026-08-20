@@ -1,0 +1,63 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>直升机救援</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#13233a;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:68vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🚁 直升机救援</h1><div class="hint">按住上升 · 救援落水者送到平台 · 60 秒</div>
+<canvas id="c" width="360" height="480"></canvas>
+<div class="bar">已救 <b id="rs">0</b> 人 · 剩余 <b id="tm">60</b> 秒</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=360,H=480;
+let y=100,vy=0,up=false,rescued=0,time=60,run=true,people=[],carrying=null,px=60;
+function setup(){y=100;vy=0;up=false;rescued=0;time=60;run=true;people=[];carrying=null;px=60;spawn()}
+function spawn(){for(let i=0;i<4;i++)people.push({x:90+Math.random()*(W-180),y:300+Math.random()*120,done:false})}
+function tick(){
+  if(!run)return;
+  time-=.016;if(time<=0){time=0;run=false;show('⏱ 救援结束','共救起 '+rescued+' 人')}
+  document.getElementById('tm').textContent=Math.ceil(time);
+  if(carrying){carrying.x=px;carrying.y=y+34}
+  vy+=up?-.3:.35;y+=vy;if(y<30){y=30;vy=0}if(y>H-60){y=H-60;vy=0}
+  px+=Math.sin(Date.now()/300)*0; // 保持垂直飞行
+  people.forEach(p=>{
+    if(p.done)return;
+    if(!carrying&&Math.hypot(p.x-px,p.y-y)<30){carrying=p}
+  });
+  if(carrying&&y<70){rescued++;document.getElementById('rs').textContent=rescued;carrying.done=true;carrying=null}
+  draw();
+}
+function draw(){
+  ctx.fillStyle='#13233a';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#1b4d7a';ctx.fillRect(0,H-110,W,110);
+  ctx.fillStyle='#2e8a4a';ctx.fillRect(0,H-120,W,12);
+  ctx.fillStyle='#8a6a3a';ctx.fillRect(px-30,H-124,60,8);
+  people.forEach(p=>{
+    if(p.done)return;
+    if(carrying===p)return;
+    ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(p.x,p.y,9,0,7);ctx.fill();
+    ctx.strokeStyle='#b02a2a';ctx.beginPath();ctx.arc(p.x,p.y,11,Math.PI,0);ctx.stroke();
+  });
+  if(carrying){ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(carrying.x,carrying.y,9,0,7);ctx.fill();ctx.strokeStyle='#555';ctx.beginPath();ctx.moveTo(px,y+20);ctx.lineTo(carrying.x,carrying.y-9);ctx.stroke()}
+  ctx.fillStyle='#d64545';ctx.beginPath();ctx.ellipse(px,y,30,12,0,0,7);ctx.fill();
+  ctx.fillStyle='#8ab8e8';ctx.fillRect(px-28,y-10,56,7);
+  ctx.fillStyle='#ffd9c8';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText('直升机',px,y+24);
+}
+cv.addEventListener('pointerdown',e=>{up=true;const r=cv.getBoundingClientRect();px=Math.max(40,Math.min(W-40,e.clientX-r.left))});
+cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();px=Math.max(40,Math.min(W-40,e.clientX-r.left))});
+cv.addEventListener('pointerup',()=>{up=false});
+window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();up=true}});
+window.addEventListener('keyup',e=>{if(e.code==='Space')up=false});
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup()}
+setup();setInterval(tick,16);
+</script></body></html>

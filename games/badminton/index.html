@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>羽毛球</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#25406b;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:68vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🏸 羽毛球</h1><div class="hint">移动球拍击打羽毛球 · 先得 7 分获胜</div>
+<canvas id="c" width="360" height="500"></canvas>
+<div class="bar">你 <b id="ps">0</b> : <b id="as">0</b> 电脑</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=360,H=500;
+let px=180,ax=180,bx=180,by=250,bvx=0,bvy=0,ps=0,as=0,run=true;
+function setup(){px=180;ax=180;bx=180;by=250;bvx=0;bvy=0;ps=0;as=0;run=true;serve()}
+function serve(){bx=180;by=250;const dir=Math.random()<.5?-1:1;bvx=dir*(1.5+Math.random()*2);bvy=dir*2}
+function tick(){
+  if(!run)return;
+  ax+=Math.sign(bx-ax)*Math.min(4.5,Math.abs(bx-ax));
+  bvy+=.09;bvx*=.995;
+  bx+=bvx;by+=bvy;
+  if(bx<8){bx=8;bvx=Math.abs(bvx)}
+  if(bx>W-8){bx=W-8;bvx=-Math.abs(bvx)}
+  if(by<42&&Math.abs(bx-ax)<36){bvy=Math.abs(bvy)*.9+1.8;bvx+=(bx-ax)*.14}
+  if(by>H-42&&Math.abs(bx-px)<36){bvy=-Math.abs(bvy)*.9-1.8;bvx+=(bx-px)*.14}
+  if(by<8){ps++;document.getElementById('ps').textContent=ps;if(ps>=7){run=false;show('🏆 你赢了！','比分 '+ps+' : '+as)}else serve()}
+  if(by>H-8){as++;document.getElementById('as').textContent=as;if(as>=7){run=false;show('😔 电脑获胜','比分 '+ps+' : '+as)}else serve()}
+  draw();
+}
+function draw(){
+  ctx.fillStyle='#25406b';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#e8f0ff';ctx.lineWidth=2;ctx.strokeRect(10,10,W-20,H-20);
+  ctx.beginPath();ctx.moveTo(10,250);ctx.lineTo(W-10,250);ctx.stroke();
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(bx,by,6,0,7);ctx.fill();
+  ctx.fillStyle='#e0342e';ctx.beginPath();ctx.arc(bx,by+6,4,0,7);ctx.fill();
+  ctx.fillStyle='#fff';ctx.fillRect(ax-32,30,64,9);ctx.fillRect(px-32,H-39,64,9);
+  ctx.strokeStyle='#999';ctx.strokeRect(ax-32,30,64,9);ctx.strokeRect(px-32,H-39,64,9);
+  ctx.fillStyle='#ffd9c8';ctx.font='12px sans-serif';ctx.textAlign='center';
+  ctx.fillText('电脑',180,22);ctx.fillText('你',180,H-10);
+}
+cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();px=Math.max(32,Math.min(W-32,e.clientX-r.left))});
+cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect();px=Math.max(32,Math.min(W-32,e.clientX-r.left))});
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup()}
+setup();setInterval(tick,16);
+</script></body></html>

@@ -1,0 +1,49 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🍉 切西瓜</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🍉 切西瓜</h1><canvas id="cv"></canvas>
+<div class="info">得分 <b id="sc">0</b> · 生命 <b id="lv">3</b></div>
+<div class="hint">在水果上滑动切开它们 · 别碰黑色炸弹！</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0;
+function size(){W=Math.min(innerWidth-24,420);H=Math.floor(W*1.2);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W;cv.height=H}
+size();addEventListener('resize',()=>{size();draw()});
+let over=false,score=0,lives=3,items=[],tick=0,trail=[];
+const FRUITS=['#57c96e','#e8a13c','#d64545','#e8d53c','#9b6be0'];
+function init(){over=false;score=0;lives=3;items=[];tick=0;trail=[];document.getElementById('sc').textContent='0';document.getElementById('lv').textContent='3';document.querySelector('.over').classList.remove('show');loop()}
+function spawn(){const r=Math.random();items.push({x:30+Math.random()*(W-60),y:H+30,vx:(Math.random()-.5)*3,vy:-(8+Math.random()*5),r:18+(r<.2?10:0),bomb:r>.88,dead:false})}
+function step(){if(over)return;tick++;if(tick%26===0)spawn();
+for(const it of items){it.x+=it.vx;it.y+=it.vy;it.vy+=.25;if(it.y>H+50)it.dead=true}
+items=items.filter(i=>!i.dead);
+if(trail.length){const pt=trail[trail.length-1];for(const it of items){if(it.dead)continue;if(Math.hypot(it.x-pt.x,it.y-pt.y)<it.r+18){if(it.bomb){over=true;msg.textContent='切到炸弹！得分 '+score;document.querySelector('.over').classList.add('show')}else if(!it.sliced){it.sliced=true;it.dead=true;score+=it.r>16?20:10;document.getElementById('sc').textContent=score}}}}
+trail.length=0;
+draw();requestAnimationFrame(step)}
+let pointerDown=false,lastX=0,lastY=0;
+cv.addEventListener('pointerdown',e=>{pointerDown=true;const r=cv.getBoundingClientRect();lastX=e.clientX-r.left;lastY=e.clientY-r.top});
+cv.addEventListener('pointermove',e=>{if(!pointerDown)return;const r=cv.getBoundingClientRect();trail.push({x:e.clientX-r.left,y:e.clientY-r.top});lastX=e.clientX-r.left;lastY=e.clientY-r.top});
+addEventListener('pointerup',()=>{pointerDown=false});
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#1c0f12';ctx.fillRect(0,0,W,H);
+for(const it of items){if(it.dead)continue;if(it.bomb){ctx.fillStyle='#333';ctx.beginPath();ctx.arc(it.x,it.y,it.r,0,7);ctx.fill();ctx.strokeStyle='#555';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(it.x-10,it.y-14);ctx.lineTo(it.x+8,it.y-6);ctx.moveTo(it.x+12,it.y-12);ctx.lineTo(it.x-2,it.y+2);ctx.stroke()}else{ctx.fillStyle=FRUITS[Math.floor(Math.abs(it.x+it.y))%FRUITS.length];ctx.beginPath();ctx.arc(it.x,it.y,it.r,0,7);ctx.fill();ctx.strokeStyle='#0b090c';ctx.stroke()}}
+if(trail.length){ctx.strokeStyle='rgba(255,217,200,.85)';ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(trail[0].x,trail[0].y);for(const p of trail)ctx.lineTo(p.x,p.y);ctx.stroke()}
+ctx.fillStyle='#ffd9c8';ctx.font='bold 16px sans-serif';ctx.textAlign='left';ctx.fillText('得分 '+score,12,24)}
+function restart(){init()}
+let running=false;function loop(){if(running)return;running=true;step()}
+init();
+
+</script></body></html>

@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🦟 抓飞虫</title><style>*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.score{font-size:13px;color:#d9a08f}.score b{color:#ffd9c8}
+canvas{background:#0c0a0d;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px}.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:16px auto 0;padding:10px 30px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}</style></head><body>
+<div class="wrap"><h1>🦟 抓飞虫</h1><div class="score">抓到 <b id="sc">0</b></div><canvas id="cv"></canvas><div class="hint">点击/触屏操作</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');const dpr=Math.min(devicePixelRatio||1,2);cv.width=360*dpr;cv.height=420*dpr;cv.style.width=Math.min(360,innerWidth-24)+'px';cv.style.height='auto';ctx.setTransform(dpr,0,0,dpr,0,0);
+let flies,score,alive,raf,spawnT;
+function rset(){flies=[];score=0;spawnT=0;alive=true;document.getElementById('sc').textContent=0;document.querySelector('.over').classList.remove('show');cancelAnimationFrame(raf);setTimeout(()=>{alive=false;{document.getElementById('msg').textContent='抓到 '+score;document.getElementById('bs').textContent=Math.max(parseInt(document.getElementById('bs').textContent||0),score);localStorage.setItem('catchflyBest',Math.max(parseInt(localStorage.getItem('catchflyBest')||0),score));document.querySelector('.over').classList.add('show');alive=false}},30000);requestAnimationFrame(loop)}
+function loop(){ctx.fillStyle='#0c0a0d';ctx.fillRect(0,0,360,420);flies.forEach(f=>{ctx.fillStyle='#888';ctx.beginPath();ctx.arc(f.x,f.y,5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#aaa';ctx.beginPath();ctx.arc(f.x-3,f.y-3,3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(f.x+3,f.y-3,3,0,Math.PI*2);ctx.fill()});
+spawnT++;if(spawnT%15===0){flies.push({x:Math.random()*340+10,y:Math.random()*400+10,vx:(Math.random()-.5)*2,vy:(Math.random()-.5)*2})}
+flies=flies.filter(f=>{f.x+=f.vx;f.y+=f.vy;f.vx+=(Math.random()-.5)*.3;f.vy+=(Math.random()-.5)*.3;if(f.x<5||f.x>355)f.vx=-f.vx;if(f.y<5||f.y>415)f.vy=-f.vy;return true});
+document.getElementById('sc').textContent=score;raf=requestAnimationFrame(loop)}
+function catchFly(e){if(!alive)return;const r=cv.getBoundingClientRect();const x=(e.clientX-r.left)*(360/r.width);const y=(e.clientY-r.top)*(420/r.height);flies=flies.filter(f=>{if(Math.abs(f.x-x)<15&&Math.abs(f.y-y)<15){score++;return false}return true})}
+function restart(){rset()}
+cv.addEventListener('pointerdown',catchFly);
+rset();
+</script></body></html>

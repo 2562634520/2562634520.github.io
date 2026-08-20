@@ -1,0 +1,96 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>冰壶对战</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#dce8f0;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:68vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🥌 冰壶对战</h1><div class="hint">拖拽后拉瞄准松手投壶 · 每队 4 壶 · 离圆心近者得分</div>
+<canvas id="c" width="360" height="500"></canvas>
+<div class="bar">你 <b id="ps">0</b> : <b id="as">0</b> AI · 第 <b id="turn">1</b> 壶</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=360,H=500;
+const CX=180,CY=120;
+let stones=[],turn=0,ps=0,as=0,dragging=null,run=true;
+function setup(){stones=[];turn=0;ps=0;as=0;dragging=null;run=true}
+function tick(){
+  stones.forEach(s=>{
+    if(s.moving){
+      s.x+=s.vx;s.y+=s.vy;s.vx*=.97;s.vy*=.97;
+      if(Math.hypot(s.vx,s.vy)<.15){s.moving=false}
+      stones.forEach(o=>{if(o!==s&&Math.hypot(o.x-s.x,o.y-s.y)<26){const d=Math.hypot(o.x-s.x,o.y-s.y)||1;const nx=(o.x-s.x)/d,ny=(o.y-s.y)/d;s.vx-=nx*2;s.vy-=ny*2;o.vx+=nx*2;o.vy+=ny*2}});
+    }
+  });
+  if(!stones.some(s=>s.moving)&&turn<8&&!dragging){
+    if(turn%2===0){/* 等待玩家 */}
+    else{
+      const ang=Math.random()*Math.PI/2-Math.PI/4,pow=5+Math.random()*4;
+      stones.push({x:180,y:440,team:'ai',vx:Math.cos(ang)*pow,vy:-Math.sin(Math.PI/2)*pow-Math.random()*1, moving:true,r:12});
+      turn++;updateTurn();
+    }
+  }
+  if(turn>=8&&!stones.some(s=>s.moving))endGame();
+  draw();
+}
+function updateTurn(){document.getElementById('turn').textContent=(turn%2===0?'你投':'AI投')}
+function endGame(){
+  run=false;
+  const d=s=>Math.hypot(s.x-CX,s.y-CY);
+  const sorted=[...stones].sort((a,b)=>d(a)-d(b));
+  let sp=0,sa=0;
+  for(let i=0;i<sorted.length;i++){
+    if(sorted[i].team==='p'&&(i===0||sorted[i-1].team==='p'))sp++;
+    else if(sorted[i].team==='ai'&&(i===0||sorted[i-1].team==='ai'))sa++;
+  }
+  ps=sp;as=sa;document.getElementById('ps').textContent=ps;document.getElementById('as').textContent=as;
+  show(sp>sa?'🏆 你赢了！':sa>sp?'😔 AI 获胜':'🤝 平局','你 '+sp+' 分 · AI '+sa+' 分');
+}
+cv.addEventListener('pointerdown',e=>{
+  if(!run||turn>=8)return;
+  const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+  if(turn%2===0&&y>400)dragging={x,y};
+});
+cv.addEventListener('pointermove',e=>{
+  if(!dragging)return;
+  const r=cv.getBoundingClientRect();
+  dragging.x=e.clientX-r.left;dragging.y=e.clientY-r.top;
+});
+cv.addEventListener('pointerup',()=>{
+  if(!dragging)return;
+  const dx=CX-dragging.x,dy=400-dragging.y,d=Math.hypot(dx,dy);
+  const pow=Math.min(10,d/30);
+  stones.push({x:180,y:440,team:'p',vx:Math.cos(Math.atan2(dy,dx))*pow,vy:Math.sin(Math.atan2(dy,dx))*pow,moving:true,r:12});
+  turn++;updateTurn();dragging=null;
+});
+function draw(){
+  ctx.fillStyle='#dce8f0';ctx.fillRect(0,0,W,H);
+  for(let i=3;i>=0;i--){
+    ctx.strokeStyle=i%2?'#c33':'#b02a2a';ctx.lineWidth=3;
+    ctx.beginPath();ctx.arc(CX,CY,28+i*24,0,7);ctx.stroke();
+  }
+  ctx.fillStyle='#b02a2a';ctx.beginPath();ctx.arc(CX,CY,6,0,7);ctx.fill();
+  stones.forEach(s=>{
+    ctx.fillStyle=s.team==='p'?'#e0342e':'#4a7ad8';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,7);ctx.fill();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.x,s.y,5,0,7);ctx.fill();
+  });
+  ctx.strokeStyle='#888';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,430);ctx.lineTo(W,430);ctx.stroke();
+  if(dragging){
+    ctx.strokeStyle='#e0342e';ctx.setLineDash([6,6]);ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(CX,CY);ctx.lineTo(dragging.x,dragging.y);ctx.stroke();ctx.setLineDash([]);
+  }
+  ctx.fillStyle='#333';ctx.font='12px sans-serif';ctx.textAlign='center';
+  ctx.fillText(turn%2===0&&turn<8?'← 拖拽投壶':'',180,462);
+}
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup()}
+setup();setInterval(tick,16);
+</script></body></html>

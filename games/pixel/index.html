@@ -1,0 +1,42 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>像素画</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+.wrap{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+.grid{display:grid;grid-template-columns:repeat(16,20px);gap:1px;background:#0b090c;border:1px solid #5a2424;border-radius:8px;padding:5px}
+.px{width:20px;height:20px;background:#26202a;cursor:pointer;border-radius:2px}
+.px.on{outline:2px solid #ffd9c8}
+.side{display:flex;flex-direction:column;gap:6px;align-items:center}
+.pal{display:flex;gap:4px;flex-wrap:wrap;max-width:120px;justify-content:center}
+.sw{width:24px;height:24px;border-radius:5px;border:2px solid #3a2020;cursor:pointer}
+.sw.on{border-color:#ffd9c8}
+canvas{background:#fff;border:1px solid #5a2424;border-radius:8px;image-rendering:pixelated}
+.btn{display:inline-block;padding:8px 16px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:13px;cursor:pointer;margin:2px}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>👾 像素画</h1><div class="hint">点格子作画 · 16×16 像素 · 可保存 PNG</div>
+<div class="wrap">
+  <div class="grid" id="grid"></div>
+  <div class="side">
+    <div class="pal" id="pal"></div>
+    <canvas id="pv" width="160" height="160"></canvas>
+    <div><button class="btn" onclick="clearAll()">清空</button><button class="btn" onclick="savePng()">保存</button></div>
+  </div>
+</div>
+<script>
+const N=16,PAL=['#ff6b6b','#e0a63d','#3d9a5a','#3d7fd6','#8a5fd6','#ff9ecb','#6a4a32','#222','#fff','#d64545'];
+let color='#222',cells=Array(N*N).fill('#fff'),gridEl=document.getElementById('grid');
+PAL.forEach(c=>{let d=document.createElement('div');d.className='sw'+(c===color?' on':'');d.style.background=c;
+d.onclick=()=>{color=c;[...document.getElementById('pal').children].forEach(x=>x.classList.remove('on'));d.classList.add('on')};
+document.getElementById('pal').appendChild(d)});
+function render(){gridEl.innerHTML='';
+for(let i=0;i<N*N;i++){let d=document.createElement('div');d.className='px';d.style.background=cells[i];
+d.onclick=()=>{cells[i]=color;render();preview()};gridEl.appendChild(d)}
+preview()}
+function preview(){let pv=document.getElementById('pv'),c=pv.getContext('2d');
+for(let i=0;i<N*N;i++){c.fillStyle=cells[i];c.fillRect((i%N)*10,Math.floor(i/N)*10,10,10)}}
+function clearAll(){cells=Array(N*N).fill('#fff');render()}
+function savePng(){let a=document.createElement('a');a.href=document.getElementById('pv').toDataURL('image/png');a.download='emeng-pixel.png';a.click()}
+render();
+</script></body></html>

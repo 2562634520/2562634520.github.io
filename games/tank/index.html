@@ -1,0 +1,53 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>坦克大战</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none;user-select:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:18px;letter-spacing:.16em;color:#ffd9c8}
+.hud{font-size:12px;color:#d9a08f;display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center}
+canvas{background:#120d10;border:1px solid #33262a;border-radius:10px;touch-action:none;display:block;max-width:96vw;max-height:58vh}
+.btn{display:inline-block;padding:7px 14px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:13px;font-weight:700;cursor:pointer;margin:3px}
+.btn.ghost{background:transparent;border:1px solid #b02a2a;color:#ffd9c8}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 30px;box-shadow:0 0 40px #b02a2a2e;max-width:86vw}
+.panel b{font-size:24px;color:#ffd9c8;display:block;margin-bottom:8px}
+.panel p{font-size:13px;color:#c9a89b;margin-bottom:12px}
+.tip{font-size:11px;color:#8f7f7b;text-align:center}
+</style></head><body>
+<div class="wrap"><h1>🪖 坦克大战</h1><div class="hud">分数 <b id="sc">0</b> · 生命 <span id="lv">3</span> · 敌数 <span id="en">10</span></div><canvas id="cv"></canvas><div class="hud"><button class="btn ghost" id="bl">◀</button><button class="btn ghost" id="br">▶</button><button class="btn ghost" id="bu">▲</button><button class="btn ghost" id="bd">▼</button><button class="btn" id="fire">开火</button></div><div class="tip">方向键移动 · 空格开火 · 消灭所有敌军</div></div>
+<div class="over"><div class="panel"><b id="msg"></b><p id="sub"></p><button class="btn" id="again">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),C=26,COLS=13,ROWS=15;
+cv.width=COLS*C;cv.height=ROWS*C;
+const M=['#############','#.....#.....#','#.#####.###.#','#...........#','#.###.#.###.#','#.#...#...#.#','#.#.#####.#.#','#.#.....#.#.#','#.###.###.#.#','#...#.#...#.#','#.###.#.###.#','#...........#','#.###.###.#.#','#...........#','#############'];
+let grid=M.map(r=>r.split('')),sc=0,lives=3,enemies=10,run=false;
+const P={x:1,y:13,d:0},en=[],bul=[],eb=[];
+function cell(x,y){return x<0||y<0||x>=COLS||y>=ROWS?'#':grid[y][x]}
+function reset(){P.x=1;P.y=13;P.d=0;bul.length=0;eb.length=0}
+function start(){grid=M.map(r=>r.split(''));sc=0;lives=3;enemies=10;en.length=0;reset();run=true;document.querySelector('.over').classList.remove('show');document.getElementById('sc').textContent='0';document.getElementById('lv').textContent='3';document.getElementById('en').textContent='10'}
+function moveTank(){const dx=[1,-1,0,0][P.d],dy=[0,0,1,-1][P.d];const nx=P.x+dx,ny=P.y+dy;if(cell(nx,ny)==='.'){P.x=nx;P.y=ny}}
+function fire(tx,ty,dx,dy,arr){let x=tx,y=ty;for(let i=0;i<18;i++){x+=dx;y+=dy;const c=cell(x,y);if(c==='#'){grid[y][x]='.';return}if(c==='=')return;arr.push({x,y,dx,dy});return}}
+function spawnEnemy(){if(enemies<=0)return;const spots=[[11,1],[6,1],[1,1]];const s=spots.filter(p=>!en.some(e=>e.x===p[0]&&e.y===p[1]));if(!s.length)return;const p=s[Math.random()*s.length|0];en.push({x:p[0],y:p[1],d:2,cd:0});enemies--;document.getElementById('en').textContent=enemies}
+function tick(){if(!run)return;
+if(Math.random()<0.03)spawnEnemy();
+en.forEach(e=>{if(e.cd>0)e.cd--;const dx=[1,-1,0,0][e.d],dy=[0,0,1,-1][e.d];const nx=e.x+dx,ny=e.y+dy;if(cell(nx,ny)==='.'&&!(nx===P.x&&ny===P.y)){e.x=nx;e.y=ny}else{e.d=Math.random()*4|0}
+if(e.cd===0){e.cd=30;fire(e.x,e.y,dx,dy,eb)}});
+bul.forEach(b=>{if(cell(b.x,b.y)==='#'){grid[b.y][b.x]='.';b.dead=true}});bul=bul.filter(b=>!b.dead);
+eb.forEach(b=>{const c=cell(b.x,b.y);if(c==='#'){grid[b.y][b.x]='.';b.dead=true}else if(b.x===P.x&&b.y===P.y){lives--;document.getElementById('lv').textContent=lives;b.dead=true;if(lives<=0){over('游戏结束','得分 '+sc);return}reset()}});eb=eb.filter(b=>!b.dead);
+en.forEach(e=>{if(e.x===P.x&&e.y===P.y){lives--;document.getElementById('lv').textContent=lives;if(lives<=0){over('游戏结束','得分 '+sc);return}reset()}});
+bul.forEach(b=>{en.forEach(e=>{if(e.x===b.x&&e.y===b.y){sc+=50;document.getElementById('sc').textContent=sc;e.dead=true;b.dead=true}})});
+bul=bul.filter(b=>!b.dead);en=en.filter(e=>!e.dead);
+if(en.length===0&&enemies===0){over('胜利！','得分 '+sc);return}
+draw()}
+function draw(){ctx.fillStyle='#120d10';ctx.fillRect(0,0,cv.width,cv.height);
+grid.forEach((r,y)=>r.forEach((c,x)=>{if(c==='#'){ctx.fillStyle='#3a262b';ctx.fillRect(x*C,y*C,C,C);ctx.fillStyle='#221417';ctx.fillRect(x*C+3,y*C+3,C-6,C-6)}}));
+[P].concat(en).forEach(t=>{const cx=t.x*C+C/2,cy=t.y*C+C/2;ctx.fillStyle=t===P?'#7de08a':'#d64545';ctx.fillRect(cx-9,cy-9,18,18);ctx.fillStyle='#120d10';ctx.fillRect(cx-4,cy-4,8,8);
+const dx=[1,-1,0,0][t.d],dy=[0,0,1,-1][t.d];ctx.fillStyle='#ffd84a';ctx.fillRect(cx+dx*10-2,cy+dy*10-2,4,4)});
+ctx.fillStyle='#ffd84a';bul.forEach(b=>ctx.fillRect(b.x*C+C/2-2,b.y*C+C/2-2,4,4));
+ctx.fillStyle='#ff8a5c';eb.forEach(b=>ctx.fillRect(b.x*C+C/2-2,b.y*C+C/2-2,4,4))}
+function over(m,s){run=false;document.getElementById('msg').textContent=m;document.getElementById('sub').textContent=s;document.querySelector('.over').classList.add('show')}
+addEventListener('keydown',e=>{if(!run)return;const k=e.key;if(k==='ArrowLeft'||k==='a'||k==='A')P.d=1;if(k==='ArrowRight'||k==='d'||k==='D')P.d=0;if(k==='ArrowUp'||k==='w'||k==='W')P.d=3;if(k==='ArrowDown'||k==='s'||k==='S')P.d=2;if(k===' '){e.preventDefault();const dx=[1,-1,0,0][P.d],dy=[0,0,1,-1][P.d];fire(P.x+dx,P.y+dy,dx,dy,bul)}moveTank()});
+const btns={'bl':1,'br':0,'bu':3,'bd':2};Object.keys(btns).forEach(id=>{const el=document.getElementById(id);let h=0;el.onmousedown=()=>h=setInterval(()=>{P.d=btns[id];moveTank()},120);el.onmouseup=()=>clearInterval(h);el.onmouseleave=()=>clearInterval(h);el.ontouchstart=e=>{e.preventDefault();h=setInterval(()=>{P.d=btns[id];moveTank()},120)};el.ontouchend=()=>clearInterval(h)});
+document.getElementById('fire').onclick=()=>{const dx=[1,-1,0,0][P.d],dy=[0,0,1,-1][P.d];fire(P.x+dx,P.y+dy,dx,dy,bul)};
+document.getElementById('again').onclick=start;start();setInterval(tick,150);
+</script></body></html>

@@ -1,0 +1,81 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>♟️ 中国象棋</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+.piece{font-size:15px}
+</style></head><body>
+<div class="wrap"><h1>♟️ 中国象棋</h1><canvas id="cv"></canvas>
+<div class="hint">点击选中棋子，再点目标位置走棋 · 红方先手</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,C=0,U=0;
+function size(){W=Math.min(innerWidth-24,innerHeight-220,420);C=W/9;U=C*0.88;cv.style.width=W+'px';cv.style.height=(C*10)+'px';cv.width=W;cv.height=C*10}
+size();addEventListener('resize',()=>{size();draw()});
+const T=['車','馬','相','仕','帥','炮','兵'],TB=['車','馬','象','士','將','炮','卒'];
+const VAL=[9,4,2,2,100,4,1];
+let board=[],sel=null,turn='r',over=false,thinking=false;
+function init(){board=[];for(let r=0;r<10;r++){board.push(Array(9).fill(null));}
+const top=[0,1,2,3,4,3,2,1,0];for(let c=0;c<9;c++){board[0][c]={s:'b',t:top[c]};board[9][c]={s:'r',t:top[c]}}
+board[2][1]={s:'b',t:5};board[2][7]={s:'b',t:5};board[7][1]={s:'r',t:5};board[7][7]={s:'r',t:5};
+[0,2,4,6,8].forEach(c=>{board[3][c]={s:'b',t:6};board[6][c]={s:'r',t:6}});
+sel=null;turn='r';over=false;thinking=false}
+function inb(r,c){return r>=0&&r<10&&c>=0&&c<9}
+function moves(r,c){const p=board[r][c];if(!p)return[];const out=[];
+const add=(rr,cc)=>{if(inb(rr,cc)&&(!board[rr][cc]||board[rr][cc].s!==p.s))out.push([rr,cc])};
+if(p.t===0){const D=[[1,0],[-1,0],[0,1],[0,-1]];for(const [dr,dc] of D){let rr=r+dr,cc=c+dc;while(inb(rr,cc)){if(!board[rr][cc])out.push([rr,cc]);else{if(board[rr][cc].s!==p.s)out.push([rr,cc]);break}rr+=dr;cc+=dc}}}
+else if(p.t===1){const H=[[-2,-1],[-2,1],[2,-1],[2,1],[-1,-2],[-1,2],[1,-2],[1,2]];for(const[dr,dc]of H){const leg=[Math.trunc(dr/2),Math.trunc(dc/2)];const rr=r+dr,cc=c+dc;if(inb(rr,cc)&&!board[r+leg[0]][c+leg[1]])add(rr,cc)}}
+else if(p.t===2){const D=[[-2,-2],[-2,2],[2,-2],[2,2]];for(const[dr,dc]of D){const rr=r+dr,cc=c+dc;if(inb(rr,cc)&&!board[r+dr/2][c+dc/2]){if(p.s==='r'&&rr>=5)add(rr,cc);if(p.s==='b'&&rr<=4)add(rr,cc)}}}
+else if(p.t===3){const D=[[-1,-1],[-1,1],[1,-1],[1,1]];for(const[dr,dc]of D){const rr=r+dr,cc=c+dc;if(cc>=3&&cc<=5&&((p.s==='r'&&rr>=7&&rr<=9)||(p.s==='b'&&rr>=0&&rr<=2)))add(rr,cc)}}
+else if(p.t===4){const D=[[-1,0],[1,0],[0,-1],[0,1]];for(const[dr,dc]of D){const rr=r+dr,cc=c+dc;if(cc>=3&&cc<=5&&((p.s==='r'&&rr>=7&&rr<=9)||(p.s==='b'&&rr>=0&&rr<=2)))add(rr,cc)}}
+else if(p.t===5){const D=[[1,0],[-1,0],[0,1],[0,-1]];for(const[dr,dc]of D){let rr=r+dr,cc=c+dc,screen=0;while(inb(rr,cc)){if(!board[rr][cc]){if(!screen)out.push([rr,cc])}else{screen++;if(screen===1&&board[rr][cc].s!==p.s)out.push([rr,cc]);if(screen>=2)break}rr+=dr;cc+=dc}}}
+else{if(p.s==='r'){add(r-1,c);if(r<=4){add(r,c-1);add(r,c+1)}}else{add(r+1,c);if(r>=5){add(r,c-1);add(r,c+1)}}}
+return out}
+function allMoves(s){const m=[];for(let r=0;r<10;r++)for(let c=0;c<9;c++){const p=board[r][c];if(p&&p.s===s)moves(r,c).forEach(x=>m.push({fr:r,fc:c,tr:x[0],tc:x[1]}))}return m}
+function apply(m){const cap=board[m.tr][m.tc];board[m.tr][m.tc]=board[m.fr][m.fc];board[m.fr][m.fc]=null;return cap}
+function aiMove(){const ms=allMoves('b');if(!ms.length)return;let best=null,bsc=-1;
+for(const m of ms){let sc=0;const cap=board[m.tr][m.tc];if(cap)sc+=VAL[cap.t]*10;
+const p=board[m.fr][m.fc];if(p.t===6)sc+=m.tr>3?3:1;if(p.t===0||p.t===5)sc+=2;
+sc+=Math.random()*2;if(sc>bsc){bsc=sc;best=m}}
+apply(best);sel=null;turn='r';afterMove()}
+function afterMove(){const k=[];for(let r=0;r<10;r++)for(let c=0;c<9;c++){const p=board[r][c];if(p&&p.t===4)k.push(p.s)}
+if(k.length<2){over=true;const win=k[0]==='r'?'你赢了！':'电脑赢了！';msg.textContent=win;document.querySelector('.over').classList.add('show');return}
+if(turn==='b'){thinking=true;setTimeout(()=>{thinking=false;aiMove();draw()},350)}draw()}
+cv.addEventListener('click',e=>{if(over||thinking||turn!=='r')return;
+const r=Math.floor((e.clientY-cv.getBoundingClientRect().top)/C),c=Math.floor((e.clientX-cv.getBoundingClientRect().left)/C);
+if(!inb(r,c))return;
+if(sel&&board[sel[0]][sel[1]]&&moves(sel[0],sel[1]).some(x=>x[0]===r&&x[1]===c)){apply({fr:sel[0],fc:sel[1],tr:r,tc:c});sel=null;turn='b';afterMove()}
+else if(board[r][c]&&board[r][c].s==='r')sel=[r,c];else sel=null;draw()});
+function draw(){ctx.clearRect(0,0,W,C*10);ctx.strokeStyle='#c9a08f';ctx.lineWidth=1.2;ctx.font='11px sans-serif';
+for(let r=0;r<10;r++){ctx.beginPath();ctx.moveTo(0,r*C+.5);ctx.lineTo(W,r*C+.5);ctx.stroke()}
+for(let c=0;c<9;c++){ctx.beginPath();ctx.moveTo(c*C+.5,0);ctx.lineTo(c*C+.5,C*10);ctx.stroke()}
+ctx.strokeRect(3*C+.5,C+.5,3*C-1,C*3-1);ctx.strokeRect(3*C+.5,6*C+.5,3*C-1,C*3-1);
+[[0,0],[8,0],[0,9],[8,9]].forEach(p=>{ctx.beginPath();ctx.moveTo(p[0]*C+.5,p[1]*C+.5);ctx.lineTo((p[0]+2)*C+.5,(p[1]+2)*C+.5);ctx.stroke()});
+[[2,0],[6,0],[2,9],[6,9]].forEach(p=>{ctx.beginPath();ctx.moveTo((p[0]+2)*C+.5,p[1]*C+.5);ctx.lineTo(p[0]*C+.5,(p[1]+2)*C+.5);ctx.stroke()});
+ctx.fillStyle='#6b4a3f';ctx.font='15px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('楚 河',W/2,C*4.7);ctx.fillText('汉 界',W/2,C*5.3);
+for(let r=0;r<10;r++)for(let c=0;c<9;c++){const p=board[r][c];if(!p)continue;
+if(sel&&sel[0]===r&&sel[1]===c){ctx.fillStyle='rgba(182,42,42,.25)';ctx.beginPath();ctx.arc(c*C+C/2,r*C+C/2,U*.62,0,7);ctx.fill()}
+moves(r,c).forEach(m=>{if(sel&&sel[0]===r&&sel[1]===c){ctx.fillStyle='rgba(214,69,69,.35)';ctx.beginPath();ctx.arc(m[1]*C+C/2,m[0]*C+C/2,8,0,7);ctx.fill()}});
+const grad=ctx.createRadialGradient(c*C+C/2,r*C+C/2,2,c*C+C/2,r*C+C/2,U/2);
+grad.addColorStop(0,p.s==='r'?'#f6d8c5':'#2b2326');grad.addColorStop(1,p.s==='r'?'#c96f4a':'#171215');
+ctx.fillStyle=grad;ctx.beginPath();ctx.arc(c*C+C/2,r*C+C/2,U/2,0,7);ctx.fill();
+ctx.strokeStyle=p.s==='r'?'#8f4a2f':'#7c6f72';ctx.lineWidth=1.5;ctx.stroke();
+ctx.fillStyle=p.s==='r'?'#5b1f12':'#e9dddd';ctx.font='bold '+(U*.55)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+ctx.fillText((p.s==='r'?T:TB)[p.t],c*C+C/2,r*C+C/2+1)}
+ctx.fillStyle='#8f7f7b';ctx.font='12px sans-serif';ctx.textAlign='center';
+ctx.fillText(turn==='r'?'轮到你（红方）':'电脑思考中…',W/2,C*10-14)}
+function restart(){document.querySelector('.over').classList.remove('show');init();draw()}
+init();draw();
+
+</script></body></html>

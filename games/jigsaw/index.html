@@ -1,0 +1,28 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>数字拼图</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:18px}
+#bd{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:#120e11;border:2px solid #b02a2a66;border-radius:12px;padding:8px;box-shadow:0 0 24px #b02a2a2e;width:min(92vw,340px)}
+.tile{aspect-ratio:1;display:grid;place-items:center;background:linear-gradient(135deg,#3a2224,#241a1c);border-radius:8px;font-size:24px;font-weight:700;color:#ffd9c8;cursor:pointer;user-select:none;transition:transform .1s}
+.tile.empty{background:transparent;cursor:default}
+.tile:active{transform:scale(.94)}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 34px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🧩 数字拼图</h1><div class="info"><span>步数 <b id="mv">0</b></span><span>4×4</span></div><div id="bd"></div><div class="hint">点击方块移到空格 · 按顺序排列</div></div>
+<div class="over"><div class="panel"><b>🎉 拼图完成！</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const bd=document.getElementById('bd');let tiles=[],mv=0;
+function restart(){mv=0;document.getElementById('mv').textContent=0;document.querySelector('.over').classList.remove('show');tiles=Array.from({length:15},(_,i)=>i+1).concat(0);for(let i=tiles.length-1;i>0;i--){let j=Math.random()*(i+1)|0;[tiles[i],tiles[j]]=[tiles[j],tiles[i]]}if(!solvable()){[tiles[0],tiles[1]]=[tiles[1],tiles[0]]}render()}
+function solvable(){let inv=0,flat=tiles.filter(x=>x);for(let i=0;i<flat.length;i++)for(let j=i+1;j<flat.length;j++)if(flat[i]>flat[j])inv++;let eR=3-(tiles.indexOf(0)/4|0);return (inv+eR)%2===0}
+function render(){bd.innerHTML='';for(let i=0;i<16;i++){let d=document.createElement('div');d.className='tile'+(tiles[i]===0?' empty':'');d.textContent=tiles[i]||'';d.addEventListener('pointerdown',()=>tap(i));bd.appendChild(d)}}
+function tap(i){let e=tiles.indexOf(0),er=e/4|0,ec=e%4,ir=i/4|0,ic=i%4;if(Math.abs(er-ir)+Math.abs(ec-ic)!==1)return;[tiles[i],tiles[e]]=[tiles[e],tiles[i]];mv++;document.getElementById('mv').textContent=mv;render();if(tiles.every((t,j)=>t===j+1||t===0))setTimeout(()=>document.querySelector('.over').classList.add('show'),200)}
+restart();
+</script></body></html>

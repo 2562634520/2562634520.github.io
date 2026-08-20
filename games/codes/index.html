@@ -1,0 +1,76 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>破译密码</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#141118;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:68vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🗝 破译密码</h1><div class="hint">猜 4 色密码 · 红=位置对 · 白=颜色对位置错 · 10 次机会</div>
+<canvas id="c" width="340" height="420"></canvas>
+<div class="bar">剩余 <b id="rm">10</b> 次</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=340;
+const COLORS=['#e0342e','#4a9ad8','#57c785','#ffd700','#c87ad8','#ff9a5a'];
+let secret=[],tries=[],sel=0,remain=10,run=true;
+function setup(){secret=[];for(let i=0;i<4;i++)secret.push(Math.floor(Math.random()*COLORS.length));tries=[];sel=0;remain=10;run=true;document.getElementById('rm').textContent=10}
+function submit(){
+  if(tries.length>=10)return;
+  const reds=[];let exact=0,loose=0;
+  const secC=[...secret],gueC=[...sel.toString().padStart(4,'0')].map(Number);
+  // sel is 4-digit index representation
+  gueC.forEach((g,i)=>{if(g===secret[i]){exact++;secC[i]=-1}});
+  gueC.forEach((g,i)=>{if(g===secret[i])return;const j=secC.indexOf(g);if(j>=0){loose++;secC[j]=-1}});
+  tries.push({g:gueC,r:exact,w:loose});
+  sel=0;
+  if(exact===4){run=false;show('🎉 破解成功！','用了 '+(10-(--remain))+' 次尝试')}
+  else{remain--;document.getElementById('rm').textContent=remain;if(remain<=0){run=false;show('😵 次数用尽','密码是 '+secret.map(c=>COLORS[c]).join(' '))}}
+}
+function draw(){
+  ctx.fillStyle='#141118';ctx.fillRect(0,0,W,420);
+  ctx.fillStyle='#ffd9c8';ctx.font='12px sans-serif';ctx.textAlign='center';
+  tries.forEach((t,i)=>{
+    const y=20+i*32;
+    t.g.forEach((c,j)=>{ctx.fillStyle=COLORS[c];ctx.beginPath();ctx.arc(70+j*32,y+8,11,0,7);ctx.fill()});
+    for(let k=0;k<t.r;k++){ctx.fillStyle='#e0342e';ctx.beginPath();ctx.arc(236+k*13,y+6,5,0,7);ctx.fill()}
+    for(let k=0;k<t.w;k++){ctx.fillStyle='#f0f0f0';ctx.beginPath();ctx.arc(236+(t.r+k)*13,y+16,4,0,7);ctx.fill()}
+  });
+  ctx.fillStyle='#ffd9c8';ctx.fillText('← 提示',250,18);
+  const cur=String(sel).padStart(4,'0').split('').map(Number);
+  for(let j=0;j<4;j++){ctx.fillStyle=COLORS[cur[j]];ctx.fillRect(50+j*62,352,48,42)}
+  for(let j=0;j<4;j++){ctx.fillStyle='#b02a2a';ctx.fillRect(50+j*62,350,48,6)}
+  COLORS.forEach((c,i)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(36+i*56,412,13,0,7);ctx.fill();ctx.strokeStyle=i===sel%6?'#fff':'#333';ctx.stroke()});
+  ctx.fillStyle='#ffd9c8';ctx.fillText('点击色盘选色 · 再点下方色块换位',170,436);
+  ctx.fillStyle='#57c785';ctx.fillRect(W-74,352,64,42);ctx.fillStyle='#141118';ctx.font='13px sans-serif';ctx.fillText('提交',W-42,378);
+}
+function cellAt(x,y){
+  if(y>=350&&y<396){
+    for(let j=0;j<4;j++)if(x>=50+j*62&&x<98+j*62)return ['cur',j];
+    if(x>=W-74&&x<W-10)return ['submit',0];
+  }
+  if(y>=398&&y<428)for(let i=0;i<COLORS.length;i++)if(x>=36+i*56-16&&x<36+i*56+16)return ['color',i];
+  return null;
+}
+cv.addEventListener('pointerdown',e=>{
+  if(!run)return;
+  const r=cv.getBoundingClientRect(),h=420/(r.height||1);
+  const x=(e.clientX-r.left)/r.width*W,y=(e.clientY-r.top)/r.height*420;
+  const hit=cellAt(x,y);
+  if(!hit)return;
+  if(hit[0]==='color'){const cur=String(sel).padStart(4,'0').split('').map(Number);const pos=cur.indexOf(0)===-1?0:cur.indexOf(0);cur[pos]=hit[1];sel=+cur.join('')}
+  if(hit[0]==='cur'){const cur=String(sel).padStart(4,'0').split('').map(Number);const i=hit[1];if(i<3){[cur[i],cur[i+1]]=[cur[i+1],cur[i]];sel=+cur.join('')}}
+  if(hit[0]==='submit')submit();
+  draw();
+});
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup()}
+setup();setInterval(draw,60);
+</script></body></html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>卡车入库</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#1a1d22;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:66vh;touch-action:none}
+.btns{display:flex;gap:10px;margin:8px 0}
+.btn2{width:70px;padding:10px 0;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:10px;font-size:14px;cursor:pointer}
+.btn2:active{transform:scale(.95)}
+.bar{font-size:13px}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🚚 卡车入库</h1><div class="hint">把卡车停进绿色车位 · 小心别撞墙</div>
+<canvas id="c" width="360" height="480"></canvas>
+<div class="btns"><button class="btn2" id="left">⬅ 左转</button><button class="btn2" id="back">⬇ 倒车</button><button class="btn2" id="fwd">⬆ 前进</button><button class="btn2" id="right">右转 ➡</button></div>
+<div class="bar">时间 <b id="tm">30</b> 秒 · 入库精度 <b id="pr">0</b>%</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=360,H=480;
+let x=180,y=400,ang=-Math.PI/2,time=30,run=true,parked=false,keys={};
+function setup(){x=180;y=400;ang=-Math.PI/2;time=30;run=true;parked=false;document.getElementById('tm').textContent=30;document.getElementById('pr').textContent=0}
+function bind(id,k){document.getElementById(id).addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true});document.getElementById(id).addEventListener('pointerup',()=>keys[k]=false);document.getElementById(id).addEventListener('pointerleave',()=>keys[k]=false)}
+bind('left','l');bind('right','r');bind('fwd','f');bind('back','b');
+window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')keys.l=true;if(e.key==='ArrowRight')keys.r=true;if(e.key==='ArrowUp')keys.f=true;if(e.key==='ArrowDown')keys.b=true});
+window.addEventListener('keyup',e=>{if(e.key==='ArrowLeft')keys.l=false;if(e.key==='ArrowRight')keys.r=false;if(e.key==='ArrowUp')keys.f=false;if(e.key==='ArrowDown')keys.b=false});
+function tick(){
+  if(!run)return;
+  if(!parked){time-=.016;if(time<=0){time=0;run=false;show('⏱ 时间到','倒车入库失败')}document.getElementById('tm').textContent=Math.ceil(time)}
+  if(keys.l)ang-=.045;if(keys.r)ang+=.045;
+  const sp=(keys.f?1.6:0)+(keys.b?-1.3:0);
+  x+=Math.cos(ang)*sp;y+=Math.sin(ang)*sp;
+  x=Math.max(24,Math.min(W-24,x));y=Math.max(24,Math.min(H-24,y));
+  if(x<28||x>W-28||y<28||y>H-28){x=Math.max(28,Math.min(W-28,x));y=Math.max(28,Math.min(H-28,y))}
+  const gx=180,gy=90;
+  const d=Math.hypot(x-gx,y-gy);
+  if(d<38&&!parked){parked=true;const pr=Math.max(0,100-Math.abs(ang+Math.PI/2)*57.3-Math.abs(x-gx)*2-Math.abs(y-gy)*2);document.getElementById('pr').textContent=pr|0;run=false;show(pr>70?'🏆 完美入库！':'✅ 入库成功','精度 '+pr|0+'% · 用时 '+(30-Math.ceil(time))+' 秒')}
+  draw();
+}
+function draw(){
+  ctx.fillStyle='#1a1d22';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#888';ctx.lineWidth=2;
+  ctx.strokeRect(10,10,W-20,H-20);ctx.strokeRect(28,28,W-56,H-56);
+  ctx.strokeStyle='#57c785';ctx.lineWidth=4;ctx.strokeRect(120,48,120,84);
+  ctx.fillStyle='#57c78522';ctx.fillRect(120,48,120,84);
+  ctx.save();ctx.translate(x,y);ctx.rotate(ang);
+  ctx.fillStyle='#d64545';ctx.fillRect(-30,-12,52,24);
+  ctx.fillStyle='#b02a2a';ctx.fillRect(22,-10,10,20);
+  ctx.fillStyle='#222';ctx.fillRect(-22,-16,8,8);ctx.fillRect(-22,8,8,8);ctx.fillRect(10,-16,8,8);ctx.fillRect(10,8,8,8);
+  ctx.restore();
+  ctx.fillStyle='#ffd9c8';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText('车位',180,44);
+}
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup()}
+setup();setInterval(tick,16);
+</script></body></html>

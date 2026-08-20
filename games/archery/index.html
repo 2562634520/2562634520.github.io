@@ -1,0 +1,48 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🏹 射箭</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🏹 射箭</h1><canvas id="cv"></canvas>
+<div class="info">得分 <b id="sc">0</b> / 120 · 箭 <b id="ar">8</b> 支</div>
+<div class="hint">按住拖动向后拉弓，松开射箭 · 注意风力偏移</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0;
+function size(){W=Math.min(innerWidth-24,440);H=Math.floor(W*.72);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W;cv.height=H}
+size();addEventListener('resize',()=>{size();draw()});
+let over=false,score=0,arrows=8,arrow={x:0,y:0,vx:0,vy:0,active:false},wind=0,drag=false,sx=0,sy=0,dx=0,dy=0;
+const TR={x:0,y:0,r:42};
+function init(){over=false;score=0;arrows=8;arrow={x:70,y:H-60,vx:0,vy:0,active:false};wind=(Math.random()-.5)*2;TR.x=W-90;TR.y=130;document.getElementById('sc').textContent='0';document.getElementById('ar').textContent='8';document.querySelector('.over').classList.remove('show');draw()}
+cv.addEventListener('pointerdown',e=>{if(over||arrow.active)return;const r=cv.getBoundingClientRect();sx=e.clientX-r.left;sy=e.clientY-r.top;drag=true;dx=0;dy=0});
+addEventListener('pointermove',e=>{if(!drag)return;const r=cv.getBoundingClientRect();dx=e.clientX-r.left-sx;dy=e.clientY-r.top-sy;draw()});
+addEventListener('pointerup',()=>{if(!drag)return;drag=false;const d=Math.hypot(dx,dy);if(d<6)return;const p=Math.min(1,d/110);arrow.vx=-(dx/d)*p*15;arrow.vy=-(dy/d)*p*15;arrow.active=true;arrows--;document.getElementById('ar').textContent=arrows});
+function step(){if(!arrow.active){requestAnimationFrame(step);return}
+arrow.x+=arrow.vx;arrow.y+=arrow.vy;arrow.vy+=.22;arrow.vx-=wind*.012;
+const dd=Math.hypot(arrow.x-TR.x,arrow.y-TR.y);if(dd<TR.r+4){const pts=dd<12?50:dd<24?30:dd<40?15:5;score+=pts;document.getElementById('sc').textContent=score;arrow.active=false;draw();if(score>=120){over=true;msg.textContent='箭术大师！得分 '+score;document.querySelector('.over').classList.add('show')}return}
+if(arrow.y>H-20||arrow.x>W+20||arrow.x<-20){arrow.active=false;draw();if(arrows<=0){over=true;msg.textContent='箭用完了，得分 '+score;document.querySelector('.over').classList.add('show')}return}
+draw();requestAnimationFrame(step)}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#141a12';ctx.fillRect(0,0,W,H);ctx.fillStyle='#2a4a2a';ctx.fillRect(0,H-30,W,30);
+ctx.strokeStyle='#8a9a8a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,H-90);ctx.lineTo(W,H-90);ctx.stroke();
+for(const[c,r]of[[255,214,69],[214,69,69],[120,140,180]]){ctx.fillStyle='rgb('+c+','+r+','+(c+r)/2+')';ctx.beginPath();ctx.arc(TR.x,TR.y,TR.r,0,7);ctx.fill();ctx.strokeStyle='#0b090c';ctx.stroke();ctx.fillStyle='#0b090c';ctx.beginPath();ctx.arc(TR.x,TR.y,TR.r*.5,0,7);ctx.fill();break}
+ctx.fillStyle='#b02a2a';ctx.beginPath();ctx.arc(TR.x,TR.y,TR.r,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(TR.x,TR.y,TR.r*.66,0,7);ctx.fill();ctx.fillStyle='#d64545';ctx.beginPath();ctx.arc(TR.x,TR.y,TR.r*.33,0,7);ctx.fill();
+ctx.strokeStyle='#c9a05a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(70,H-60);ctx.lineTo(70-dx*5,H-60-dy*5);ctx.stroke();
+if(arrow.active||!drag){ctx.strokeStyle='#e8dcd5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(arrow.x,arrow.y);ctx.lineTo(arrow.x-16,arrow.y);ctx.stroke()}
+ctx.fillStyle='#ffd9c8';ctx.font='bold 15px sans-serif';ctx.textAlign='left';ctx.fillText('得分 '+score+' / 120',12,24);ctx.textAlign='right';ctx.fillText('箭 '+arrows+' · 风力 '+(wind>0?'→':'←')+Math.abs(wind).toFixed(1),W-12,24)}
+function restart(){init()}
+init();setInterval(step,16);
+
+</script></body></html>

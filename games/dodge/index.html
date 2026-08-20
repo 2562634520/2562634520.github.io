@@ -1,0 +1,41 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>子弹风暴</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none;user-select:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.hud{font-size:13px;color:#d9a08f;display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
+canvas{background:#120d10;border:1px solid #33262a;border-radius:12px;touch-action:none;display:block;max-width:96vw;max-height:68vh}
+.btn{display:inline-block;padding:9px 22px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin:4px}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 30px;box-shadow:0 0 40px #b02a2a2e;max-width:86vw}
+.panel b{font-size:24px;color:#ffd9c8;display:block;margin-bottom:8px}
+.panel p{font-size:13px;color:#c9a89b;margin-bottom:12px}
+.tip{font-size:11px;color:#8f7f7b;text-align:center}
+</style></head><body>
+<div class="wrap"><h1>💥 子弹风暴</h1><div class="hud">存活 <b id="sc">0</b>s · 最佳 <span id="best">0</span>s</div><canvas id="cv"></canvas><div class="tip">拖动 / 方向键躲避四面八方子弹</div></div>
+<div class="over"><div class="panel"><b id="msg"></b><p id="sub"></p><button class="btn" id="again">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');cv.width=360;cv.height=480;
+let px=180,py=240,run=false,t=0,best=+(localStorage.getItem('dodgeBest')||0),bul=[],keys={};
+document.getElementById('best').textContent=best;
+function start(){px=180;py=240;t=0;bul=[];run=true;document.querySelector('.over').classList.remove('show')}
+function tick(){if(!run)return;t+=0.033;document.getElementById('sc').textContent=t.toFixed(1);
+if(Math.random()<0.09){const a=Math.random()*Math.PI*2,sp=2+Math.random()*2.2;
+const b={x:180+Math.cos(a)*260,y:240+Math.sin(a)*260,vx:Math.cos(a+Math.PI)*sp,vy:Math.sin(a+Math.PI)*sp};
+if(b.x>20&&b.x<cv.width-20&&b.y>20&&b.y<cv.height-20)bul.push(b)}
+if(keys.l)px-=4.5;if(keys.r)px+=4.5;if(keys.u)py-=4.5;if(keys.d)py+=4.5;
+px=Math.max(14,Math.min(cv.width-14,px));py=Math.max(14,Math.min(cv.height-14,py));
+bul.forEach(b=>{b.x+=b.vx;b.y+=b.vy;if(b.x<10||b.x>cv.width-10)b.vx*=-1;if(b.y<10||b.y>cv.height-10)b.vy*=-1;
+if(Math.abs(b.x-px)<15&&Math.abs(b.y-py)<15)over('被击中了','存活 '+t.toFixed(1)+'s')});
+draw()}
+function draw(){ctx.fillStyle='#120d10';ctx.fillRect(0,0,cv.width,cv.height);
+bul.forEach(b=>{ctx.fillStyle='#ff8a5c';ctx.beginPath();ctx.arc(b.x,b.y,5,0,7);ctx.fill();ctx.strokeStyle='#ff8a5c44';ctx.beginPath();ctx.arc(b.x,b.y,10,0,7);ctx.stroke()});
+ctx.fillStyle='#7de08a';ctx.beginPath();ctx.arc(px,py,13,0,7);ctx.fill();ctx.fillStyle='#120d10';ctx.beginPath();ctx.arc(px,py,6,0,7);ctx.fill()}
+function over(m,s){run=false;if(t>best){best=+t.toFixed(1);localStorage.setItem('dodgeBest',best);document.getElementById('best').textContent=best}
+document.getElementById('msg').textContent=m;document.getElementById('sub').textContent=s+' · 最佳 '+best+'s';document.querySelector('.over').classList.add('show')}
+addEventListener('keydown',e=>{const k=e.key;if(k==='ArrowLeft'||k==='a'||k==='A')keys.l=true;if(k==='ArrowRight'||k==='d'||k==='D')keys.r=true;if(k==='ArrowUp'||k==='w'||k==='W')keys.u=true;if(k==='ArrowDown'||k==='s'||k==='S')keys.d=true});
+addEventListener('keyup',e=>{const k=e.key;if(k==='ArrowLeft'||k==='a'||k==='A')keys.l=false;if(k==='ArrowRight'||k==='d'||k==='D')keys.r=false;if(k==='ArrowUp'||k==='w'||k==='W')keys.u=false;if(k==='ArrowDown'||k==='s'||k==='S')keys.d=false});
+cv.addEventListener('touchmove',e=>{const r=cv.getBoundingClientRect(),t=e.touches[0];px=(t.clientX-r.left)*(cv.width/r.width);py=(t.clientY-r.top)*(cv.height/r.height)},{passive:true});
+document.getElementById('again').onclick=start;start();setInterval(tick,33);
+</script></body></html>

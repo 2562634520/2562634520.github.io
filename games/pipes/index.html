@@ -1,0 +1,77 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>接水管</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#101820;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:68vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🔧 接水管</h1><div class="hint">点击旋转水管 · 让水从绿口流到红口</div>
+<canvas id="c" width="360" height="360"></canvas>
+<div class="bar">关卡 <b id="lv">1</b>/3 · 步数 <b id="st">0</b></div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),N=5,S=72;
+// 管口位: 0上 1右 2下 3左; 5=直(上下) 3=弯(上右) 7=T(上右下) 15=十字
+const LEVELS=[
+  {start:[0,0],end:[4,4],tiles:[[5,3,3,7,3],[3,5,15,5,3],[3,7,3,3,5],[7,5,15,7,3],[3,3,5,3,5]],rots:[[0,0,0,0,1],[0,0,0,0,0],[0,0,1,1,0],[0,0,0,0,1],[0,0,0,0,0]]},
+  {start:[0,2],end:[4,2],tiles:[[3,5,3,5,3],[7,3,15,3,7],[3,5,3,5,3],[7,3,15,3,7],[3,5,3,5,3]],rots:[[1,0,0,0,1],[0,1,0,1,0],[1,0,1,0,1],[0,1,0,1,0],[1,0,1,0,1]]},
+  {start:[0,0],end:[4,0],tiles:[[3,5,3,5,3],[7,3,15,5,3],[3,7,3,3,5],[7,3,15,7,3],[3,5,3,5,3]],rots:[[0,0,1,0,0],[0,1,0,1,1],[1,0,1,0,0],[0,1,0,1,1],[0,0,1,0,0]]}
+];
+let level=0,rots=[],steps=0,run=true;
+function openAt(r,c,d){const m=LEVELS[level].tiles[r][c],rot=rots[r][c];return (m>>((d-rot+4)%4))&1}
+function solve(){
+  const L=LEVELS[level],dirs=[[-1,0],[0,1],[1,0],[0,-1]];
+  const q=[L.start],seen=new Set([L.start[0]*N+L.start[1]]);
+  while(q.length){
+    const [r,c]=q.shift();
+    if(r===L.end[0]&&c===L.end[1])return true;
+    for(let d=0;d<4;d++){
+      const nr=r+dirs[d][0],nc=c+dirs[d][1];
+      if(nr<0||nr>=N||nc<0||nc>=N||seen.has(nr*N+nc))continue;
+      if(openAt(r,c,d)&&openAt(nr,nc,(d+2)%4)){seen.add(nr*N+nc);q.push([nr,nc])}
+    }
+  }
+  return false;
+}
+function setup(){level=0;steps=0;newLevel()}
+function newLevel(){rots=LEVELS[level].rots.map(r=>[...r]);steps=0;document.getElementById('lv').textContent=(level+1)+'/3';document.getElementById('st').textContent=0}
+function draw(){
+  ctx.fillStyle='#101820';ctx.fillRect(0,0,360,360);
+  const L=LEVELS[level];
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+    const x=c*S,y=r*S,m=L.tiles[r][c];
+    ctx.strokeStyle='#2a4a5a';ctx.lineWidth=2;ctx.strokeRect(x+2,y+2,S-4,S-4);
+    ctx.strokeStyle='#4a9ad8';ctx.lineWidth=9;ctx.lineCap='round';
+    const dirs=[[0,-S/2+8],[S/2-8,0],[0,S/2-8],[-S/2+8,0]];
+    ctx.beginPath();
+    for(let d=0;d<4;d++){
+      if(openAt(r,c,d)){ctx.moveTo(x+S/2,y+S/2);ctx.lineTo(x+S/2+dirs[d][0],y+S/2+dirs[d][1])}
+    }
+    ctx.stroke();
+    ctx.fillStyle='#101820';ctx.beginPath();ctx.arc(x+S/2,y+S/2,4.5,0,7);ctx.fill();
+  }
+  ctx.fillStyle='#57c785';ctx.beginPath();ctx.arc(L.start[1]*S+S/2,L.start[0]*S+S/2,9,0,7);ctx.fill();
+  ctx.fillStyle='#e0342e';ctx.beginPath();ctx.arc(L.end[1]*S+S/2,L.end[0]*S+S/2,9,0,7);ctx.fill();
+}
+cv.addEventListener('pointerdown',e=>{
+  const r=cv.getBoundingClientRect(),c=Math.floor((e.clientX-r.left)/S),row=Math.floor((e.clientY-r.top)/S);
+  if(c<0||c>=N||row<0||row>=N)return;
+  rots[row][c]=(rots[row][c]+1)%4;steps++;document.getElementById('st').textContent=steps;
+  if(solve()){
+    if(level>=2){show('🎉 全部通水！','总步数 '+steps)}
+    else{level++;newLevel()}
+  }
+  draw();
+});
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup()}
+setup();setInterval(draw,60);
+</script></body></html>

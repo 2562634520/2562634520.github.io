@@ -1,0 +1,42 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🏃‍♂️ 跨栏</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🏃‍♂️ 跨栏</h1><canvas id="cv"></canvas>
+<div class="info">跨栏 <b id="sc">0</b></div>
+<div class="hint">点击跳跃跨过红色栏杆 · 撞栏游戏结束</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0;
+function size(){W=Math.min(innerWidth-24,460);H=Math.floor(W*.62);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W;cv.height=H}
+size();addEventListener('resize',()=>{size();draw()});
+let over=false,score=0,runner=0,vy=0,y=0,onGround=true,hurdles=[],tick=0,speed=7;
+function init(){over=false;score=0;runner=0;vy=0;y=H-80;onGround=true;hurdles=[];tick=0;speed=7;document.getElementById('sc').textContent='0';document.querySelector('.over').classList.remove('show');loop()}
+cv.addEventListener('pointerdown',()=>{if(over)return;if(onGround){vy=-12;onGround=false}});
+function step(){if(over)return;tick++;runner+=speed;vy+=.6;y+=vy;if(y>=H-80){y=H-80;vy=0;onGround=true}
+if(tick%52===0)hurdles.push({x:W+30,w:8,h:34});
+for(const h of hurdles){h.x-=speed;const rx=runner+14;if(rx>h.x&&rx<h.x+h.w&&y+42>H-80-h.h){over=true;msg.textContent='撞栏了！跑过 '+score+' 个栏';document.querySelector('.over').classList.add('show');return}if(rx>h.x+h.w&&!h.scored){h.scored=true;score++;document.getElementById('sc').textContent=score}}
+hurdles=hurdles.filter(h=>h.x>-40);draw();requestAnimationFrame(step)}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#10160f';ctx.fillRect(0,0,W,H);ctx.fillStyle='#b02a2a';ctx.fillRect(0,H-40,W,40);ctx.strokeStyle='#8a9a8a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,H-80);ctx.lineTo(W,H-80);ctx.stroke();
+for(const h of hurdles){if(h.x<-30)continue;ctx.fillStyle='#d64545';ctx.fillRect(h.x,H-80-h.h,h.w,h.h);ctx.strokeStyle='#ffd9c8';ctx.strokeRect(h.x,H-80-h.h,h.w,h.h)}
+const x=Math.min(runner,W-60);ctx.fillStyle='#b02a2a';ctx.beginPath();ctx.arc(x,H-110,12,0,7);ctx.fill();ctx.strokeStyle='#d64545';ctx.lineWidth=4;ctx.lineCap='round';if(!onGround){ctx.beginPath();ctx.moveTo(x,y-22);ctx.lineTo(x+18,y-30);ctx.moveTo(x,y-22);ctx.lineTo(x+16,y-6);ctx.moveTo(x-8,y-22);ctx.lineTo(x-22,y-12);ctx.moveTo(x-8,y-22);ctx.lineTo(x-24,y-34)}else{ctx.beginPath();ctx.moveTo(x,y-22);ctx.lineTo(x+18,y-28);ctx.moveTo(x,y-22);ctx.lineTo(x+16,y-10);ctx.moveTo(x-8,y-22);ctx.lineTo(x-22,y-28);ctx.moveTo(x-8,y-22);ctx.lineTo(x-20,y-10)}ctx.stroke();
+ctx.fillStyle='#ffd9c8';ctx.font='bold 15px sans-serif';ctx.textAlign='left';ctx.fillText('跨栏 '+score,12,24)}
+function restart(){init()}
+let running=false;function loop(){if(running)return;running=true;step()}
+init();
+
+</script></body></html>

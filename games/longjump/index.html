@@ -1,0 +1,42 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🏃 跳远</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🏃 跳远</h1><canvas id="cv"></canvas>
+<div class="info">本次 <b id="sc">0.0 米</b> · 空中再点可加力</div>
+<div class="hint">点击起跳 · 空中再次点击加力，跳得越远越好</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0;
+function size(){W=Math.min(innerWidth-24,460);H=Math.floor(W*.62);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W;cv.height=H}
+size();addEventListener('resize',()=>{size();draw()});
+let over=false,state='run',tick=0,runner=0,power=0,jump={x:0,y:0,vy:0,done:false},best=0,last=0;
+function init(){over=false;state='run';tick=0;runner=0;power=0;jump={x:0,y:0,vy:0,done:false};last=0;document.getElementById('sc').textContent='0.0 米';document.querySelector('.over').classList.remove('show');loop()}
+cv.addEventListener('pointerdown',()=>{if(over)return;if(state==='run'){state='jump';power=Math.min(100,30+tick*2);jump.x=runner;jump.y=H-90;jump.vy=-(9+power*.08)}else if(state==='jump'&&!jump.done){jump.vy-=2}});
+function step(){if(over)return;tick++;
+if(state==='run'){runner+=3.5;if(runner>W-60)runner=W-60}
+else if(state==='jump'){jump.x+=5.5;if(power<100)power+=.3;jump.vy+=.42;jump.y+=jump.vy;if(jump.y>=H-90){jump.y=H-90;jump.done=true;last=Math.floor(jump.x/10)/10;if(last>best)best=last;document.getElementById('sc').textContent=last.toFixed(1)+' 米';setTimeout(()=>{over=true;msg.textContent='跳了 '+last.toFixed(1)+' 米 · 历史最佳 '+best.toFixed(1);document.querySelector('.over').classList.add('show')},700)}}
+draw();requestAnimationFrame(step)}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#10160f';ctx.fillRect(0,0,W,H);ctx.fillStyle='#c9a05a';ctx.fillRect(0,H-60,W,60);ctx.strokeStyle='#8a9a8a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,H-90);ctx.lineTo(W,H-90);ctx.stroke();
+if(state==='run'){const x=runner;ctx.fillStyle='#b02a2a';ctx.beginPath();ctx.arc(x-10,H-110,12,0,7);ctx.fill();ctx.strokeStyle='#d64545';ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x,H-92);ctx.lineTo(x+16,H-100);ctx.moveTo(x,H-92);ctx.lineTo(x+18,H-78);ctx.moveTo(x-8,H-92);ctx.lineTo(x-22,H-100);ctx.moveTo(x-8,H-92);ctx.lineTo(x-20,H-76);ctx.stroke()}
+else if(state==='jump'){const x=jump.x,y=jump.y;ctx.fillStyle='#b02a2a';ctx.beginPath();ctx.arc(x-10,y-30,12,0,7);ctx.fill();ctx.strokeStyle='#d64545';ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x,y-8);ctx.lineTo(x+22,y-14);ctx.moveTo(x,y-8);ctx.lineTo(x+24,y+8);ctx.moveTo(x-8,y-8);ctx.lineTo(x-24,y+4);ctx.moveTo(x-8,y-8);ctx.lineTo(x-22,y-22);ctx.stroke()}
+ctx.fillStyle='#ffd9c8';ctx.font='bold 15px sans-serif';ctx.textAlign='left';ctx.fillText('成绩 '+last.toFixed(1)+' 米 · 最佳 '+best.toFixed(1),12,24)}
+function restart(){init()}
+let running=false;function loop(){if(running)return;running=true;step()}
+init();
+
+</script></body></html>

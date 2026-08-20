@@ -1,0 +1,51 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>飞镖大师</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none;user-select:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.hud{font-size:13px;color:#d9a08f;display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
+canvas{background:#120d10;border:1px solid #33262a;border-radius:12px;touch-action:none;display:block;max-width:96vw;max-height:68vh}
+.btn{display:inline-block;padding:9px 22px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin:4px}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 30px;box-shadow:0 0 40px #b02a2a2e;max-width:86vw}
+.panel b{font-size:24px;color:#ffd9c8;display:block;margin-bottom:8px}
+.panel p{font-size:13px;color:#c9a89b;margin-bottom:12px}
+.tip{font-size:11px;color:#8f7f7b;text-align:center}
+</style></head><body>
+<div class="wrap"><h1>🎯 飞镖大师</h1><div class="hud">本局 <b id="sc">0</b> 分 · 剩余 <span id="left">10</span> 镖</div><canvas id="cv"></canvas><div class="tip">从飞镖处按住拖动，松手投出</div></div>
+<div class="over"><div class="panel"><b id="msg"></b><p id="sub"></p><button class="btn" id="again">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');cv.width=360;cv.height=480;
+let sc=0,left=10,run=true,darts=[],drag=null;
+const rings=[{r:26,p:50},{r:52,p:30},{r:78,p:10},{r:104,p:5}],CX=180,CY=180,DX=180,DY=430;
+function tick(){darts.forEach(d=>{if(d.fin)return;d.x+=d.vx;d.y+=d.vy;d.vy+=0.32;if(d.y>=DY){d.y=DY;d.vx*=0.75;d.vy=0;if(Math.abs(d.vx)<0.4)d.fin=true}});
+darts.forEach(d=>{if(d.fin&&d.hit===undefined){d.hit=scoreAt(d.x,d.y);if(d.hit>0){sc+=d.hit;document.getElementById('sc').textContent=sc}}});
+darts=darts.filter(d=>d.y<DY+40);
+draw()}
+function scoreAt(x,y){const d=Math.sqrt((x-CX)**2+(y-CY)**2);if(d>115)return 0;for(const r of rings){if(d<=r.r)return r.p}return 0}
+function draw(){ctx.fillStyle='#120d10';ctx.fillRect(0,0,cv.width,cv.height);
+ctx.fillStyle='#1c1417';ctx.beginPath();ctx.arc(CX,CY,118,0,7);ctx.fill();
+ctx.fillStyle='#d64545';ctx.beginPath();ctx.arc(CX,CY,104,0,7);ctx.fill();
+ctx.fillStyle='#e8dcd5';ctx.beginPath();ctx.arc(CX,CY,78,0,7);ctx.fill();
+ctx.fillStyle='#d64545';ctx.beginPath();ctx.arc(CX,CY,52,0,7);ctx.fill();
+ctx.fillStyle='#e8dcd5';ctx.beginPath();ctx.arc(CX,CY,26,0,7);ctx.fill();
+ctx.fillStyle='#b02a2a';ctx.beginPath();ctx.arc(CX,CY,9,0,7);ctx.fill();
+ctx.strokeStyle='#8f7f7b';ctx.setLineDash([4,4]);ctx.beginPath();ctx.arc(CX,CY,115,0,7);ctx.stroke();ctx.setLineDash([]);
+ctx.fillStyle='#d9a08f';ctx.fillRect(DX-3,DY-14,6,14);
+darts.forEach(d=>{ctx.strokeStyle='#e8dcd5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(d.x-d.vx*3,d.y-d.vy*3-10);ctx.stroke();ctx.fillStyle='#d64545';ctx.beginPath();ctx.arc(d.x,d.y,4,0,7);ctx.fill();ctx.lineWidth=1});
+if(drag){ctx.strokeStyle='#ffd84a';ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(DX,DY);ctx.lineTo(drag.x,drag.y);ctx.stroke();ctx.setLineDash([])}}
+function throwDart(vx,vy){if(left<=0)return;left--;document.getElementById('left').textContent=left;
+const v=Math.min(16,Math.max(5,Math.sqrt(vx*vx+vy*vy)/4));const a=Math.atan2(vy,vx);
+darts.push({x:DX,y:DY,vx:Math.cos(a)*v,vy:Math.sin(a)*v,fin:false});
+if(left===0){setTimeout(()=>{document.getElementById('msg').textContent='投掷结束';document.getElementById('sub').textContent='本局得分 '+sc;document.querySelector('.over').classList.add('show')},1200)}}
+function pos(e){const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)*(cv.width/r.width),y:(e.clientY-r.top)*(cv.height/r.height)}}
+cv.addEventListener('touchstart',e=>{drag=pos(e.touches[0])},{passive:true});
+cv.addEventListener('touchmove',e=>{drag=pos(e.touches[0])},{passive:true});
+cv.addEventListener('touchend',e=>{if(drag){throwDart(DX-drag.x,DY-drag.y);drag=null}},{passive:true});
+cv.addEventListener('mousedown',e=>{drag=pos(e)});
+cv.addEventListener('mousemove',e=>{if(drag)drag=pos(e)});
+cv.addEventListener('mouseup',e=>{if(drag){throwDart(DX-drag.x,DY-drag.y);drag=null}});
+document.getElementById('again').onclick=()=>{sc=0;left=10;darts=[];document.getElementById('sc').textContent='0';document.getElementById('left').textContent='10';document.querySelector('.over').classList.remove('show')};
+setInterval(tick,33);
+</script></body></html>

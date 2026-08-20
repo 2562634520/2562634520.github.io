@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>七巧板</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#171421;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:70vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0;display:flex;gap:10px;align-items:center}
+.btn{display:inline-block;padding:8px 16px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:13px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+</style></head><body>
+<h1>📐 七巧板</h1><div class="hint">拖动 7 块板拼进虚线正方形 · 点选后旋转</div>
+<canvas id="c" width="420" height="420"></canvas>
+<div class="bar">已拼 <b id="done">0</b>/7
+  <button class="btn" onclick="rotate()">↻ 旋转</button>
+  <button class="btn" onclick="again()">重新打乱</button>
+</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=420,H=420,S=230,OX=95,OY=95;
+let pieces=[],sel=-1,placed=0,drag=false,dx=0,dy=0,run=true;
+function shapes(){return[
+{pts:[[0,0],[100,0],[50,50]],color:'#d64545'},
+{pts:[[0,0],[0,100],[-50,50]],color:'#3d7fd6'},
+{pts:[[0,0],[100,0],[100,100],[0,100]],color:'#e0a63d'},
+{pts:[[0,0],[50,0],[25,50]],color:'#3d9a5a'},
+{pts:[[0,0],[50,0],[25,50]],color:'#8a5fd6'},
+{pts:[[0,0],[0,50],[-50,50],[-50,0]],color:'#ff9ecb'},
+{pts:[[0,0],[50,0],[0,50]],color:'#f2e3d0'}]}
+function setup(){let sh=shapes();pieces=sh.map((s,i)=>({pts:s.pts.map(p=>[p[0],p[1]]),color:s.color,x:150+(i%4)*72,y:330+Math.floor(i/4)*78,rot:0,base:s.pts}));
+sel=-1;placed=0;run=true}
+function inSquare(p){return p[0]>OX&&p[0]<OX+S&&p[1]>OY&&p[1]<OY+S}
+function poly(p){return p.pts.map(v=>[p.x+v[0],p.y+v[1]])}
+function allIn(p){return poly(p).every(v=>inSquare(v))}
+function checkPlaced(){placed=pieces.filter(p=>allIn(p)).length;document.getElementById('done').textContent=placed;
+if(placed===7){run=false;show('🧩 完美拼合','七块板全部归位！')}}
+function hit(x,y){for(let i=pieces.length-1;i>=0;i--){let p=poly(pieces[i]);
+let inside=false;for(let j=0,k=p.length-1;j<p.length;k=j++){if((p[j][1]>y)!==(p[k][1]>y)&&x<(p[k][0]-p[j][0])*(y-p[j][1])/(p[k][1]-p[j][1])+p[j][0])inside=!inside}
+if(inside)return i}return -1}
+function rotate(){if(sel<0||!run)return;let p=pieces[sel];p.rot=(p.rot+45)%360;
+p.pts=p.base.map(v=>{let a=p.rot*Math.PI/180,x=v[0]*Math.cos(a)-v[1]*Math.sin(a),y=v[0]*Math.sin(a)+v[1]*Math.cos(a);return[x,y]});
+checkPlaced();draw()}
+function draw(){ctx.fillStyle='#171421';ctx.fillRect(0,0,W,H);
+ctx.strokeStyle='#5a5a7a';ctx.setLineDash([6,6]);ctx.strokeRect(OX,OY,S,S);ctx.setLineDash([]);
+pieces.forEach((p,i)=>{ctx.beginPath();let pts=poly(p);ctx.moveTo(pts[0][0],pts[0][1]);for(let k=1;k<pts.length;k++)ctx.lineTo(pts[k][0],pts[k][1]);ctx.closePath();
+ctx.fillStyle=p.color;ctx.globalAlpha=.88;ctx.fill();ctx.globalAlpha=1;ctx.strokeStyle=i===sel?'#ffd9c8':'#1a0f12';ctx.lineWidth=i===sel?3:1.5;ctx.stroke()})}
+cv.addEventListener('pointerdown',e=>{if(!run)return;let r=cv.getBoundingClientRect(),x=(e.clientX-r.left)*(420/r.width),y=(e.clientY-r.top)*(420/r.height);
+let i=hit(x,y);if(i<0){sel=-1;draw();return}sel=i;drag=true;dx=x-pieces[i].x;dy=y-pieces[i].y;draw()});
+cv.addEventListener('pointermove',e=>{if(!drag||sel<0)return;let r=cv.getBoundingClientRect(),x=(e.clientX-r.left)*(420/r.width),y=(e.clientY-r.top)*(420/r.height);
+pieces[sel].x=x-dx;pieces[sel].y=y-dy;draw()});
+window.addEventListener('pointerup',()=>{if(drag){drag=false;if(sel>=0){let p=pieces[sel];if(allIn(p)){p.x=OX;p.y=OY}checkPlaced();draw()}}});
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup();checkPlaced();draw()}
+setup();draw();
+</script></body></html>

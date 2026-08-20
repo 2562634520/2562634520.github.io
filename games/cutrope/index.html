@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>割绳子</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#16201a;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:68vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🪢 割绳子</h1><div class="hint">划过绳子割断 · 让糖果掉进小怪嘴里 · 共 5 关</div>
+<canvas id="c" width="360" height="480"></canvas>
+<div class="bar">关卡 <b id="lv">1</b>/5 · 得分 <b id="sc">0</b></div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=360,H=480;
+let level=0,score=0,candy=null,cut=false,run=true,swipes=[];
+const LEVELS=[
+  {anchor:[180,60],mouth:[180,400],len:140,obst:[]},
+  {anchor:[120,50],mouth:[240,410],len:180,obst:[[240,120,260,140]]},
+  {anchor:[260,50],mouth:[140,400],len:150,obst:[[120,200,340,214]]},
+  {anchor:[180,40],mouth:[180,420],len:220,obst:[[60,280,300,292],[160,120,200,300]]},
+  {anchor:[90,60],mouth:[270,410],len:200,obst:[[60,200,330,212],[180,120,196,360]]}
+];
+function setup(){level=0;score=0;run=true;newLevel()}
+function newLevel(){
+  const L=LEVELS[level];cut=false;swipes=[];
+  candy={x:L.anchor[0],y:L.anchor[1]+L.len,vx:0,vy:0,hanging:true};
+  document.getElementById('lv').textContent=(level+1)+'/5';
+}
+function cutRope(x,y){
+  if(cut||!candy.hanging)return;
+  const L=LEVELS[level];
+  const dx=candy.x-L.anchor[0],dy=candy.y-L.anchor[1],d=Math.hypot(dx,dy);
+  const px=Math.hypot(x-L.anchor[0],y-L.anchor[1]);
+  const dot=((x-L.anchor[0])*dx+(y-L.anchor[1])*dy)/(d*d);
+  const projX=L.anchor[0]+dx*dot,projY=L.anchor[1]+dy*dot;
+  if(Math.hypot(x-projX,y-projY)<16&&dot>=0&&dot<=1.2){
+    cut=true;candy.hanging=false;
+    candy.vx=(x-L.anchor[0])*.02;candy.vy=(y-L.anchor[1])*.02+1;
+  }
+}
+cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect();swipes=[[e.clientX-r.left,e.clientY-r.top]];cutRope(swipes[0][0],swipes[0][1])});
+cv.addEventListener('pointermove',e=>{if(!swipes.length)return;const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;swipes.push([x,y]);cutRope(x,y)});
+cv.addEventListener('pointerup',()=>swipes=[]);
+function tick(){
+  if(!run)return;
+  if(candy&&!candy.hanging){
+    candy.vy+=.35;candy.vx*=.99;candy.x+=candy.vx;candy.y+=candy.vy;
+    const L=LEVELS[level];
+    L.obst.forEach(o=>{
+      const cx=Math.max(o[0],Math.min(candy.x,o[2])),cy=Math.max(o[1],Math.min(candy.y,o[3]));
+      if(Math.hypot(candy.x-cx,candy.y-cy)<12){candy.vy=Math.abs(candy.vy)*.6;candy.vx*=-.5}
+    });
+    if(Math.hypot(candy.x-L.mouth[0],candy.y-L.mouth[1])<26){
+      score+=10;document.getElementById('sc').textContent=score;
+      if(level>=4){run=false;show('🎉 全部通关！','总得分 '+score)}
+      else{level++;newLevel()}
+    }else if(candy.y>H-10||candy.x<0||candy.x>W){
+      run=false;show('😵 糖果掉了','第 '+(level+1)+' 关失败 · 得分 '+score);
+    }
+  }
+  draw();
+}
+function draw(){
+  ctx.fillStyle='#16201a';ctx.fillRect(0,0,W,H);
+  const L=LEVELS[level];
+  ctx.strokeStyle='#6a5a2a';ctx.lineWidth=3;
+  ctx.beginPath();ctx.arc(L.anchor[0],L.anchor[1],7,0,7);ctx.fill();
+  if(candy.hanging){ctx.beginPath();ctx.moveTo(L.anchor[0],L.anchor[1]);ctx.lineTo(candy.x,candy.y);ctx.stroke()}
+  L.obst.forEach(o=>{ctx.fillStyle='#4a5a3a';ctx.fillRect(o[0],o[1],o[2]-o[0],o[3]-o[1])});
+  ctx.fillStyle='#3a6a3a';ctx.fillRect(L.mouth[0]-30,L.mouth[1]-12,60,16);
+  ctx.fillStyle='#d64545';ctx.fillRect(L.mouth[0]-20,L.mouth[1]-18,14,8);ctx.fillRect(L.mouth[0]+6,L.mouth[1]-18,14,8);
+  if(candy){ctx.fillStyle='#ffb3c8';ctx.beginPath();ctx.arc(candy.x,candy.y,10,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(candy.x-6,candy.y-13,12,5)}
+  if(swipes.length>1){ctx.strokeStyle='rgba(255,217,200,.5)';ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(swipes[0][0],swipes[0][1]);for(let i=1;i<swipes.length;i++)ctx.lineTo(swipes[i][0],swipes[i][1]);ctx.stroke()}
+}
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup()}
+setup();setInterval(tick,16);
+</script></body></html>

@@ -1,0 +1,30 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>神射手</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:18px}
+#cv{background:linear-gradient(#1a2413,#120e11);border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 34px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🏹 神射手</h1><div class="info"><span>得分 <b id="sc">0</b></span><span>箭 <b id="arr">8</b></span></div><canvas id="cv"></canvas><div class="hint">滑动调整角度松手发射</div></div>
+<div class="over"><div class="panel"><b>得分 <span id="finalsc">0</span></b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),dpr=Math.min(devicePixelRatio||1,2);
+let W,H,bow,target,arrow,score=0,arrows=8,alive,state='aim',angle=-Math.PI/4,dragY=0,frame=0;
+function size(){W=Math.min(innerWidth-24,420);H=Math.min(innerHeight-150,540);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+size();addEventListener('resize',size);
+function restart(){score=0;arrows=8;alive=true;state='aim';bow={x:46,y:H-60};arrow=null;newTarget();document.getElementById('sc').textContent=0;document.getElementById('arr').textContent=8;document.querySelector('.over').classList.remove('show');requestAnimationFrame(loop)}
+function newTarget(){target={x:W*0.55+Math.random()*W*0.3,y:40+Math.random()*H*0.35,r:22}}
+restart();
+cv.addEventListener('pointerdown',e=>{if(state!=='aim')return;dragY=e.clientY;state='draw'});
+cv.addEventListener('pointermove',e=>{if(state!=='draw')return;let dy=e.clientY-dragY;angle=-Math.PI/4+(dy*0.006)});
+cv.addEventListener('pointerup',()=>{if(state!=='draw')return;state='fly';arrows--;document.getElementById('arr').textContent=arrows;arrow={x:bow.x,y:bow.y,vx:Math.cos(angle)*9,vy:Math.sin(angle)*9}});
+function loop(){requestAnimationFrame(loop);if(!alive)return;frame++;ctx.clearRect(0,0,W,H);ctx.fillStyle='#0f140d';ctx.fillRect(0,0,W,H);ctx.fillStyle='#7a5a32';ctx.fillRect(0,H-14,W,14);ctx.strokeStyle='#8a7a5a';ctx.lineWidth=3;ctx.beginPath();ctx.arc(target.x,target.y,target.r,0,7);ctx.stroke();ctx.fillStyle='#b02a2a';ctx.beginPath();ctx.arc(target.x,target.y,target.r*0.65,0,7);ctx.fill();ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(target.x,target.y,5,0,7);ctx.fill();ctx.strokeStyle='#6b3a2a';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(bow.x,bow.y);ctx.lineTo(bow.x+110,bow.y-18);ctx.stroke();ctx.strokeStyle='#d9a08f';ctx.beginPath();ctx.arc(bow.x+58,bow.y-8,34,-Math.PI/2,Math.PI/2);ctx.stroke();if(state==='draw'){ctx.strokeStyle='#ffe9dd';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(bow.x+58,bow.y-8);ctx.lineTo(bow.x+58+Math.cos(angle)*60,bow.y-8+Math.sin(angle)*60);ctx.stroke()}if(state==='fly'&&arrow){arrow.x+=arrow.vx;arrow.y+=arrow.vy;arrow.vy+=0.25;ctx.strokeStyle='#e8dcd5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(arrow.x,arrow.y);ctx.lineTo(arrow.x-14,arrow.y);ctx.stroke();ctx.fillStyle='#d64545';ctx.beginPath();ctx.arc(arrow.x,arrow.y,3,0,7);ctx.fill();if(Math.hypot(arrow.x-target.x,arrow.y-target.y)<target.r+5){score+=Math.max(10,Math.round((1-Math.hypot(arrow.x-target.x,arrow.y-target.y)/(target.r+5))*50));document.getElementById('sc').textContent=score;state='aim';arrow=null;newTarget();return}if(arrow.y>H-16||arrow.x>W+20||arrow.y<-20){if(arrows<=0){state='done';document.getElementById('finalsc').textContent=score;document.querySelector('.over').classList.add('show')}else{state='aim';arrow=null}}}}
+</script></body></html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>冰球守门</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#101821;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:68vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🏒 冰球守门</h1><div class="hint">移动守门员挡球 · 60 秒内别让球进门</div>
+<canvas id="c" width="360" height="500"></canvas>
+<div class="bar">扑救 <b id="sv">0</b> · 失球 <b id="gl">0</b> · 剩余 <b id="tm">60</b> 秒</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=360,H=500;
+let px=180,puck=null,saves=0,goals=0,time=60,run=true;
+function setup(){px=180;saves=0;goals=0;time=60;run=true;launch();document.getElementById('tm').textContent=60}
+function launch(){
+  puck={x:180,y:120,vx:(Math.random()-.5)*6,vy:2.5+Math.random()*2.5};
+  if(Math.abs(puck.vx)<1.2)puck.vx=Math.sign(puck.vx||1)*1.2;
+}
+function tick(){
+  if(!run)return;
+  time-=.016;if(time<=0){time=0;run=false;show('⏱ 时间到',saves+' 次扑救 · '+goals+' 个失球');return}
+  document.getElementById('tm').textContent=Math.ceil(time);
+  if(!puck)return;
+  puck.x+=puck.vx;puck.y+=puck.vy;
+  if(puck.x<12){puck.x=12;puck.vx=Math.abs(puck.vx)}
+  if(puck.x>W-12){puck.x=W-12;puck.vx=-Math.abs(puck.vx)}
+  if(puck.y<12){puck.y=12;puck.vy=Math.abs(puck.vy)}
+  if(Math.hypot(puck.x-px,puck.y-460)<30){
+    saves++;document.getElementById('sv').textContent=saves;
+    puck.vy=-Math.abs(puck.vy)*1.15;puck.vx+=Math.sign(puck.x-px)*1.5;launch();
+  }
+  if(puck.y>H-14){goals++;document.getElementById('gl').textContent=goals;launch()}
+  draw();
+}
+function draw(){
+  ctx.fillStyle='#101821';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#2c4a63';ctx.lineWidth=2;ctx.strokeRect(20,10,W-40,80);
+  ctx.fillStyle='#b02a2a';ctx.fillRect(24,14,W-48,72);
+  ctx.strokeStyle='#e8f4ff';ctx.beginPath();ctx.moveTo(20,50);ctx.lineTo(W-20,50);ctx.stroke();
+  if(puck){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(puck.x,puck.y,10,0,7);ctx.fill();ctx.strokeStyle='#000';ctx.stroke()}
+  ctx.fillStyle='#d64545';ctx.beginPath();ctx.arc(px,460,22,0,7);ctx.fill();ctx.strokeStyle='#ffd9c8';ctx.stroke();
+  ctx.fillStyle='#ffd9c8';ctx.font='11px sans-serif';ctx.textAlign='center';
+  ctx.fillText('守门员',px,487);
+}
+cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();px=Math.max(22,Math.min(W-22,e.clientX-r.left))});
+cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect();px=Math.max(22,Math.min(W-22,e.clientX-r.left))});
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup()}
+setup();setInterval(tick,16);
+</script></body></html>

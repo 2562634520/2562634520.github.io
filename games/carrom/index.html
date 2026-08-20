@@ -1,0 +1,71 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🎯 卡罗姆</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🎯 卡罗姆</h1><canvas id="cv"></canvas>
+<div class="info">比分 <b id="sc">0 : 0</b> · 黑子=你，白子=电脑，红后=3分</div>
+<div class="hint">从白色击子向目标方向拖动松手发射，先把所有己方子+皇后打进袋即胜</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let S=0,M=0;const R=11,SR=13;
+function size(){S=Math.min(innerWidth-24,innerHeight-240,430);M=S*.08;cv.style.width=S+'px';cv.style.height=S+'px';cv.width=S;cv.height=S}
+size();addEventListener('resize',()=>{size();draw()});
+let pieces=[],striker={x:0,y:0,vx:0,vy:0},turn=0,over=false,aiming=false,aimFrom=null,score=[0,0],moving=false;
+const POCKETS=[[M,M],[S-M,M],[M,S-M],[S-M,S-M]];
+function init(){pieces=[];const cx=S/2,cy=S/2;[[cx-16,cy],[cx+16,cy],[cx,cy-16],[cx,cy+16],[cx-10,cy-12],[cx+10,cy+12],[cx-12,cy+8],[cx+12,cy-8]].forEach((p,i)=>{pieces.push({x:p[0],y:p[1],vx:0,vy:0,r:R,c:i<4?'b':'w',dead:false})});
+pieces.push({x:cx,y:cy,vx:0,vy:0,r:R,c:'q',dead:false});
+striker={x:S/2,y:S-M-20,vx:0,vy:0};turn=0;over=false;score=[0,0];moving=false;document.getElementById('sc').textContent='0 : 0';loop()}
+function pocket(p){for(const q of POCKETS)if(Math.hypot(p.x-q[0],p.y-q[1])<R+10)return true;return false}
+function step(){if(over)return;
+for(const p of pieces){if(p.dead)continue;p.x+=p.vx;p.y+=p.vy;p.vx*=.99;p.vy*=.99;
+if(p.x<M+R){p.x=M+R;p.vx=Math.abs(p.vx)*.7}if(p.x>S-M-R){p.x=S-M-R;p.vx=-Math.abs(p.vx)*.7}
+if(p.y<M+R){p.y=M+R;p.vy=Math.abs(p.vy)*.7}if(p.y>S-M-R){p.y=S-M-R;p.vy=-Math.abs(p.vy)*.7}
+if(pocket(p)){p.dead=true;if(p.c==='q')score[turn]+=3;else score[turn]+=1;document.getElementById('sc').textContent=score[0]+' : '+score[1];
+if(score[turn]>=5){over=true;msg.textContent=turn===0?'你赢了！':'电脑赢了！';document.querySelector('.over').classList.add('show');return}}}
+striker.x+=striker.vx;striker.y+=striker.vy;striker.vx*=.99;striker.vy*=.99;
+if(striker.x<M+SR){striker.x=M+SR;striker.vx=Math.abs(striker.vx)*.7}if(striker.x>S-M-SR){striker.x=S-M-SR;striker.vx=-Math.abs(striker.vx)*.7}
+if(striker.y<M+SR){striker.y=M+SR;striker.vy=Math.abs(striker.vy)*.7}if(striker.y>S-M-SR){striker.y=S-M-SR;striker.vy=-Math.abs(striker.vy)*.7}
+if(pocket(striker)){striker={x:S/2,y:turn===0?S-M-20:M+20,vx:0,vy:0};turn=1-turn;moving=false}
+const all=[striker,...pieces.filter(p=>!p.dead)];
+for(let i=0;i<all.length;i++)for(let j=i+1;j<all.length;j++){const a=all[i],b=all[j];const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),rr=a.r+b.r;if(d>0&&d<rr){const nx=dx/d,ny=dy/d,overlap=(rr-d)/2;a.x-=nx*overlap;a.y-=ny*overlap;b.x+=nx*overlap;b.y+=ny*overlap;
+const dvx=a.vx-b.vx,dvy=a.vy-b.vy,dot=dvx*nx+dvy*ny;if(dot>0){const imp=dot*.92;a.vx-=imp*nx;a.vy-=imp*ny;b.vx+=imp*nx;b.vy+=imp*ny}}}
+moving=Math.max(Math.abs(striker.vx),Math.abs(striker.vy),...pieces.map(p=>Math.abs(p.vx)+Math.abs(p.vy)))>.3;
+if(!moving&&!over&&!aiming){if(turn===1)setTimeout(aiShot,500)}
+draw();requestAnimationFrame(step)}
+function shoot(tx,ty){const dx=tx-striker.x,dy=ty-striker.y,d=Math.hypot(dx,dy)||1;const sp=Math.min(14,d/18);striker.vx=dx/d*sp;striker.vy=dy/d*sp;moving=true;const got=[];setTimeout(()=>{const n=turn;let mine=false;pieces.forEach(p=>{if(p.dead&&p.c!=='q'&&(n===0?p.c==='b':p.c==='w'))mine=true});if(!mine)turn=1-turn},1400)}
+function aiShot(){if(over)return;const targets=pieces.filter(p=>!p.dead);if(!targets.length)return;const t=targets[Math.floor(Math.random()*targets.length)];const dx=t.x-striker.x,dy=t.y-striker.y,d=Math.hypot(dx,dy)||1;const jx=-dy/d*60,jy=dx/d*60;shoot(striker.x+jx,striker.y+jy)}
+cv.addEventListener('mousedown',e=>{if(over||turn!==0||moving)return;const r=cv.getBoundingClientRect();aiming=true;aimFrom={x:e.clientX-r.left,y:e.clientY-r.top}});
+cv.addEventListener('mousemove',e=>{if(!aiming)return;const r=cv.getBoundingClientRect();aimTo={x:e.clientX-r.left,y:e.clientY-r.top};draw()});
+cv.addEventListener('mouseup',e=>{if(!aiming)return;const r=cv.getBoundingClientRect();aiming=false;const x=e.clientX-r.left,y=e.clientY-r.top;shoot(x,y)});
+cv.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0],r=cv.getBoundingClientRect();if(over||turn!==0||moving)return;aiming=true;aimFrom={x:t.clientX-r.left,y:t.clientY-r.top}},{passive:false});
+cv.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0],r=cv.getBoundingClientRect();aimTo={x:t.clientX-r.left,y:t.clientY-r.top};draw()},{passive:false});
+cv.addEventListener('touchend',e=>{if(!aiming)return;const r=cv.getBoundingClientRect();aiming=false;shoot(aimTo.x,aimTo.y)},{passive:false});
+let aimTo=null;
+function draw(){ctx.clearRect(0,0,S,S);ctx.fillStyle='#2b160f';ctx.fillRect(0,0,S,S);ctx.strokeStyle='#c9a08f';ctx.lineWidth=3;ctx.strokeRect(M,M,S-M*2,S-M*2);ctx.fillStyle='#b02a2a';
+for(const p of POCKETS){ctx.beginPath();ctx.arc(p[0],p[1],10,0,7);ctx.fill()}
+ctx.beginPath();ctx.moveTo(S/2,M);ctx.lineTo(S/2,S-M);ctx.moveTo(M,S/2);ctx.lineTo(S-M,S/2);ctx.stroke();
+for(const p of pieces){if(p.dead)continue;const g=ctx.createRadialGradient(p.x-2,p.y-2,2,p.x,p.y,R);if(p.c==='b'){g.addColorStop(0,'#333');g.addColorStop(1,'#000')}else if(p.c==='w'){g.addColorStop(0,'#fff');g.addColorStop(1,'#bbb')}else{g.addColorStop(0,'#ff8a80');g.addColorStop(1,'#b02a2a')}
+ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,R,0,7);ctx.fill();ctx.strokeStyle='#0005';ctx.stroke()}
+const gs=ctx.createRadialGradient(striker.x-3,striker.y-3,3,striker.x,striker.y,SR);gs.addColorStop(0,'#ffe9df');gs.addColorStop(1,'#d9a08f');ctx.fillStyle=gs;ctx.beginPath();ctx.arc(striker.x,striker.y,SR,0,7);ctx.fill();
+if(aiming&&aimFrom){ctx.strokeStyle='#ffd9c8';ctx.lineWidth=2;ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(striker.x,striker.y);ctx.lineTo(aimTo.x,aimTo.y);ctx.stroke();ctx.setLineDash([])}
+ctx.fillStyle='#8f7f7b';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText(turn===0?'轮到你（点击棋子旁拖动击打）':'电脑瞄准中…',S/2,S-8)}
+function restart(){document.querySelector('.over').classList.remove('show');init()}
+let running=false;function loop(){if(running)return;running=true;step()}
+function end(){}
+init();
+
+</script></body></html>

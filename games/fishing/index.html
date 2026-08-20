@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>悠闲钓鱼</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#14202a,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#9ab8c8;display:flex;gap:18px}
+#cv{background:linear-gradient(#1a2a38,#101820);border:2px solid #3a6a8a66;border-radius:12px;box-shadow:0 0 24px #3a6a8a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f9faf}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #3a6a8a88;border-radius:16px;padding:24px 34px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#2a5a7a,#3a8ab0);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🎣 悠闲钓鱼</h1><div class="info"><span>收获 <b id="sc">0</b></span><span>目标 100</span></div><canvas id="cv"></canvas><div class="hint">鱼咬钩时点击收杆</div></div>
+<div class="over"><div class="panel"><b>🎉 满载而归！</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),dpr=Math.min(devicePixelRatio||1,2);
+let W,H,fish=[],score=0,alive=true,frame=0,bobber={x:0,y:0},biting=false,biteT=0,cast=false;
+const TYPES=[{n:'🐟',p:10,s:0.6},{n:'🐠',p:15,s:0.7},{n:'🦐',p:5,s:0.8},{n:'🐡',p:25,s:0.5}];
+function size(){W=Math.min(innerWidth-24,340);H=Math.min(innerHeight-150,540);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+size();addEventListener('resize',size);
+function restart(){score=0;alive=true;fish=[];frame=0;cast=false;biting=false;document.getElementById('sc').textContent=0;document.querySelector('.over').classList.remove('show');requestAnimationFrame(loop)}
+restart();
+function castRod(){if(cast)return;cast=true;bobber={x:W*0.6,y:H*0.15,t:0};setTimeout(()=>{if(cast)biting=true},900+Math.random()*1400)}
+cv.addEventListener('pointerdown',()=>{if(!cast){castRod()}else if(biting){let t=TYPES[Math.random()*TYPES.length|0];score+=t.p;document.getElementById('sc').textContent=score;biting=false;cast=false;setTimeout(castRod,600);if(score>=100){alive=false;document.querySelector('.over').classList.add('show')}}else{cast=false}});
+function loop(){requestAnimationFrame(loop);if(!alive)return;frame++;if(frame%40===0)fish.push({x:Math.random()*W,y:H*0.55+Math.random()*H*0.35,s:0.4+Math.random()*0.8,d:Math.random()<0.5?1:-1,t:TYPES[Math.random()*TYPES.length|0]});ctx.clearRect(0,0,W,H);ctx.fillStyle='#16242e';ctx.fillRect(0,0,W,H);ctx.fillStyle='#1e3444';ctx.fillRect(0,H*0.5,W,H*0.5);ctx.strokeStyle='#2a4a5a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(W*0.6,H*0.15-60);ctx.lineTo(bobber.x,bobber.y);ctx.stroke();ctx.fillStyle='#7a5a32';ctx.fillRect(W*0.59,H*0.15-62,14,14);ctx.strokeStyle='#5a4a3a';ctx.beginPath();ctx.moveTo(W*0.62,H*0.15-70);ctx.lineTo(W*0.38,H*0.15-70);ctx.stroke();if(cast){ctx.fillStyle=biting?'#ff9d80':'#d64545';ctx.beginPath();ctx.arc(bobber.x,bobber.y,5,0,7);ctx.fill();if(biting){bobber.y+=Math.sin(frame*0.4)*3}}for(let f of fish){f.x+=f.s*f.d;if(f.x<-20)f.x=W+20;if(f.x>W+20)f.x=-20;ctx.font=(14+f.s*8)+'px serif';ctx.textAlign='center';ctx.fillText(f.t.n,f.x,f.y)}ctx.fillStyle='#9ab8c8';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText(cast?(biting?'🎣 咬钩了！快点击！':'等待鱼儿上钩…'):'点击抛竿',W/2,H-14)}
+</script></body></html>

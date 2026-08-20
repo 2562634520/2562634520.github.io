@@ -1,0 +1,47 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>💣 大炮攻城</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+.ctrl{display:flex;gap:12px;align-items:center;font-size:13px;color:#d9a08f}
+input[type=range]{accent-color:#d64545}
+</style></head><body>
+<div class="wrap"><h1>💣 大炮攻城</h1><canvas id="cv"></canvas>
+<div class="ctrl"><span>角度 <input type="range" id="angle" min="15" max="80" value="50"><b id="angleV">50°</b></span><span>力度 <input type="range" id="power" min="20" max="100" value="55"><b id="powerV">55%</b></span><button class="btn small" id="btnFire">开炮</button></div>
+<div class="hint">调整角度力度开炮 · 剩余炮弹 <b id="ammo">10</b> · 摧毁全部城块即胜</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0;
+function size(){W=Math.min(innerWidth-24,460);H=Math.floor(W*.62);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W;cv.height=H}
+size();addEventListener('resize',()=>{size();draw()});
+let angle=50,power=55,ammo=10,blocks=[],balls=[],over=false,shot=false;
+function init(){blocks=[];for(let i=0;i<4;i++)for(let j=0;j<3;j++)blocks.push({x:W-100+j*28,y:40+i*22,w:26,h:20,hp:i<2?2:1});ammo=10;balls=[];over=false;shot=false;document.getElementById('ammo').textContent=ammo;document.getElementById('angleV').textContent=angle+'°';document.getElementById('powerV').textContent=power+'%';draw()}
+function fire(){if(over||shot||ammo<=0)return;ammo--;shot=true;document.getElementById('ammo').textContent=ammo;const a=angle*Math.PI/180,speed=power*.16;balls.push({x:48,y:H-42,vx:Math.cos(a)*speed,vy:-Math.sin(a)*speed,r:6});requestAnimationFrame(step)}
+function step(){if(!balls.length){shot=false;draw();if(ammo<=0&&blocks.some(b=>b.hp>0)){over=true;msg.textContent='炮弹用完了，攻城失败';document.querySelector('.over').classList.add('show')}if(blocks.every(b=>b.hp<=0)){over=true;msg.textContent='城池攻破，你赢了！';document.querySelector('.over').classList.add('show')}return}
+for(const b of balls){b.x+=b.vx;b.y+=b.vy;b.vy+=.14;if(b.y>H-36){b.y=H-36;b.vy*=-.45;b.vx*=.75}if(b.x>W||b.x<0){b.dead=true}
+for(const k of blocks){if(k.hp>0&&b.x>k.x&&b.x<k.x+k.w&&b.y>k.y&&b.y<k.y+k.h){k.hp--;b.dead=true;b.vy=-Math.abs(b.vy)*.55;break}}}
+balls=balls.filter(b=>!b.dead);draw();requestAnimationFrame(step)}
+function draw(){ctx.clearRect(0,0,W,H);const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#2a1417');g.addColorStop(1,'#150d0f');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ctx.fillStyle='#1d1213';ctx.fillRect(0,H-30,W,30);
+ctx.save();ctx.translate(42,H-36);ctx.rotate(-angle*Math.PI/180);ctx.fillStyle='#3d2622';ctx.fillRect(0,-8,34,16);ctx.fillStyle='#d64545';ctx.fillRect(34,-5,10,10);ctx.restore();ctx.fillStyle='#241416';ctx.beginPath();ctx.arc(42,H-36,16,0,7);ctx.fill();
+for(const k of blocks){ctx.fillStyle=k.hp>1?'#8f4a2f':'#c96f4a';ctx.fillRect(k.x,k.y,k.w,k.h);ctx.strokeStyle='#0006';ctx.strokeRect(k.x+.5,k.y+.5,k.w-1,k.h-1)}
+for(const b of balls){ctx.fillStyle='#222';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,7);ctx.fill();ctx.strokeStyle='#ffd9c8';ctx.stroke()}
+ctx.fillStyle='#8f7f7b';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText('大炮攻城 · 剩余炮弹 '+ammo,W/2,H-8)}
+document.getElementById('angle').oninput=e=>{angle=+e.target.value;document.getElementById('angleV').textContent=angle+'°';draw()};
+document.getElementById('power').oninput=e=>{power=+e.target.value;document.getElementById('powerV').textContent=power+'%';draw()};
+document.getElementById('btnFire').onclick=fire;
+function restart(){document.querySelector('.over').classList.remove('show');init()}
+init();
+
+</script></body></html>

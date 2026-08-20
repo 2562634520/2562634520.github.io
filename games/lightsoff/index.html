@@ -1,0 +1,35 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>💡 关灯游戏</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>💡 关灯游戏</h1><canvas id="cv"></canvas>
+<div class="info">步数 <b id="sc">0</b></div>
+<div class="hint">点击方块会翻转它自己和上下左右，让所有灯熄灭</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let N=5,CELL=0,grid=[],moves=0;
+function size(){const w=Math.min(innerWidth-24,340);CELL=Math.floor(w/N);cv.style.width=(CELL*N)+'px';cv.style.height=(CELL*N)+'px';cv.width=CELL*N;cv.height=CELL*N}
+size();addEventListener('resize',()=>{size();draw()});
+function init(){moves=0;do{grid=Array.from({length:N},()=>Array.from({length:N},()=>Math.random()<.5))}while(grid.flat().every(v=>!v)||solved());document.getElementById('sc').textContent='0';document.querySelector('.over').classList.remove('show');draw()}
+function toggle(x,y){if(x<0||x>=N||y<0||y>=N)return;grid[y][x]=!grid[y][x]}
+function solved(){return grid.every(r=>r.every(v=>!v))}
+cv.addEventListener('pointerdown',e=>{if(document.querySelector('.over').classList.contains('show'))return;const r=cv.getBoundingClientRect();const x=Math.floor((e.clientX-r.left)/CELL),y=Math.floor((e.clientY-r.top)/CELL);if(x<0||x>=N||y<0||y>=N)return;toggle(x,y);toggle(x-1,y);toggle(x+1,y);toggle(x,y-1);toggle(x,y+1);moves++;document.getElementById('sc').textContent=moves;draw();if(solved()){document.querySelector('.over').classList.add('show');msg.textContent='全灭了！用了 '+moves+' 步'}});
+function draw(){ctx.clearRect(0,0,cv.width,cv.height);for(let y=0;y<N;y++)for(let x=0;x<N;x++){ctx.fillStyle=grid[y][x]?'#ffd9c8':'#2a1618';ctx.fillRect(x*CELL,y*CELL,CELL-3,CELL-3);if(grid[y][x]){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x*CELL+CELL/2,y*CELL+CELL/2,CELL*.18,0,7);ctx.fill()}}}
+function restart(){init()}
+init();
+
+</script></body></html>

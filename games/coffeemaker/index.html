@@ -1,0 +1,28 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>☕ 冲咖啡</title><style>*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.score{font-size:13px;color:#d9a08f}.score b{color:#ffd9c8}
+canvas{background:#0c0a0d;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px}.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:16px auto 0;padding:10px 30px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}</style></head><body>
+<div class="wrap"><h1>☕ 冲咖啡</h1><div class="score">分数 <b id="sc">0</b> · 最佳 <b id="bs">0</b></div><canvas id="cv"></canvas><div class="hint">点击/触屏操作</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');const dpr=Math.min(devicePixelRatio||1,2);cv.width=360*dpr;cv.height=420*dpr;cv.style.width=Math.min(360,innerWidth-24)+'px';cv.style.height='auto';ctx.setTransform(dpr,0,0,dpr,0,0);
+let cup,water,score,best,alive,raf,target;
+function rset(){cup={x:140,y:300,w:80,h:100};water=0;score=0;best=parseInt(localStorage.coffeemakerBest||0);document.getElementById('bs').textContent=best;target=85+Math.floor(Math.random()*15);alive=true;document.querySelector('.over').classList.remove('show');cancelAnimationFrame(raf);requestAnimationFrame(loop)}
+function loop(){ctx.fillStyle='#0c0a0d';ctx.fillRect(0,0,360,420);ctx.fillStyle='#5a4a3a';ctx.fillRect(60,80,20,180);ctx.fillStyle='#a0c0d0';const h=Math.min(water,180);ctx.fillRect(60,260-h,20,h);ctx.fillStyle='#b02a2a';ctx.beginPath();ctx.arc(cup.x+cup.w/2,cup.y-5,8,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(cup.x,cup.y,cup.w,cup.h);const wh=Math.min(water,cup.h);ctx.fillStyle='#5a3a1a';ctx.fillRect(cup.x+5,cup.y+cup.h-wh,cup.w-10,wh-5);ctx.fillStyle='#ffd9c8';ctx.font='12px sans-serif';ctx.fillText('目标 '+target+'ml',15,30);ctx.fillText('当前 '+Math.floor(water)+'ml',15,46);ctx.fillText('差值 '+Math.abs(target-water),15,62);
+raf=requestAnimationFrame(loop)}
+function pour(){if(!alive)return;water+=2}
+function stop(){if(!alive)return;const diff=Math.abs(target-water);if(diff<5){score+=100;localStorage.setItem('coffeemakerBest',Math.max(parseInt(localStorage.getItem('coffeemakerBest')||0),score));document.getElementById('bs').textContent=Math.max(parseInt(document.getElementById('bs').textContent||0),score)}else if(diff<15)score+=30;else score+=5;if(diff<5&&score>=best*0.8){document.getElementById('bs').textContent=Math.max(parseInt(document.getElementById('bs').textContent||0),score);localStorage.setItem('coffeemakerBest',Math.max(parseInt(localStorage.getItem('coffeemakerBest')||0),score))}
+alive=false;{document.getElementById('msg').textContent='命中 '+Math.floor(100-Math.abs(target-water))+String.fromCharCode(37);document.getElementById('bs').textContent=Math.max(parseInt(document.getElementById('bs').textContent||0),Math.floor(100-Math.abs(target-water))+String.fromCharCode(37));localStorage.setItem('coffeemakerBest',Math.max(parseInt(localStorage.getItem('coffeemakerBest')||0),Math.floor(100-Math.abs(target-water))+String.fromCharCode(37)));document.querySelector('.over').classList.add('show');alive=false};return}
+function restart(){rset()}
+let pressT;
+cv.addEventListener('pointerdown',e=>{pressT=Date.now();pour()});
+cv.addEventListener('pointerup',stop);
+rset();
+</script></body></html>

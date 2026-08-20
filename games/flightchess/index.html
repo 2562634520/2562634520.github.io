@@ -1,0 +1,53 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🎲 飞行棋</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+.dice{width:74px;height:74px;border-radius:14px;background:linear-gradient(145deg,#fff,#e8ddd3);display:flex;align-items:center;justify-content:center;font-size:34px;color:#7a2b24;font-weight:900;box-shadow:0 4px 14px #0008;cursor:pointer;user-select:none}
+</style></head><body>
+<div class="wrap"><h1>🎲 飞行棋</h1><canvas id="cv"></canvas>
+<div class="dice" id="dice">掷骰</div>
+<div class="hint">掷到6才能起飞 · 掷到6再掷一次 · 四架先到终点获胜（你=红）</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const SIDE=13,LEN=52;let CELL=0;
+function size(){const w=Math.min(innerWidth-24,innerHeight-280,430);CELL=Math.floor(w/SIDE);cv.style.width=(CELL*SIDE)+'px';cv.style.height=(CELL*SIDE)+'px';cv.width=CELL*SIDE;cv.height=CELL*SIDE}
+size();addEventListener('resize',()=>{size();draw()});
+let planes=[[],[],[]],turn=0,over=false,thinking=false,lastRoll=0;
+function init(){planes=[[0,0,0,0],[0,0,0,0],[0,0,0,0]];turn=Math.floor(Math.random()*3);over=false;thinking=false;lastRoll=0;document.getElementById('dice').textContent='掷骰';draw();if(turn!==0)setTimeout(aiTurn,600)}
+function cellPos(i){i=((i%LEN)+LEN)%LEN;const m=SIDE-1;if(i<SIDE)return[i*CELL+CELL/2,CELL/2];if(i<SIDE*2)return[(SIDE-1)*CELL+CELL/2,(i-SIDE)*CELL+CELL/2];if(i<SIDE*3)return[(SIDE-1-(i-SIDE*2))*CELL+CELL/2,(SIDE-1)*CELL+CELL/2];return[CELL/2,(SIDE-1-(i-SIDE*3))*CELL+CELL/2]}
+const STARTS=[0,17,34],COLORS=['#d64545','#3f8f4f','#3d6fd6'];
+function launched(me){for(let i=0;i<4;i++)if(planes[me][i]===0)return false;return true}
+function roll(){if(over||thinking||turn!==0)return;lastRoll=1+Math.floor(Math.random()*6);document.getElementById('dice').textContent=lastRoll;doTurn();draw()}
+function doTurn(){const me=turn;
+if(!launched(me)){if(lastRoll===6){planes[me][0]=1;extra=1}else extra=0}
+else{let moved=false;for(let i=3;i>=0;i--){const d=planes[me][i];if(d>0&&d<LEN&&d+lastRoll<=LEN){planes[me][i]=d+lastRoll;moved=true;break}}
+if(!moved){for(let i=0;i<4;i++)if(planes[me][i]===0&&lastRoll===6){planes[me][i]=1;moved=true;break}}
+extra=lastRoll===6?1:0}
+next(extra)}
+let extra=0;
+function next(e){const me=turn;if(planes[me].every(p=>p===LEN)){over=true;msg.textContent=me===0?'你赢了！':'电脑 '+(me===1?'绿':'蓝')+' 赢了！';document.querySelector('.over').classList.add('show');draw();return}
+draw();if(e)return;turn=(turn+1)%3;draw();if(turn!==0)setTimeout(aiTurn,700)}
+function aiTurn(){if(over)return;lastRoll=1+Math.floor(Math.random()*6);document.getElementById('dice').textContent=lastRoll;doTurn();draw()}
+document.getElementById('dice').onclick=roll;
+function draw(){ctx.clearRect(0,0,CELL*SIDE,CELL*SIDE);ctx.fillStyle='#151011';ctx.fillRect(0,0,CELL*SIDE,CELL*SIDE);
+for(let i=0;i<LEN;i++){const p=cellPos(i);ctx.fillStyle=(i%2===0?'#241418':'#1b1013');ctx.fillRect(p[0]-CELL/2+1,p[1]-CELL/2+1,CELL-2,CELL-2)}
+for(const k in STARTS){const p=cellPos(STARTS[k]);ctx.fillStyle='#b02a2a33';ctx.fillRect(p[0]-CELL/2+1,p[1]-CELL/2+1,CELL-2,CELL-2)}
+for(let m=0;m<3;m++)for(let i=0;i<4;i++){const d=planes[m][i];if(d===0)continue;const p=d===LEN?homePos(m,i):cellPos(STARTS[m]+d-1);ctx.fillStyle=COLORS[m];ctx.beginPath();ctx.arc(p[0],p[1],CELL*.32,0,7);ctx.fill();ctx.strokeStyle='#fff3';ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold '+(CELL*.3)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(i+1,p[0],p[1]+1)}
+ctx.fillStyle='#8f7f7b';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText(turn===0?'轮到你掷骰':'电脑思考中…',CELL*SIDE/2,CELL*SIDE-8)}
+function homePos(m,i){let x,y;if(m===0){x=CELL*1.8+i*CELL*.5;y=CELL*1.8}else if(m===1){x=CELL*(SIDE-1.8)-i*CELL*.5;y=CELL*(SIDE-1.8)}else{x=CELL*SIDE/2+(i%2?CELL*.5:-CELL*.5);y=m===2?CELL*1.8:CELL*(SIDE-1.8)}return[x,y]}
+function restart(){document.querySelector('.over').classList.remove('show');init()}
+init();draw();
+
+</script></body></html>

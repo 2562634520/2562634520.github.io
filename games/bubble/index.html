@@ -1,0 +1,55 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>泡泡消消乐</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.score{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;height:auto;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:block;margin:16px auto 0;padding:10px 30px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🫧 泡泡消消乐</h1><div class="score">得分 <b id="sc">0</b></div><canvas id="cv"></canvas><div class="hint">拖动瞄准 · 松开发射彩泡 · 同色三连消除</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0,dpr=Math.min(devicePixelRatio||1,2);
+function size(){W=Math.min(innerWidth-24,innerHeight-190,420);H=Math.floor(W*1.35);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+size();addEventListener('resize',size);
+const COLORS=['#c0392b','#2e8b57','#2b5fd9','#d9a52b','#8e44ad'];
+const R=Math.max(9,W*0.035),COLS=10;let grid=[],shooter={x:0,y:0,ang:-Math.PI/2},cur,next,score=0,flying=null,timer;
+function restart(){score=0;grid=[];for(let r=0;r<7;r++)for(let c=0;c<COLS;c++){if(r%2&&c===COLS-1)continue;if(Math.random()<.52)grid.push({x:8+c*R*2+(r%2?R:0),y:8+r*R*1.72,c:COLORS[Math.random()*COLORS.length|0]})}
+shooter={x:W/2,y:H-36,ang:-Math.PI/2};cur=COLORS[Math.random()*COLORS.length|0];next=COLORS[Math.random()*COLORS.length|0];flying=null;
+document.querySelector('.over').classList.remove('show');document.getElementById('sc').textContent=0;
+clearInterval(timer);timer=setInterval(step,16)}
+function step(){if(flying){flying.x+=Math.cos(flying.ang)*5.5;flying.y+=Math.sin(flying.ang)*5.5;
+if(flying.y<R){flying.y=R;flying.ang=Math.PI-flying.ang}
+if(flying.x<R){flying.x=R;flying.ang=-flying.ang}
+if(flying.x>W-R){flying.x=W-R;flying.ang=Math.PI-flying.ang}
+let hit=flying.y>H-R*2;
+for(const b of grid){if(!hit&&Math.hypot(b.x-flying.x,b.y-flying.y)<R*1.7){hit=true;break}}
+if(hit){land(flying);flying=null;cur=next;next=COLORS[Math.random()*COLORS.length|0]}}
+draw()}
+function land(b){grid.push({x:b.x,y:b.y,c:b.c});
+const linked=new Set([grid.indexOf(b)]);
+function grow(){let added=false;for(let i=0;i<grid.length;i++){const a=grid[i];if(a.c!==b.c||linked.has(i))continue;for(const j of linked){if(Math.hypot(grid[j].x-a.x,grid[j].y-a.y)<R*2.1){linked.add(i);added=true;break}}}return added}
+while(grow()){}
+if(linked.size>=3){const keep=grid.filter((_,i)=>!linked.has(i));score+=(grid.length-keep.length)*10;grid=keep;document.getElementById('sc').textContent=score}
+if(grid.length===0){clearInterval(timer);document.getElementById('msg').textContent='清屏成功！得分 '+score;document.querySelector('.over').classList.add('show')}}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#120e11';ctx.fillRect(0,0,W,H);
+grid.forEach(b=>{ctx.fillStyle=b.c;ctx.beginPath();ctx.arc(b.x,b.y,R,0,7);ctx.fill();ctx.strokeStyle='#00000055';ctx.lineWidth=1;ctx.stroke()});
+ctx.save();ctx.translate(shooter.x,shooter.y);ctx.rotate(shooter.ang);ctx.fillStyle='#2a1c1e';ctx.fillRect(-R*1.5,-R*0.42,R*3,R*0.84);ctx.restore();
+ctx.fillStyle=cur;ctx.beginPath();ctx.arc(shooter.x,shooter.y,R,0,7);ctx.fill();ctx.strokeStyle='#00000055';ctx.lineWidth=1;ctx.stroke();
+ctx.fillStyle=next;ctx.beginPath();ctx.arc(18,18,R*0.7,0,7);ctx.fill();
+if(flying){ctx.fillStyle=flying.c;ctx.beginPath();ctx.arc(flying.x,flying.y,R,0,7);ctx.fill()}}
+let aim=false;
+cv.addEventListener('pointerdown',e=>{aim=true});
+cv.addEventListener('pointermove',e=>{if(!aim)return;const r=cv.getBoundingClientRect();const a=Math.atan2((e.clientY-r.top)-shooter.y,(e.clientX-r.left)-shooter.x);shooter.ang=Math.max(-Math.PI*0.92,Math.min(-0.08,a))});
+cv.addEventListener('pointerup',e=>{if(!aim)return;aim=false;const r=cv.getBoundingClientRect();const a=Math.atan2((e.clientY-r.top)-shooter.y,(e.clientX-r.left)-shooter.x);shooter.ang=a>-0.08||a<-Math.PI*0.92?-Math.PI/2:a;
+flying={x:shooter.x,y:shooter.y-R-2,ang:shooter.ang,c:cur}});
+restart();
+</script></body></html>

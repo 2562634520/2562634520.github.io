@@ -1,0 +1,39 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>骰子对决</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.score{font-size:13px;color:#d9a08f}
+.board{display:flex;gap:34px;align-items:center}
+.side{text-align:center}
+.side b{display:block;font-size:13px;color:#d9a08f;margin-bottom:8px}
+.die{width:88px;height:88px;border-radius:16px;background:linear-gradient(145deg,#fff,#e8e2dc);color:#1c1516;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:10px;box-shadow:0 8px 24px #b02a2a33}
+.die i{display:grid;place-items:center}.die i:before{content:'';width:12px;height:12px;border-radius:50%;background:#1c1516;opacity:0}
+.die[data-v="1"] i:nth-child(5):before,.die[data-v="2"] i:nth-child(1):before,.die[data-v="2"] i:nth-child(9):before,.die[data-v="3"] i:nth-child(1):before,.die[data-v="3"] i:nth-child(5):before,.die[data-v="3"] i:nth-child(9):before,.die[data-v="4"] i:nth-child(1):before,.die[data-v="4"] i:nth-child(3):before,.die[data-v="4"] i:nth-child(7):before,.die[data-v="4"] i:nth-child(9):before,.die[data-v="5"] i:nth-child(1):before,.die[data-v="5"] i:nth-child(3):before,.die[data-v="5"] i:nth-child(5):before,.die[data-v="5"] i:nth-child(7):before,.die[data-v="5"] i:nth-child(9):before,.die[data-v="6"] i:nth-child(1):before,.die[data-v="6"] i:nth-child(3):before,.die[data-v="6"] i:nth-child(4):before,.die[data-v="6"] i:nth-child(6):before,.die[data-v="6"] i:nth-child(7):before,.die[data-v="6"] i:nth-child(9):before{opacity:1}
+.vs{font-size:20px;color:#8f7f7b}
+.status{font-size:17px;color:#ffd9c8;min-height:24px}
+.btn{border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;padding:12px 40px;font-size:16px;font-weight:700;cursor:pointer}
+.hint{font-size:11px;color:#8f7f7b}
+</style></head><body>
+<div class="wrap"><h1>🎲 骰子对决</h1><div class="score">你先胜 <b id="pw">0</b> 局 · 电脑 <span id="cw">0</span> 局（三局两胜）</div>
+<div class="board"><div class="side"><b>你</b><div class="die" id="pd"></div></div><span class="vs">VS</span><div class="side"><b>电脑</b><div class="die" id="cd"></div></div></div>
+<div class="status" id="st">点击开始掷骰子</div>
+<button class="btn" id="btn" onclick="roll()">掷骰子</button>
+<div class="hint">点数大者获胜，三局两胜</div></div>
+<script>
+let pw=0,cw=0;
+const pd=document.getElementById('pd'),cd=document.getElementById('cd'),st=document.getElementById('st');
+function face(el,v){el.dataset.v=v;el.innerHTML='';for(let i=1;i<=9;i++)el.appendChild(document.createElement('i'))}
+function roll(){if(pw===2||cw===2)return;
+const b=document.getElementById('btn');b.disabled=true;b.textContent='…';st.textContent='滚动中…';
+let n=0;const iv=setInterval(()=>{face(pd,1+Math.random()*6|0);face(cd,1+Math.random()*6|0);n++;if(n>10){clearInterval(iv);finish()}},60)}
+function finish(){const p=1+Math.random()*6|0,c=1+Math.random()*6|0;face(pd,p);face(cd,c);
+if(p>c){pw++;st.textContent='🎉 你赢了这一局！'}else if(c>p){cw++;st.textContent='😔 电脑赢了这一局'}else{st.textContent='🤝 平局，再来一次'}
+document.getElementById('pw').textContent=pw;document.getElementById('cw').textContent=cw;
+if(pw===2){st.textContent='🏆 你赢得对决！';reset()}else if(cw===2){st.textContent='💀 电脑赢得对决';reset()}
+else{const b=document.getElementById('btn');b.disabled=false;b.textContent='掷骰子'}}
+function reset(){pw=0;cw=0;document.getElementById('pw').textContent=0;document.getElementById('cw').textContent=0;
+setTimeout(()=>{st.textContent='点击开始掷骰子';const b=document.getElementById('btn');b.disabled=false;b.textContent='掷骰子'},1800)}
+face(pd,5);face(cd,2);
+</script></body></html>

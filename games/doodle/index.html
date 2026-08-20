@@ -1,0 +1,30 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>涂鸦跳跃</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:18px}
+#cv{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 34px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🖍️ 涂鸦跳跃</h1><div class="info"><span>高度 <b id="sc">0</b></span><span>最高 <b id="best">0</b></span></div><canvas id="cv"></canvas><div class="hint">按住左右屏幕倾斜 · 落在平台上</div></div>
+<div class="over"><div class="panel"><b>掉下去了！</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),dpr=Math.min(devicePixelRatio||1,2);
+let W,H,player,plats=[],score,best=+localStorage.getItem('emeng_doodle')||0,alive,cam=0,vy=0,touchDir=0,frame=0;
+function size(){W=Math.min(innerWidth-24,360);H=Math.min(innerHeight-150,560);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+size();addEventListener('resize',size);
+function restart(){score=0;alive=true;cam=0;vy=0;frame=0;plats=[];for(let i=0;i<9;i++)plats.push({x:Math.random()*(W-70),y:H-i*58,w:70,h:10,m:Math.random()<0.12});player={x:W/2-13,y:H-90,w:26,h:30};document.getElementById('sc').textContent=0;document.querySelector('.over').classList.remove('show');requestAnimationFrame(loop)}
+restart();
+cv.addEventListener('pointerdown',e=>{touchDir=e.clientX<W/2?-1:1});
+cv.addEventListener('pointerup',()=>{touchDir=0});cv.addEventListener('pointerleave',()=>{touchDir=0});
+addEventListener('keydown',e=>{if(e.key==='ArrowLeft')touchDir=-1;if(e.key==='ArrowRight')touchDir=1});
+addEventListener('keyup',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight')touchDir=0});
+function loop(){requestAnimationFrame(loop);if(!alive)return;frame++;player.x+=touchDir*4;if(player.x<-20)player.x=W+18;if(player.x>W+20)player.x=-18;player.y+=vy;vy+=0.45;if(vy>0){for(let p of plats){if(player.x+player.w>p.x&&player.x<p.x+p.w&&player.y+player.h>p.y&&player.y+player.h<p.y+p.h+8&&vy<16){vy=-10.5;if(p.m)plats.splice(plats.indexOf(p),1)}}}if(player.y<cam+H*0.45){cam=player.y-H*0.45;score=Math.max(score,Math.floor(-cam/10));document.getElementById('sc').textContent=score;if(score>best){best=score;localStorage.setItem('emeng_doodle',best);document.getElementById('best').textContent=best}while(plats[plats.length-1].y>cam-30){let last=plats[plats.length-1].y;plats.push({x:Math.random()*(W-70),y:last-58,w:70,h:10,m:Math.random()<0.12})}}ctx.clearRect(0,0,W,H);for(let p of plats){if(p.y>cam-20&&p.y<cam+H+20){ctx.fillStyle=p.m?'#b02a2a':'#3a2828';ctx.fillRect(p.x,p.y-cam,p.w,p.h)}}ctx.fillStyle='#d64545';ctx.shadowColor='#ff6040';ctx.shadowBlur=10;ctx.fillRect(player.x,player.y-cam,player.w,player.h);ctx.shadowBlur=0;ctx.fillStyle='#ffe9dd';ctx.fillRect(player.x+4,player.y-cam-5,18,5);if(player.y-cam>H+20){alive=false;document.querySelector('.over').classList.add('show')}}
+</script></body></html>

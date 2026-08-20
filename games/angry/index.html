@@ -1,0 +1,32 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>愤怒小鸟</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:18px}
+#cv{background:linear-gradient(#201318,#120e11);border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 34px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🐦 愤怒小鸟</h1><div class="info"><span>关卡 <b id="lv">1</b></span><span>剩余 <b id="left">3</b></span></div><canvas id="cv"></canvas><div class="hint">拖动小鸟向后拉 · 松手发射</div></div>
+<div class="over"><div class="panel"><b id="msg">闯关失败</b><button class="btn" onclick="restart()">重新开始</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),dpr=Math.min(devicePixelRatio||1,2);
+let W,H,bird,pigs=[],blocks=[],slings,level=1,left=3,alive,state='aim',dragging=false,dragX=0,dragY=0,frame=0;
+function size(){W=Math.min(innerWidth-24,420);H=Math.min(innerHeight-150,520);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+size();addEventListener('resize',size);
+function restart(){level=Math.max(1,level);left=3;state='aim';pigs=[];blocks=[];slings={x:Math.min(W*0.16,70),y:H-70};bird={x:slings.x,y:slings.y,vx:0,vy:0,r:13,onSlingshot:true};build(level);document.getElementById('lv').textContent=level;document.getElementById('left').textContent=left;document.querySelector('.over').classList.remove('show');requestAnimationFrame(loop)}
+function build(lv){let pigN=Math.min(1+lv,5);for(let i=0;i<pigN;i++)pigs.push({x:W*0.7+Math.random()*W*0.18,y:H-42,r:16,hp:1});blocks.push({x:W*0.64,y:H-44,w:14,h:44},{x:W*0.64+44,y:H-44,w:14,h:44},{x:W*0.64-16,y:H-82,w:90,h:12})}
+restart();
+function pos(e){let r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+cv.addEventListener('pointerdown',e=>{if(state!=='aim'||!bird.onSlingshot)return;let p=pos(e);if(Math.hypot(p.x-bird.x,p.y-bird.y)<40){dragging=true;dragX=p.x;dragY=p.y}});
+cv.addEventListener('pointermove',e=>{if(!dragging)return;let p=pos(e);dragX=p.x;dragY=p.y});
+cv.addEventListener('pointerup',()=>{if(!dragging)return;dragging=false;let dx=slings.x-dragX,dy=slings.y-dragY,dist=Math.hypot(dx,dy);if(dist<12){bird.x=slings.x;bird.y=slings.y;return}bird.vx=dx*0.12;bird.vy=dy*0.12;bird.onSlingshot=false;state='fly';left--;document.getElementById('left').textContent=left});
+addEventListener('keydown',e=>{if(e.code==='Space'&&state!=='fly'){bird.vx=slings.x-(slings.x-60);bird.vy=-(slings.y-30)*0.1;bird.vx=8;bird.vy=-7;bird.onSlingshot=false;state='fly';left--;document.getElementById('left').textContent=left}});
+function loop(){requestAnimationFrame(loop);frame++;ctx.clearRect(0,0,W,H);ctx.strokeStyle='#3a2a2c';ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(0,H-14);ctx.lineTo(W,H-14);ctx.stroke();ctx.strokeStyle='#6b3a2a';ctx.beginPath();ctx.moveTo(slings.x-24,H-16);ctx.lineTo(slings.x-8,slings.y);ctx.moveTo(slings.x+24,H-16);ctx.lineTo(slings.x+8,slings.y);ctx.stroke();if(state==='aim'&&dragging){let dx=Math.max(-70,Math.min(70,slings.x-dragX)),dy=Math.max(-80,Math.min(20,slings.y-dragY));bird.x=slings.x-dx*0.55;bird.y=slings.y-dy*0.55;ctx.strokeStyle='#d9a08f55';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(slings.x-4,slings.y+4);ctx.lineTo(bird.x,bird.y);ctx.stroke();ctx.setLineDash([])}else if(state==='aim'){bird.x=slings.x;bird.y=slings.y}ctx.fillStyle='#d64545';ctx.beginPath();ctx.arc(bird.x,bird.y,bird.r,0,7);ctx.fill();ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(bird.x+4,bird.y-5,3,0,7);ctx.fill();for(let i=blocks.length-1;i>=0;i--){let b=blocks[i];ctx.fillStyle='#4a3a34';ctx.fillRect(b.x,b.y,b.w,b.h)}for(let i=pigs.length-1;i>=0;i--){let p=pigs[i];ctx.fillStyle='#8fae5a';ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();ctx.fillStyle='#e8dcd5';ctx.beginPath();ctx.arc(p.x-4,p.y-3,2,0,7);ctx.arc(p.x+4,p.y-3,2,0,7);ctx.fill()}if(state==='fly'){bird.x+=bird.vx;bird.y+=bird.vy;bird.vy+=0.35;for(let i=blocks.length-1;i>=0;i--){let b=blocks[i];if(bird.x+bird.r>b.x&&bird.x-bird.r<b.x+b.w&&bird.y+bird.r>b.y&&bird.y-bird.r<b.y+b.h){bird.vx*=-0.4;bird.vy*=-0.3;blocks.splice(i,1)}}for(let i=pigs.length-1;i>=0;i--){let p=pigs[i];if(Math.hypot(bird.x-p.x,bird.y-p.y)<p.r+bird.r){p.hp--;if(p.hp<=0)pigs.splice(i,1);else p.r=Math.max(8,p.r-4)}else if(bird.vx*bird.vx+bird.vy*bird.vy>1200&&Math.hypot(bird.x-p.x,bird.y-p.y)<p.r+bird.r+20){pigs.splice(i,1)}}if(bird.y>H-20||bird.x>W+30||bird.x<-30){if(pigs.length===0){state='done';document.getElementById('msg').textContent='闯关成功！';document.querySelector('.over').classList.add('show');level++;left=3;restart()}else if(left<=0){state='done';document.getElementById('msg').textContent='小鸟用完啦';document.querySelector('.over').classList.add('show')}else{state='aim';bird.onSlingshot=true;bird.x=slings.x;bird.y=slings.y}}}}
+</script></body></html>

@@ -1,0 +1,43 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>雪山滑雪</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none;user-select:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.hud{font-size:13px;color:#d9a08f;display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
+canvas{background:#120d10;border:1px solid #33262a;border-radius:12px;touch-action:none;display:block;max-width:96vw;max-height:68vh}
+.btn{display:inline-block;padding:9px 22px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin:4px}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 30px;box-shadow:0 0 40px #b02a2a2e;max-width:86vw}
+.panel b{font-size:24px;color:#ffd9c8;display:block;margin-bottom:8px}
+.panel p{font-size:13px;color:#c9a89b;margin-bottom:12px}
+.tip{font-size:11px;color:#8f7f7b;text-align:center}
+</style></head><body>
+<div class="wrap"><h1>⛷️ 雪山滑雪</h1><div class="hud">得分 <b id="sc">0</b> · 最佳 <span id="best">0</span></div><canvas id="cv"></canvas><div class="tip">←→ 控制滑行 · 躲树吃旗</div></div>
+<div class="over"><div class="panel"><b id="msg"></b><p id="sub"></p><button class="btn" id="again">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');cv.width=360;cv.height=480;
+let px=180,py=400,run=false,sc=0,best=+(localStorage.getItem('skiBest')||0),obs=[],flags=[],spd=3.4,frame=0;
+document.getElementById('best').textContent=best;
+function start(){px=180;py=400;sc=0;obs=[];flags=[];spd=3.4;run=true;document.querySelector('.over').classList.remove('show')}
+function tick(){if(!run)return;sc+=Math.floor(spd);document.getElementById('sc').textContent=sc;spd=Math.min(7,spd+0.008);
+if(frame%26===0){if(Math.random()<0.75)obs.push({x:20+Math.random()*320,y:-30});if(Math.random()<0.3)flags.push({x:20+Math.random()*320,y:-30})}
+obs.forEach(o=>o.y+=spd);flags.forEach(o=>o.y+=spd);
+obs=obs.filter(o=>o.y<cv.height+40);flags=flags.filter(o=>o.y<cv.height+40);
+obs.forEach(o=>{if(Math.abs(o.x-px)<20&&Math.abs(o.y-py)<20){over('撞到树了','得分 '+sc)}});
+flags=flags.filter(o=>{if(Math.abs(o.x-px)<22&&Math.abs(o.y-py)<22){sc+=100;document.getElementById('sc').textContent=sc;return false}return true});
+frame++;draw()}
+function draw(){ctx.fillStyle='#16141d';ctx.fillRect(0,0,cv.width,cv.height);
+ctx.strokeStyle='#3a2a2e';for(let i=0;i<cv.width;i+=30){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,cv.height);ctx.stroke()}
+obs.forEach(o=>{ctx.fillStyle='#1f4d3a';ctx.beginPath();ctx.arc(o.x,o.y,14,0,7);ctx.fill();ctx.fillStyle='#2e6b50';ctx.beginPath();ctx.arc(o.x-6,o.y-4,7,0,7);ctx.fill()});
+flags.forEach(o=>{ctx.fillStyle='#ffd84a';ctx.beginPath();ctx.arc(o.x,o.y,7,0,7);ctx.fill();ctx.fillStyle='#b02a2a';ctx.fillRect(o.x-9,o.y-1,18,2)});
+ctx.fillStyle='#d64545';ctx.fillRect(px-9,py-22,18,26);
+ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(px,py-26,7,0,7);ctx.fill();
+ctx.strokeStyle='#e8dcd5';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(px-8,py+4);ctx.lineTo(px-18,py+18);ctx.moveTo(px+8,py+4);ctx.lineTo(px+18,py+18);ctx.stroke();ctx.lineWidth=1}
+function over(m,s){run=false;if(sc>best){best=sc;localStorage.setItem('skiBest',best);document.getElementById('best').textContent=best}
+document.getElementById('msg').textContent=m;document.getElementById('sub').textContent=s+' · 最佳 '+best;document.querySelector('.over').classList.add('show')}
+addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A')px=Math.max(18,px-16);if(e.key==='ArrowRight'||e.key==='d'||e.key==='D')px=Math.min(cv.width-18,px+16)});
+let touchX=0;cv.addEventListener('touchstart',e=>{touchX=e.touches[0].clientX},{passive:true});
+cv.addEventListener('touchmove',e=>{const t=e.touches[0];px=Math.max(18,Math.min(cv.width-18,px+(t.clientX-touchX)*1.2));touchX=t.clientX},{passive:true});
+document.getElementById('again').onclick=start;start();setInterval(tick,33);
+</script></body></html>

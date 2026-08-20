@@ -1,0 +1,33 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>太空射击</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:18px}
+#cv{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 34px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🚀 太空射击</h1><div class="info"><span>得分 <b id="sc">0</b></span><span>生命 <b id="hp">3</b></span></div><canvas id="cv"></canvas><div class="hint">滑动移动 · 自动开火</div></div>
+<div class="over"><div class="panel"><b>飞船坠毁</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),dpr=Math.min(devicePixelRatio||1,2);
+let W,H,ship,bullets=[],enemies=[],stars=[],score,hp,alive,frame=0,fire=0,tx=0;
+function size(){W=Math.min(innerWidth-24,340);H=Math.min(innerHeight-150,560);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+size();addEventListener('resize',size);
+for(let i=0;i<40;i++)stars.push({x:Math.random()*W,y:Math.random()*H,s:Math.random()*2+0.5});
+function restart(){score=0;hp=3;alive=true;bullets=[];enemies=[];frame=0;ship={x:W/2-18,y:H-64,w:36,h:30};document.getElementById('sc').textContent=0;document.getElementById('hp').textContent=3;document.querySelector('.over').classList.remove('show');requestAnimationFrame(loop)}
+restart();
+function move(v){ship.x=Math.max(8,Math.min(W-ship.w-8,ship.x+v))}
+addEventListener('keydown',e=>{if(e.key==='ArrowLeft')move(-42);if(e.key==='ArrowRight')move(42)});
+cv.addEventListener('pointerdown',e=>{tx=e.clientX;cv.setPointerCapture(e.pointerId)});
+cv.addEventListener('pointermove',e=>{if(tx!==null){ship.x=Math.max(8,Math.min(W-ship.w-8,ship.x+(e.clientX-tx)*1.1));tx=e.clientX}});
+cv.addEventListener('pointerup',()=>{tx=null});
+function loop(){requestAnimationFrame(loop);if(!alive)return;frame++;if(frame%9===0){bullets.push({x:ship.x+ship.w/2-2,y:ship.y-8});}if(frame%40===0){enemies.push({x:Math.random()*(W-30),y:-36,w:30,h:24,s:1.5+Math.random()*1.5});}ctx.clearRect(0,0,W,H);ctx.fillStyle='#0b090c';ctx.fillRect(0,0,W,H);ctx.fillStyle='#f5d9c8';for(const s of stars){s.y+=s.s;if(s.y>H)s.y=0;ctx.globalAlpha=s.s*0.35;ctx.fillRect(s.x,s.y,1.5,1.5);ctx.globalAlpha=1}ctx.fillStyle='#d64545';ctx.shadowColor='#ff6040';ctx.shadowBlur=12;ctx.beginPath();ctx.moveTo(ship.x+ship.w/2,ship.y);ctx.lineTo(ship.x,ship.y+ship.h);ctx.lineTo(ship.x+ship.w,ship.y+ship.h);ctx.closePath();ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#ff9d80';for(let i=bullets.length-1;i>=0;i--){let b=bullets[i];b.y-=7;ctx.fillRect(b.x,b.y,4,10);if(b.y<-10)bullets.splice(i,1)}for(let i=enemies.length-1;i>=0;i--){let e=enemies[i];e.y+=e.s;ctx.fillStyle='#8a1f1f';ctx.fillRect(e.x,e.y,e.w,e.h);ctx.fillStyle='#d64545';ctx.fillRect(e.x+4,e.y+4,e.w-8,e.h-8);if(e.y>H+40){enemies.splice(i,1);continue}let hit=false;for(let j=bullets.length-1;j>=0;j--){let b=bullets[j];if(b.x>e.x&&b.x<e.x+e.w&&b.y>e.y&&b.y<e.y+e.h){bullets.splice(j,1);enemies.splice(i,1);score+=10;document.getElementById('sc').textContent=score;hit=true;break}}if(hit)continue;if(e.y+e.h>ship.y&&e.x<ship.x+ship.w&&e.x+e.w>ship.x){enemies.splice(i,1);hp--;document.getElementById('hp').textContent=hp;if(hp<=0)return die()}}}
+function die(){alive=false;document.querySelector('.over').classList.add('show')}
+</script></body></html>

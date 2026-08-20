@@ -1,0 +1,52 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🔤 Wordle 猜词</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style>
+.cell{width:44px;height:44px;border:2px solid #5a3a3a;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#ffd9c8;background:#1c1214;text-transform:uppercase}
+.cell.cur{border-color:#d64545;box-shadow:0 0 10px #b02a2a55}
+.cell[data-st="2"]{background:#2a7a3a;border-color:#2a7a3a}
+.cell[data-st="1"]{background:#8a7a2a;border-color:#8a7a2a}
+.cell[data-st="0"]{background:#3a2a2a;border-color:#3a2a2a}
+.rw{display:flex;gap:6px;justify-content:center}
+.key{min-width:32px;height:38px;padding:0 6px;border:0;border-radius:8px;background:#2a1a1c;color:#ffd9c8;font-size:14px;font-weight:700;cursor:pointer}
+.key[data-st="2"]{background:#2a7a3a}
+.key[data-st="1"]{background:#8a7a2a}
+.key[data-st="0"]{background:#3a2a2a}
+.key:hover{background:#4a2a2a}</head><body>
+<div class="wrap"><h1>🔤 Wordle 猜词</h1><div id="b" style="display:flex;flex-direction:column;gap:6px"></div>
+<div id="k" style="display:flex;flex-wrap:wrap;justify-content:center;gap:5px;max-width:420px"></div>
+<div class="hint">6 次机会猜出 5 字母单词 · 绿=位置对 黄=字母对 灰=没有</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const WORDS=['APPLE','BRAIN','CLOUD','DREAM','EAGER','FLAME','GRACE','HOUSE','IVORY','JELLY','KNIFE','LEMON','MONEY','NIGHT','OCEAN','PIANO','QUEEN','RIVER','STORM','TIGER','UNCLE','VOICE','WATER','YOUNG','ZEBRA','CANDY','DOGMA','FABLE','GHOST','HONEY','JOKER','KOALA','LUNAR','MAGIC','NOVEL','OLIVE','PAPER','QUIET','ROBOT','SUGAR','TOWER','URBAN','VIPER','WITCH','YACHT'];
+const ANS=WORDS[Math.floor(Math.random()*WORDS.length)];
+let row=0,col=0,guesses=[],over=false,boardEl=null,keysEl=null,used={};
+function init(){row=0;col=0;guesses=[];over=false;used={};const b=document.getElementById('b');b.innerHTML='';for(let r=0;r<6;r++){const div=document.createElement('div');div.className='rw';for(let c=0;c<5;c++){const cell=document.createElement('div');cell.className='cell';div.appendChild(cell)}b.appendChild(div)}
+const k=document.getElementById('k');k.innerHTML='';'QWERTYUIOPASDFGHJKLZXCVBNM'.split('').forEach(ch=>{const btn=document.createElement('button');btn.textContent=ch;btn.className='key';btn.onclick=()=>type(ch);k.appendChild(btn)});
+const back=document.createElement('button');back.textContent='⌫';back.className='key';back.onclick=del;k.appendChild(back);
+const enter=document.createElement('button');enter.textContent='↵';enter.className='key';enter.onclick=()=>submit();k.appendChild(enter);draw()}
+function type(ch){if(over)return;if(col<5){guesses[row]=(guesses[row]||[]);guesses[row][col]=ch;col++;draw()}}
+function del(){if(over)return;if(col>0){col--;guesses[row].pop();draw()}}
+function submit(){if(over)return;const g=guesses[row]||[];if(g.length<5)return;const tmp=ANS.split('');const res=g.map((ch,i)=>{if(ch===tmp[i]){tmp[i]='.';return 2}return 0});
+g.forEach((ch,i)=>{if(res[i]===0){const j=tmp.indexOf(ch);if(j>=0){tmp[j]='.';res[i]=1}else res[i]=0}});
+const cells=document.querySelectorAll('#b .rw')[row].children;for(let i=0;i<5;i++){cells[i].dataset.st=res[i];cells[i].textContent=g[i];const key=[...document.querySelectorAll('#k .key')].find(b=>b.textContent===g[i]);if(key&&!key.dataset.st||(key.dataset.st||0)<res[i]){key.dataset.st=res[i]}}
+if(g.join('')===ANS){over=true;msg.textContent='猜对了！单词是 '+ANS;document.querySelector('.over').classList.add('show')}else if(row>=5){over=true;msg.textContent='没猜出来，答案是 '+ANS;document.querySelector('.over').classList.add('show')}else{row++;col=0}}
+function draw(){const rows=document.querySelectorAll('#b .rw');for(let r=0;r<6;r++){for(let c=0;c<5;c++){const cell=rows[r].children[c];cell.textContent=(guesses[r]||[])[c]||'';cell.dataset.st='';cell.className='cell'+(r===row?' cur':'')}}}
+function restart(){init()}
+document.addEventListener('keydown',e=>{const ch=e.key.toUpperCase();if(/^[A-Z]$/.test(ch))type(ch);else if(e.key==='Backspace')del();else if(e.key==='Enter')submit()});
+init();
+
+</script></body></html>

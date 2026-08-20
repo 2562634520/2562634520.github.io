@@ -1,0 +1,27 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🐧 企鹅滑冰</title><style>*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.score{font-size:13px;color:#d9a08f}.score b{color:#ffd9c8}
+canvas{background:#0c0a0d;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px}.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:16px auto 0;padding:10px 30px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}</style></head><body>
+<div class="wrap"><h1>🐧 企鹅滑冰</h1><div class="score">距离 <b id="sc">0</b></div><canvas id="cv"></canvas><div class="hint">点击/触屏操作</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');const dpr=Math.min(devicePixelRatio||1,2);cv.width=360*dpr;cv.height=360*dpr;cv.style.width=Math.min(360,innerWidth-24)+'px';cv.style.height='auto';ctx.setTransform(dpr,0,0,dpr,0,0);
+let player,ice,fish,score,alive,raf,tick;
+function rset(){player={x:180,y:300};ice=[];fish=[];score=0;tick=0;alive=true;for(let i=0;i<5;i++)ice.push({x:Math.random()*320,y:Math.random()*360});document.getElementById('sc').textContent=0;document.querySelector('.over').classList.remove('show');cancelAnimationFrame(raf);requestAnimationFrame(loop)}
+function loop(){if(!alive)return;tick++;if(tick%50===0)fish.push({x:Math.random()*320,y:-20});
+fish.forEach(f=>f.y+=2);fish=fish.filter(f=>{if(f.y>360)return false;if(Math.hypot(player.x-f.x,player.y-f.y)<30){score+=10;return false}return true});
+ice.forEach(i=>{if(Math.hypot(player.x-i.x,player.y-i.y)<20&&Math.abs(player.x-i.x)<15&&Math.abs(player.y-i.y)<15){player.x=i.x;player.y=i.y}});
+score+=0.1;if(score>=50){{document.getElementById('msg').textContent='距离 '+Math.floor(score);document.getElementById('bs').textContent=Math.max(parseInt(document.getElementById('bs').textContent||0),Math.floor(score));localStorage.setItem('penguinBest',Math.max(parseInt(localStorage.getItem('penguinBest')||0),Math.floor(score)));document.querySelector('.over').classList.add('show');alive=false};return}
+document.getElementById('sc').textContent=Math.floor(score);
+ctx.fillStyle='#0c0a0d';ctx.fillRect(0,0,360,360);ctx.fillStyle='rgba(180,220,255,.2)';ice.forEach(i=>{ctx.beginPath();ctx.arc(i.x,i.y,20,0,7);ctx.fill()});ctx.fillStyle='#ffd9c8';fish.forEach(f=>{ctx.beginPath();ctx.ellipse(f.x,f.y,8,5,0,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(f.x-4,f.y-3,2,2);ctx.fillStyle='#ffd9c8'});ctx.fillStyle='#0c0a0d';ctx.fillRect(player.x-10,player.y-15,20,25);ctx.fillStyle='#ffd9c8';ctx.fillRect(player.x-7,player.y-7,14,14);ctx.fillStyle='#b02a2a';ctx.fillRect(player.x-3,player.y-2,6,4);raf=requestAnimationFrame(loop)}
+function restart(){rset()}
+cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect();const x=(e.clientX-r.left)*(360/r.width);const y=(e.clientY-r.top)*(360/r.height);player.x=x;player.y=y});
+rset();
+</script></body></html>

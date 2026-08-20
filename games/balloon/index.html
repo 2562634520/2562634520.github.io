@@ -1,0 +1,31 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>气球射手</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none;user-select:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.hud{font-size:13px;color:#d9a08f;display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
+#area{position:relative;width:min(92vw,340px);height:min(58vh,400px);background:#120d10;border:1px solid #33262a;border-radius:12px;overflow:hidden;touch-action:none}
+#area div{position:absolute}
+.btn{display:inline-block;padding:9px 22px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin:4px}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 30px;box-shadow:0 0 40px #b02a2a2e;max-width:86vw}
+.panel b{font-size:24px;color:#ffd9c8;display:block;margin-bottom:8px}
+.panel p{font-size:13px;color:#c9a89b;margin-bottom:12px}
+.tip{font-size:11px;color:#8f7f7b;text-align:center}
+</style></head><body>
+<div class="wrap"><h1>🎈 气球射手</h1><div class="hud">得分 <b id="sc">0</b> · 漏掉 <span id="ms">0</span>/3</div><div id="area"></div><div class="tip">点击 / 点按气球将其戳破 · 别让气球飞走</div></div>
+<div class="over"><div class="panel"><b id="msg"></b><p id="sub"></p><button class="btn" id="again">再来一局</button></div></div>
+<script>
+const area=document.getElementById('area');let sc=0,ms=0,run=true,spd=0.9,tickN=0;
+function mk(){const b=document.createElement('div');b.style.cssText='width:44px;height:56px;border-radius:50% 50% 46% 46%;left:'+(8+Math.random()*(area.clientWidth-60))+'px;bottom:-70px';
+const hue=['#d64545','#d9a52b','#2b5fd9','#16a2a0','#8e44ad'][Math.random()*5|0];
+b.style.background='radial-gradient(circle at 35% 30%,#ffffff55,'+hue+')';
+const line=document.createElement('span');line.style.cssText='position:absolute;left:21px;bottom:-8px;width:2px;height:14px;background:#8f7f7b';b.appendChild(line);
+b.onclick=()=>{if(!run)return;sc++;document.getElementById('sc').textContent=sc;b.remove();bs.splice(bs.indexOf(b),1)};
+area.appendChild(b);return b}
+const bs=[];let last=0;
+setInterval(()=>{if(!run)return;tickN++;if(tickN%30===0)bs.push(mk());
+bs.slice().forEach(b=>{const y=parseFloat(b.style.bottom||'-70');b.style.bottom=(y+spd)+'px';if(y>area.clientHeight){ms++;document.getElementById('ms').textContent=ms;b.remove();bs.splice(bs.indexOf(b),1);if(ms>=3){run=false;document.getElementById('msg').textContent='游戏结束';document.getElementById('sub').textContent='得分 '+sc;document.querySelector('.over').classList.add('show')}}})},40);
+document.getElementById('again').onclick=()=>{sc=0;ms=0;document.getElementById('sc').textContent='0';document.getElementById('ms').textContent='0';bs.forEach(b=>b.remove());bs.length=0;run=true;document.querySelector('.over').classList.remove('show')};
+</script></body></html>

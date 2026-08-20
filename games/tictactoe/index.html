@@ -1,0 +1,31 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>井字棋</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
+h1{font-size:22px;letter-spacing:.16em;color:#ffd9c8}
+#status{font-size:16px;color:#d9a08f;min-height:1.4em}
+#bd{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(86vw,320px)}
+.cell{aspect-ratio:1;display:grid;place-items:center;background:#241a1c;border:2px solid #b02a2a55;border-radius:14px;font-size:48px;font-weight:800;cursor:pointer;user-select:none;transition:background .12s,transform .1s}
+.cell:active{transform:scale(.94)}
+.cell.x{color:#ff9d80}.cell.o{color:#8faeff}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 38px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>⭕ 井字棋</h1><div id="status">你执 X · 先手</div><div id="bd"></div><div class="hint">三连即胜 · 与电脑对战</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const bd=document.getElementById('bd'),status=document.getElementById('status');let board=[],turn='X',over=false,cells=[];
+function restart(){board=Array(9).fill('');turn='X';over=false;status.textContent='你执 X · 先手';document.querySelector('.over').classList.remove('show');render()}
+function render(){bd.innerHTML='';cells=[];for(let i=0;i<9;i++){let d=document.createElement('div');d.className='cell '+board[i];d.textContent=board[i]||'';d.addEventListener('pointerdown',()=>play(i));bd.appendChild(d);cells.push(d)}}
+function play(i){if(over||board[i])return;board[i]=turn;render();let w=check(board);if(w){end(w);return}if(!board.includes('')){over=true;document.getElementById('msg').textContent='平局！';document.querySelector('.over').classList.add('show');return}turn='O';status.textContent='电脑思考中…';setTimeout(ai,400)}
+function check(b){let lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];for(let l of lines){let [a,c,d]=l;if(b[a]&&b[a]===b[c]&&b[a]===b[d])return b[a]}return null}
+function ai(){let b=board.slice();for(let i=0;i<9;i++){if(!b[i]){b[i]='O';if(check(b)==='O'){board[i]='O';done();return}b[i]=''}}for(let i=0;i<9;i++){if(!b[i]){b[i]='X';if(check(b)==='X'){board[i]='O';done();return}b[i]=''}}let empty=[];for(let i=0;i<9;i++)if(!b[i])empty.push(i);if(empty.length){let i=empty[Math.random()*empty.length|0];board[i]='O';done()}}
+function done(){turn='X';render();status.textContent='轮到你了';let w=check(board);if(w)end(w);else if(!board.includes('')){over=true;document.getElementById('msg').textContent='平局！';document.querySelector('.over').classList.add('show')}}
+function end(w){over=true;document.getElementById('msg').textContent=w==='X'?'🎉 你赢了！':w==='O'?'😅 电脑赢了':'平局';document.querySelector('.over').classList.add('show')}
+restart();
+</script></body></html>

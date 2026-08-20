@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>麻将连连看</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+.grid{display:grid;grid-template-columns:repeat(6,54px);gap:6px;background:#141019;border:1px solid #3a2020;border-radius:14px;padding:10px}
+.tile{width:54px;height:54px;display:flex;align-items:center;justify-content:center;font-size:26px;background:linear-gradient(145deg,#3a2424,#241517);border:1px solid #6a2e2e;border-radius:9px;cursor:pointer}
+.tile.on{outline:3px solid #ffd9c8}
+.tile.dim{opacity:.25;pointer-events:none}
+.bar{font-size:13px;margin:8px 0}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🀄 麻将连连看</h1><div class="hint">点击两张相同且可连通的牌消除 · 只能走直线或一个拐角</div>
+<div class="grid" id="grid"></div>
+<div class="bar">剩余 <b id="left">36</b> 张 · 已消除 <b id="done">0</b> 对</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const TILES=['🀄','🀅','🀆','🀇','🀈','🀉','🀊','🀋','🀌','🀍','🀎','🀏','🀐','🀑','🀒','🀓','🀔','🀕'];
+let grid=[],sel=null,left=36,done=0;
+function build(){let arr=[];for(let i=0;i<18;i++){arr.push(TILES[i]);arr.push(TILES[i])}
+for(let i=arr.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));let t=arr[i];arr[i]=arr[j];arr[j]=t}
+grid=[];for(let i=0;i<6;i++)grid.push(arr.slice(i*6,i*6+6));sel=null;left=36;done=0}
+function clearRow(a,b,r){if(a>b){let t=a;a=b;b=t}for(let c=a+1;c<b;c++)if(grid[r][c])return false;return true}
+function clearCol(a,b,c){if(a>b){let t=a;a=b;b=t}for(let r=a+1;r<b;r++)if(grid[r][c])return false;return true}
+function link(p,q){let r1=p[0],c1=p[1],r2=q[0],c2=q[1];
+if(r1===r2)return clearRow(c1,c2,r1);
+if(c1===c2)return clearCol(r1,r2,c1);
+if(!grid[r1][c2]&&clearRow(c1,c2,r1)&&clearCol(r1,r2,c2))return true;
+if(!grid[r2][c1]&&clearRow(c1,c2,r2)&&clearCol(r1,r2,c1))return true;
+return false}
+function tap(i,j){if(!grid[i][j])return;
+if(!sel){sel=[i,j];render();return}
+if(sel[0]===i&&sel[1]===j){sel=null;render();return}
+if(grid[sel[0]][sel[1]]===grid[i][j]&&link(sel,[i,j])){
+grid[sel[0]][sel[1]]=0;grid[i][j]=0;sel=null;done++;left-=2;render();
+if(!left){show('🎉 通关了','全部 '+done+' 对已消除')}
+return}
+sel=[i,j];render()}
+function render(){let g=document.getElementById('grid');g.innerHTML='';
+for(let i=0;i<6;i++)for(let j=0;j<6;j++){let d=document.createElement('div');d.className='tile';
+if(!grid[i][j])d.classList.add('dim');else{d.textContent=grid[i][j];if(sel&&sel[0]===i&&sel[1]===j)d.classList.add('on');d.onclick=()=>tap(i,j)}
+g.appendChild(d)}
+document.getElementById('left').textContent=left;document.getElementById('done').textContent=done}
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');build();render()}
+build();render();
+</script></body></html>

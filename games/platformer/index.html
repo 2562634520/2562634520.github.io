@@ -1,0 +1,57 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🎮 横版闯关</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🎮 横版闯关</h1><canvas id="cv"></canvas>
+<div class="info">金币 <b id="sc">0</b> / 20</div>
+<div class="hint">←→ 移动，空格/点击右侧跳跃 · 收集金币跑到终点</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0;
+function size(){W=Math.min(innerWidth-24,460);H=Math.floor(W*.72);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W;cv.height=H}
+size();addEventListener('resize',()=>{size();draw()});
+let over=false,win=false,score=0,cam=0,player={x:60,y:0,vy:0,onGround:true},platforms=[],coins=[],spikes=[],tick=0;
+function init(){over=false;win=false;score=0;cam=0;player={x:60,y:0,vy:0,onGround:true};platforms=[];coins=[];spikes=[];tick=0;
+for(let i=0;i<24;i++){const px=i*180;platforms.push({x:px,y:300-Math.abs(Math.sin(i*.8))*120,w:150})}
+for(let i=0;i<20;i++)coins.push({x:120+i*210,y:250-Math.abs(Math.sin(i*.9))*120});
+for(let i=2;i<20;i+=4)spikes.push({x:i*360,y:0});
+document.getElementById('sc').textContent='0';document.querySelector('.over').classList.remove('show');loop()}
+let left=false,right=false;
+cv.addEventListener('pointerdown',e=>{if(over)return;const r=cv.getBoundingClientRect();if(e.clientX-r.left<W/2)left=true;else right=true});
+addEventListener('pointerup',()=>{left=false;right=false});
+addEventListener('keydown',e=>{if(e.code==='ArrowLeft')left=true;if(e.code==='ArrowRight')right=true;if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();if(player.onGround){player.vy=-12;player.onGround=false}}});
+addEventListener('keyup',e=>{if(e.code==='ArrowLeft')left=false;if(e.code==='ArrowRight')right=false});
+function step(){if(over)return;tick++;if(left)player.x-=4.5;if(right)player.x+=4.5;player.vy+=.55;player.y+=player.vy;player.onGround=false;
+for(const p of platforms){if(player.x+20>p.x&&player.x-20<p.x+p.w&&player.y+34>=p.y&&player.y+34<=p.y+12&&player.vy>0){player.y=p.y-34;player.vy=0;player.onGround=true}}
+if(player.y>H+40){over=true;msg.textContent='掉下去了！得分 '+score;document.querySelector('.over').classList.add('show')}
+for(const c of coins){if(Math.hypot(player.x+14-c.x,player.y+14-c.y)<24&&!c.got){c.got=true;score++;document.getElementById('sc').textContent=score}}
+for(const s of spikes){if(s.x<player.x+20&&s.x+30>player.x-20&&player.y+30>330&&player.y<380){over=true;msg.textContent='踩到尖刺！得分 '+score;document.querySelector('.over').classList.add('show')}}
+cam=Math.max(0,Math.min(4300-W,player.x-W*.4));
+if(player.x>4300){win=true;over=true;msg.textContent='通关成功！得分 '+score;document.querySelector('.over').classList.add('show')}
+draw();requestAnimationFrame(step)}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#121018';ctx.fillRect(0,0,W,H);
+for(const p of platforms){const x=p.x-cam;if(x>-160&&x<W+160){ctx.fillStyle='#4a2a2a';ctx.fillRect(x,p.y,p.w,16);ctx.fillStyle='#57c96e';ctx.fillRect(x,p.y,16,16)}}
+for(const c of coins){if(c.got)continue;const x=c.x-cam;if(x>-20&&x<W+20){ctx.fillStyle='#ffc93c';ctx.beginPath();ctx.arc(x,c.y,8,0,7);ctx.fill()}}
+for(const s of spikes){const x=s.x-cam;if(x>-40&&x<W+40){ctx.fillStyle='#8a8a8a';ctx.beginPath();ctx.moveTo(x,380);ctx.lineTo(x+15,330);ctx.lineTo(x+30,380);ctx.fill()}}
+if(player.x-cam<W+60){const x=player.x-cam,y=player.y;ctx.fillStyle='#b02a2a';ctx.fillRect(x-12,y,26,34);ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(x+1,y-7,8,0,7);ctx.fill()}
+if(player.x>4300-80){ctx.fillStyle='#ffd9c8';ctx.font='bold 15px sans-serif';ctx.textAlign='center';ctx.fillText('🏁 终点',W/2,50)}
+ctx.fillStyle='#ffd9c8';ctx.font='bold 15px sans-serif';ctx.textAlign='left';ctx.fillText('金币 '+score+' / 20',12,24)}
+function restart(){init()}
+let running=false;function loop(){if(running)return;running=true;step()}
+init();
+
+</script></body></html>

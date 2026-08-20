@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>深海潜航</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#0a2035;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:68vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🛸 深海潜航</h1><div class="hint">按住上浮 · 松开下沉 · 吃气泡补氧 · 躲水雷</div>
+<canvas id="c" width="360" height="480"></canvas>
+<div class="bar">深度 <b id="dp">0</b> 米 · 珍珠 <b id="pn">0</b> · 氧气 <b id="ox">100</b>%</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=360,H=480;
+let y=100,vy=0,up=false,oxy=100,depth=0,pearls=0,objs=[],run=true;
+function setup(){y=100;vy=0;up=false;oxy=100;depth=0;pearls=0;objs=[];run=true}
+function tick(){
+  if(!run)return;
+  depth+=1.2;document.getElementById('dp').textContent=depth|0;
+  vy+=up?-.25:.28;y+=vy;if(y<20){y=20;vy=0}if(y>H-20){y=H-20;vy=0}
+  oxy-=.055;document.getElementById('ox').textContent=Math.max(0,oxy|0);
+  if(oxy<=0){run=false;show('🫧 氧气耗尽','下潜 '+depth|0+' 米 · 珍珠 '+pearls);return}
+  if(Math.random()<.016)objs.push({x:W+20,y:30+Math.random()*(H-60),kind:Math.random()<.4?'bubble':Math.random()<.6?'pearl':'mine'});
+  objs.forEach(o=>o.x-=2.4);
+  objs=objs.filter(o=>o.x>-30);
+  objs.forEach(o=>{
+    if(Math.hypot(o.x-70,o.y-y)<24){
+      if(o.kind==='bubble'){oxy=Math.min(100,oxy+18);o.x=-99}
+      else if(o.kind==='pearl'){pearls++;document.getElementById('pn').textContent=pearls;o.x=-99}
+      else{run=false;show('💥 撞到水雷','下潜 '+depth|0+' 米 · 珍珠 '+pearls)}
+    }
+  });
+  draw();
+}
+function draw(){
+  ctx.fillStyle='#0a2035';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#1b4a6b';for(let i=0;i<W;i+=40){const x=(i-depth*1.4)%(W+40)-20;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+  objs.forEach(o=>{
+    if(o.kind==='bubble'){ctx.strokeStyle='#9fd8ff';ctx.beginPath();ctx.arc(o.x,o.y,9,0,7);ctx.stroke()}
+    else if(o.kind==='pearl'){ctx.fillStyle='#ffe9f0';ctx.beginPath();ctx.arc(o.x,o.y,7,0,7);ctx.fill()}
+    else{ctx.fillStyle='#444';ctx.beginPath();ctx.arc(o.x,o.y,10,0,7);ctx.fill();ctx.strokeStyle='#ff6b6b';ctx.stroke()}
+  });
+  ctx.fillStyle='#7ab8d8';ctx.beginPath();ctx.ellipse(70,y,28,16,0,0,7);ctx.fill();
+  ctx.fillStyle='#9fd8ff';ctx.fillRect(94,y-8,12,16);ctx.fillRect(46,y-4,10,8);
+  ctx.fillStyle='#0a2035';ctx.beginPath();ctx.arc(84,y-4,5,0,7);ctx.fill();
+}
+cv.addEventListener('pointerdown',()=>{up=true});
+cv.addEventListener('pointerup',()=>{up=false});
+cv.addEventListener('pointerleave',()=>{up=false});
+window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();up=true}});
+window.addEventListener('keyup',e=>{if(e.code==='Space')up=false});
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup()}
+setup();setInterval(tick,16);
+</script></body></html>

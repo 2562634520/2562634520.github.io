@@ -1,0 +1,50 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🧱 方块爆破</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🧱 方块爆破</h1><canvas id="cv"></canvas>
+<div class="info">得分 <b id="sc">0</b></div>
+<div class="hint">从底部拖动方块到棋盘 · 排满整行/整列消除</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let N=8,CELL=0,grid=[],score=0,pieces=[],active=null,dragX=0,dragY=0,touchId=null;
+const SHAPES=[[[0,0],[1,0],[0,1],[1,1]],[[0,0],[1,0],[2,0]],[[0,0],[0,1],[0,2]],[[0,0],[1,0],[1,1]],[[0,0],[1,0],[2,0],[1,1]],[[0,0]],[[0,0],[1,0],[0,1]]];
+function size(){const w=Math.min(innerWidth-24,380);CELL=Math.floor(w/N);cv.style.width=(CELL*N)+'px';cv.style.height=(CELL*N)+'px';cv.width=CELL*N;cv.height=CELL*N}
+size();addEventListener('resize',()=>{size();draw()});
+function init(){score=0;grid=Array.from({length:N},()=>Array(N).fill(false));pieces=[];for(let i=0;i<3;i++)pieces.push({cells:SHAPES[Math.floor(Math.random()*SHAPES.length)].map(p=>[...p])});active=null;dragX=0;dragY=0;document.getElementById('sc').textContent='0';document.querySelector('.over').classList.remove('show');draw()}
+function canPlace(cx,cy){if(!active)return false;return active.cells.every(([x,y])=>{const gx=cx+x,gy=cy+y;return gx>=0&&gx<N&&gy>=0&&gy<N&&!grid[gy][gx]})}
+function place(cx,cy){active.cells.forEach(([x,y])=>{grid[cy+y][cx+x]=true});pieces.splice(pieces.indexOf(active),1);active=null;let cleared=0;
+for(let y=0;y<N;y++){if(grid[y].every(Boolean)){grid[y]=Array(N).fill(false);cleared++}}
+for(let x=0;x<N;x++){let full=true;for(let y=0;y<N;y++)if(!grid[y][x]){full=false;break}if(full)for(let y=0;y<N;y++)grid[y][x]=false}
+score+=cleared*20+10;document.getElementById('sc').textContent=score;
+if(pieces.length<3)pieces.push({cells:SHAPES[Math.floor(Math.random()*SHAPES.length)].map(p=>[...p])});
+if(!pieces.some(p=>{for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(p.cells.every(([dx,dy])=>{const gx=x+dx,gy=y+dy;return gx<N&&gy<N&&!grid[gy][gx]}))return true;return false})){document.querySelector('.over').classList.add('show');msg.textContent='无处可放，得分 '+score}
+draw()}
+function fit(){if(!active)return;for(let y=0;y<N;y++)for(let x=0;x<N;x++){if(canPlace(x,y)){return {x,y}}}return null}
+function snapTo(){if(!active)return;const c=Math.round((dragX)/CELL),r=Math.round((dragY)/CELL);if(canPlace(c,r)){place(c,r)}else{const f=fit();if(f)place(f.x,f.y)}}
+cv.addEventListener('pointerdown',e=>{if(document.querySelector('.over').classList.contains('show'))return;const r=cv.getBoundingClientRect();const x=e.clientX-r.left,y=e.clientY-r.top;const idx=Math.floor(x/CELL);const p=pieces[idx];if(!p)return;active=p;dragX=x;dragY=y;touchId=e.pointerId;draw()});
+cv.addEventListener('pointermove',e=>{if(!active||e.pointerId!==touchId)return;const r=cv.getBoundingClientRect();dragX=e.clientX-r.left;dragY=e.clientY-r.top;draw()});
+cv.addEventListener('pointerup',e=>{if(!active||e.pointerId!==touchId)return;const r=cv.getBoundingClientRect();dragX=e.clientX-r.left;dragY=e.clientY-r.top;snapTo();touchId=null;draw()});
+function draw(){ctx.clearRect(0,0,cv.width,cv.height);ctx.fillStyle='#141018';ctx.fillRect(0,0,cv.width,cv.height);
+for(let y=0;y<N;y++)for(let x=0;x<N;x++){if(!grid[y][x])continue;ctx.fillStyle='#d64545';ctx.fillRect(x*CELL+1,y*CELL+1,CELL-2,CELL-2);ctx.strokeStyle='#ffd9c833';ctx.strokeRect(x*CELL+1,y*CELL+1,CELL-2,CELL-2)}
+if(active){const w=Math.max(...active.cells.map(c=>c[0]))+1;const ox=dragX-(w*CELL)/2,oy=dragY-20;ctx.globalAlpha=.85;active.cells.forEach(([x,y])=>{const gx=ox+x*CELL,gy=oy+y*CELL;if(gx>-CELL&&gx<cv.width&&gy>-CELL&&gy<cv.height){ctx.fillStyle='#e8a13c';ctx.fillRect(gx+1,gy+1,CELL-2,CELL-2)}});ctx.globalAlpha=1}
+for(let i=0;i<3;i++){const p=pieces[i];if(!p||p===active)continue;const ox=i*CELL+6,oy=cv.height-46;p.cells.forEach(([x,y])=>{ctx.fillStyle='#5a4a6a';ctx.fillRect(ox+x*10,oy+y*10,9,9)})}
+ctx.fillStyle='#ffd9c8';ctx.font='bold 15px sans-serif';ctx.textAlign='left';ctx.fillText('得分 '+score,12,20)}
+function restart(){init()}
+init();
+
+</script></body></html>

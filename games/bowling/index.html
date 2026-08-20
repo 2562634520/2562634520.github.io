@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>保龄球</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#1c2029;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:68vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🎳 保龄球</h1><div class="hint">按住蓄力 · 左右拖动瞄准 · 松手投球</div>
+<canvas id="c" width="360" height="500"></canvas>
+<div class="bar">第 <b id="th">1</b>/3 球 · 已倒 <b id="sc">0</b> 个瓶</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=360,H=500;
+let pins=[],ball=null,power=0,holding=false,throwNum=1,total=0,score=0,run=true;
+function setup(){
+  pins=[];ball=null;power=0;throwNum=1;total=0;score=0;run=true;
+  const rows=[[180],[160,200],[140,180,220],[120,160,200,240]];
+  rows.forEach((xs,ri)=>xs.forEach(x=>pins.push({x,y:70+ri*24,up:true})));
+  document.getElementById('th').textContent=1;document.getElementById('sc').textContent=0;
+}
+function tick(){
+  if(!run)return;
+  if(ball){
+    ball.x+=ball.vx;ball.y+=ball.vy;
+    if(ball.x<16||ball.x>W-16)ball.vx*=-1;
+    pins.forEach(p=>{
+      if(p.up&&Math.hypot(p.x-ball.x,p.y-ball.y)<24){p.up=false;score++;document.getElementById('sc').textContent=score}
+    });
+    if(ball.y<40){
+      total+=score;score=0;document.getElementById('sc').textContent=0;
+      if(throwNum>=3){run=false;show('🎳 比赛结束','三球共击倒 '+total+' 个瓶子');}
+      else{throwNum++;document.getElementById('th').textContent=throwNum;ball=null}
+    }
+  }
+  draw();
+}
+function draw(){
+  ctx.fillStyle='#242a35';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#45506a';ctx.lineWidth=1;
+  for(let i=0;i<10;i++){ctx.beginPath();ctx.moveTo(0,90+i*45);ctx.lineTo(W,60+i*45);ctx.stroke()}
+  pins.forEach(p=>{
+    ctx.fillStyle=p.up?'#ffe9c9':'#6a6258';ctx.beginPath();ctx.arc(p.x,p.y,9,0,7);ctx.fill();
+    ctx.strokeStyle='#b02a2a';ctx.stroke();
+    if(p.up){ctx.fillStyle='#b02a2a';ctx.fillRect(p.x-3,p.y-14,6,4)}
+  });
+  if(ball){ctx.fillStyle='#222';ctx.beginPath();ctx.arc(ball.x,ball.y,15,0,7);ctx.fill();ctx.strokeStyle='#888';ctx.stroke()}
+  if(holding&&!ball){
+    const pct=power/100;
+    ctx.fillStyle='#333a47';ctx.fillRect(20,H-44,140,14);
+    ctx.fillStyle=pct>.85?'#e0342e':'#d64545';ctx.fillRect(20,H-44,140*pct,14);
+    ctx.fillStyle='#ffd9c8';ctx.font='12px sans-serif';ctx.textAlign='center';
+    ctx.fillText('力量 '+(power|0)+'%',90,H-52);
+    ctx.beginPath();ctx.moveTo(180,80);ctx.lineTo(180+(ball?ball.offset:0)*0,80);ctx.stroke();
+    const off=ball?ball.offset:0;
+    ctx.strokeStyle='#ffd9c8';ctx.setLineDash([5,5]);
+    ctx.beginPath();ctx.moveTo(180+off,60);ctx.lineTo(180+off,450);ctx.stroke();ctx.setLineDash([]);
+  }
+}
+let off=0;
+cv.addEventListener('pointerdown',e=>{
+  if(!run)return;holding=true;power=0;off=0;
+  const r=cv.getBoundingClientRect();off=(e.clientX-r.left)-180;
+});
+cv.addEventListener('pointermove',e=>{
+  if(!holding)return;
+  const r=cv.getBoundingClientRect();off=Math.max(-100,Math.min(100,(e.clientX-r.left)-180));
+  power=Math.min(100,power+1.2);
+});
+cv.addEventListener('pointerup',()=>{
+  if(!holding)return;holding=false;
+  ball={x:180+off,y:430,vx:off*.18,vy:-Math.max(4,power*.42)};
+});
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup()}
+setup();setInterval(tick,16);
+</script></body></html>

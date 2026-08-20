@@ -1,0 +1,46 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🤼 相扑对决</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🤼 相扑对决</h1><canvas id="cv"></canvas>
+<div class="info">得分 <b id="sc">0</b> / 3</div>
+<div class="hint">快速点击/按空格积累推力，把蓝方相扑推圈外</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0;
+function size(){W=Math.min(innerWidth-24,420);H=Math.floor(W*.72);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W;cv.height=H}
+size();addEventListener('resize',()=>{size();draw()});
+let over=false,player={x:0,p:0},ai={x:0,p:0},ring=0,score=0,tick=0,tapT=0,state='ready';
+function init(){over=false;ring=Math.min(W*.8,330);player={x:W/2-40,p:0};ai={x:W/2+40,p:0};score=0;tick=0;tapT=0;state='ready';document.getElementById('sc').textContent='0';document.querySelector('.over').classList.remove('show');loop()}
+cv.addEventListener('pointerdown',()=>{if(over)return;if(state==='ready')state='fight';else{tapT=Math.min(tapT+4,30);player.p+=4}});
+addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();if(over)return;if(state==='ready')state='fight';else{tapT=Math.min(tapT+4,30);player.p+=4}}});
+function step(){if(over)return;tick++;
+if(state==='fight'){ai.p+=2+Math.random()*3;player.x+=player.p*.7;ai.x-=ai.p*.7;player.p*=.85;ai.p*=.85;tapT=Math.max(0,tapT-1);player.p+=tapT*.8;
+const cx=(player.x+ai.x)/2;const d=player.x-ai.x;if(d>-14&&d<14){if(player.p>ai.p)ai.x+=3;else player.x-=3}
+if(player.x<W/2-ring/2||Math.abs(player.x-W/2)>ring/2){over=true;msg.textContent='你被推出圈外！';document.querySelector('.over').classList.add('show')}
+if(ai.x>W/2+ring/2||Math.abs(ai.x-W/2)>ring/2){score++;document.getElementById('sc').textContent=score;if(score>=3){over=true;msg.textContent='3 局全胜，相扑冠军！';document.querySelector('.over').classList.add('show')}else{state='ready';setTimeout(()=>{if(!over){state='fight';player.x=W/2-40;ai.x=W/2+40;player.p=0;ai.p=0}},800)}}
+player.x=Math.max(W/2-ring/2+10,Math.min(W/2+ring/2-10,player.x));ai.x=Math.max(W/2-ring/2+10,Math.min(W/2+ring/2-10,ai.x))}
+draw();requestAnimationFrame(step)}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#161210';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#c9a05a';ctx.lineWidth=4;ctx.beginPath();ctx.arc(W/2,H*.62,ring/2,0,7);ctx.stroke();ctx.fillStyle='#2a2018';ctx.beginPath();ctx.arc(W/2,H*.62,ring/2-4,0,7);ctx.fill();
+const py=H*.6;ctx.fillStyle='#b02a2a';ctx.beginPath();ctx.ellipse(player.x,py,30,36,0,0,7);ctx.fill();ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(player.x,py-38,9,0,7);ctx.fill();
+const ay=H*.6;ctx.fillStyle='#4a6a9e';ctx.beginPath();ctx.ellipse(ai.x,ay,30,36,0,0,7);ctx.fill();ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(ai.x,ay-38,9,0,7);ctx.fill();
+ctx.fillStyle='#ffd9c8';ctx.font='bold 15px sans-serif';ctx.textAlign='left';ctx.fillText('得分 '+score+' / 3',12,24);ctx.textAlign='center';ctx.fillText(state==='ready'?'点击开始推搡':'连点/按空格用力推',W/2,H-16)}
+function restart(){init()}
+let running=false;function loop(){if(running)return;running=true;step()}
+init();
+
+</script></body></html>

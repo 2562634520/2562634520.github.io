@@ -1,0 +1,45 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>五子棋</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.score{font-size:13px;color:#d9a08f}
+canvas{background:#171210;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;height:auto;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:block;margin:16px auto 0;padding:10px 30px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>⚫ 五子棋</h1><div class="score">你（黑） <b id="ws">0</b> : <span id="ls">0</span> 电脑（白）</div><canvas id="cv"></canvas><div class="hint">点击交叉点落子，五连即胜</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="start()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let S=0,dpr=Math.min(devicePixelRatio||1,2);
+function size(){S=Math.min(innerWidth-24,innerHeight-190,440);cv.style.width=S+'px';cv.style.height=S+'px';cv.width=S*dpr;cv.height=S*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+size();addEventListener('resize',size);
+const N=15,M=15;let board,over,ws=0,ls=0;
+const P=S/(N+1),O=P/2;
+function start(){board=Array.from({length:N},()=>Array(N).fill(0));over=false;document.querySelector('.over').classList.remove('show');draw()}
+function win(x,y,v){const dirs=[[1,0],[0,1],[1,1],[1,-1]];
+for(const d of dirs){let c=1;for(let i=1;i<5;i++){const nx=x+d[0]*i,ny=y+d[1]*i;if(nx<0||ny<0||nx>=N||ny>=N||board[nx][ny]!==v)break;c++}for(let i=1;i<5;i++){const nx=x-d[0]*i,ny=y-d[1]*i;if(nx<0||ny<0||nx>=N||ny>=N||board[nx][ny]!==v)break;c++}if(c>=5)return true}return false}
+function ai(){let best=-1,bx=-1,by=-1;
+for(let x=0;x<N;x++)for(let y=0;y<N;y++){if(board[x][y])continue;
+let sc=0;const dirs=[[1,0],[0,1],[1,1],[1,-1]];
+for(const d of dirs){let a=1,b=1;for(let i=1;i<5;i++){const nx=x+d[0]*i,ny=y+d[1]*i;if(nx<0||ny<0||nx>=N||ny>=N||board[nx][ny]===1)break;if(board[nx][ny]===2)a++}for(let i=1;i<5;i++){const nx=x-d[0]*i,ny=y-d[1]*i;if(nx<0||ny<0||nx>=N||ny>=N||board[nx][ny]===1)break;if(board[nx][ny]===2)b++}sc+=Math.max(a,b)*2;
+let c=1,d=1;for(let i=1;i<5;i++){const nx=x+d[0]*i,ny=y+d[1]*i;if(nx<0||ny<0||nx>=N||ny>=N||board[nx][ny]===2)break;if(board[nx][ny]===1)c++}for(let i=1;i<5;i++){const nx=x-d[0]*i,ny=y-d[1]*i;if(nx<0||ny<0||nx>=N||ny>=N||board[nx][ny]===2)break;if(board[nx][ny]===1)d++}sc+=Math.max(c,d)*3}
+if(sc>best){best=sc;bx=x;by=y}}
+board[bx][by]=2;if(win(bx,by,2)){over=true;ls++;document.getElementById('ls').textContent=ls;document.getElementById('msg').textContent='电脑获胜';document.querySelector('.over').classList.add('show')}draw()}
+function tap(e){if(over)return;const r=cv.getBoundingClientRect();const x=Math.round((e.clientX-r.left-O)/P),y=Math.round((e.clientY-r.top-O)/P);
+if(x<0||y<0||x>=N||y>=N||board[x][y])return;
+board[x][y]=1;draw();
+if(win(x,y,1)){over=true;ws++;document.getElementById('ws').textContent=ws;document.getElementById('msg').textContent='你赢了！';document.querySelector('.over').classList.add('show');return}
+setTimeout(ai,180)}
+function draw(){ctx.clearRect(0,0,S,S);ctx.fillStyle='#171210';ctx.fillRect(0,0,S,S);
+ctx.strokeStyle='#7a4a35';ctx.lineWidth=1;for(let i=0;i<N;i++){ctx.beginPath();ctx.moveTo(O+i*P,O);ctx.lineTo(O+i*P,S-O);ctx.stroke();ctx.beginPath();ctx.moveTo(O,O+i*P);ctx.lineTo(S-O,O+i*P);ctx.stroke()}
+for(let x=0;x<N;x++)for(let y=0;y<N;y++){if(!board[x][y])continue;ctx.beginPath();ctx.arc(O+x*P,O+y*P,board[x][y]===1?9:8,0,7);ctx.fillStyle=board[x][y]===1?'#17181c':'#f0ece6';ctx.fill();ctx.strokeStyle='#00000066';ctx.lineWidth=1;ctx.stroke()}}
+cv.addEventListener('click',tap);
+start();
+</script></body></html>

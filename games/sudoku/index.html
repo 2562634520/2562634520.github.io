@@ -1,0 +1,34 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>数独</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:18px}
+#bd{display:grid;grid-template-columns:repeat(9,1fr);gap:2px;background:#120e11;border:3px solid #b02a2a88;border-radius:10px;padding:4px;box-shadow:0 0 24px #b02a2a2e;width:min(92vw,360px)}
+.cell{aspect-ratio:1;display:grid;place-items:center;background:#241a1c;font-size:16px;font-weight:700;cursor:pointer;user-select:none;border-radius:3px}
+.cell.fixed{color:#d9a08f}
+.cell.sel{background:#b02a2a66}
+.cell.same{background:#4a1f1f55}
+.cell.right{background:#1f3a24!important}
+.cell.wrong{background:#5a1f1f!important}
+.numrow{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;justify-content:center}
+.num{width:34px;height:34px;border-radius:8px;background:#241a1c;border:1px solid #b02a2a55;color:#ffd9c8;font-size:17px;font-weight:700;cursor:pointer}
+.num:active{transform:scale(.9)}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 34px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🧩 数独</h1><div class="info"><span>错误 <b id="err">0</b></span><span>难度 简单</span></div><div id="bd"></div><div class="numrow" id="numrow"></div><div class="hint">点格子再选数字 · 清除=擦除</div></div>
+<div class="over"><div class="panel"><b>🎉 完成数独！</b><button class="btn" onclick="restart()">新一局</button></div></div>
+<script>
+const bd=document.getElementById('bd'),nr=document.getElementById('numrow');let puzzle=[],solution=[],sel=null,errs=0;
+function makeSolution(){let g=Array.from({length:9},()=>Array(9).fill(0));function ok(r,c,v){for(let i=0;i<9;i++){if(g[r][i]===v||g[i][c]===v)return false}let br=r/3|0,bc=c/3|0;for(let i=0;i<3;i++)for(let j=0;j<3;j++)if(g[br*3+i][bc*3+j]===v)return false;return true}function fill(){for(let r=0;r<9;r++)for(let c=0;c<9;c++){if(g[r][c])continue;let nums=[1,2,3,4,5,6,7,8,9];for(let i=8;i>0;i--){let j=Math.random()*(i+1)|0;[nums[i],nums[j]]=[nums[j],nums[i]]}for(let v of nums){if(ok(r,c,v)){g[r][c]=v;if(fill())return true;g[r][c]=0}}return false}return true}fill();return g}
+function restart(){errs=0;sel=null;document.getElementById('err').textContent=0;document.querySelector('.over').classList.remove('show');solution=makeSolution();puzzle=solution.map(r=>r.slice());let holes=42;while(holes){let r=Math.random()*9|0,c=Math.random()*9|0;if(puzzle[r][c]){puzzle[r][c]=0;holes--}}render()}
+function render(){bd.innerHTML='';for(let i=0;i<81;i++){let r=i/9|0,c=i%9,d=document.createElement('div');d.className='cell'+(puzzle[r][c]?' fixed':'');d.textContent=puzzle[r][c]||'';d.dataset.i=i;d.addEventListener('pointerdown',()=>{sel=i;render()});bd.appendChild(d)}nr.innerHTML='';for(let n=1;n<=9;n++){let b=document.createElement('button');b.className='num';b.textContent=n;b.onclick=()=>setNum(n);nr.appendChild(b)}let clr=document.createElement('button');clr.className='num';clr.textContent='⌫';clr.onclick=()=>setNum(0);nr.appendChild(clr);for(let i=0;i<81;i++){let r=i/9|0,c=i%9,d=bd.children[i];if(sel===i)d.classList.add('sel');else if(sel!==null&&puzzle[r][c]&&puzzle[r][c]===puzzle[sel/9|0][sel%9])d.classList.add('same');if(puzzle[r][c]&&puzzle[r][c]!==solution[r][c])d.classList.add('wrong');else if(puzzle[r][c])d.classList.add('right')}}
+function setNum(v){if(sel===null)return;let r=sel/9|0,c=sel%9;if(solution[r][c]===0||puzzle[r][c]&&solution[r][c]===puzzle[r][c])return;if(v&&v!==solution[r][c]){errs++;document.getElementById('err').textContent=errs;puzzle[r][c]=v;render();return}puzzle[r][c]=v;render();if(puzzle.every((row,r)=>row.every((x,c)=>x===solution[r][c]))){document.querySelector('.over').classList.add('show')}}
+restart();
+</script></body></html>

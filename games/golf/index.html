@@ -1,0 +1,43 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>迷你高尔夫</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none;user-select:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.hud{font-size:13px;color:#d9a08f;display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
+canvas{background:#120d10;border:1px solid #33262a;border-radius:12px;touch-action:none;display:block;max-width:96vw;max-height:68vh}
+.btn{display:inline-block;padding:9px 22px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin:4px}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 30px;box-shadow:0 0 40px #b02a2a2e;max-width:86vw}
+.panel b{font-size:24px;color:#ffd9c8;display:block;margin-bottom:8px}
+.panel p{font-size:13px;color:#c9a89b;margin-bottom:12px}
+.tip{font-size:11px;color:#8f7f7b;text-align:center}
+</style></head><body>
+<div class="wrap"><h1>⛳ 迷你高尔夫</h1><div class="hud">第 <span id="hole">1</span>/3 洞 · 杆数 <b id="st">0</b> · 总杆 <span id="tot">0</span></div><canvas id="cv"></canvas><div class="tip">在球上按住向后拖动瞄准，松手击球</div></div>
+<div class="over"><div class="panel"><b id="msg"></b><p id="sub"></p><button class="btn" id="again">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');cv.width=360;cv.height=460;
+const holes=[[{x:70,y:410,r:16},{x:250,y:70,r:24},{x:120,y:120,r:20},{x:290,y:360,r:22},{x:300,y:240,r:20}],[{x:60,y:80,r:20},{x:200,y:220,r:24},{x:110,y:340,r:22},{x:300,y:90,r:20}],[{x:300,y:400,r:14},{x:70,y:240,r:20},{x:180,y:70,r:18},{x:250,y:180,r:16}]];
+let hi=0,bx,by,st=0,tot=0,run=true,drag=null,bvx=0,bvy=0;
+function loadHole(){const h=holes[hi];bx=h[0].x;by=h[0].y;st=0;bvx=0;bvy=0;document.getElementById('hole').textContent=hi+1;document.getElementById('st').textContent='0';document.getElementById('tot').textContent=tot}
+function start(){hi=0;tot=0;loadHole()}
+function tick(){bx+=bvx;by+=bvy;bvx*=0.985;bvy*=0.985;if(Math.abs(bvx)<0.08)bvx=0;if(Math.abs(bvy)<0.08)bvy=0;
+const h=holes[hi];h.slice(1).forEach(w=>{const dx=bx-w.x,dy=by-w.y,d=Math.sqrt(dx*dx+dy*dy)||1;if(d<w.r+10){bx=w.x+(dx/d)*(w.r+10);by=w.y+(dy/d)*(w.r+10);const dot=bvx*(dx/d)+bvy*(dy/d);if(dot<0){bvx-=2*dot*(dx/d);bvy-=2*dot*(dy/d)}}});
+const g=h[0];if(Math.sqrt((bx-g.x)**2+(by-g.y)**2)<g.r&&Math.abs(bvx)+Math.abs(bvy)<1){tot+=st;if(hi<2){hi++;loadHole()}else{document.getElementById('msg').textContent='三洞完成！';document.getElementById('sub').textContent='总杆数 '+tot;document.querySelector('.over').classList.add('show')}}
+draw()}
+function draw(){ctx.fillStyle='#1a2b1d';ctx.fillRect(0,0,cv.width,cv.height);
+const h=holes[hi];h.slice(1).forEach(w=>{ctx.fillStyle='#3a4a3e';ctx.beginPath();ctx.arc(w.x,w.y,w.r,0,7);ctx.fill();ctx.strokeStyle='#223';ctx.stroke()});
+ctx.fillStyle='#120d10';ctx.beginPath();ctx.arc(h[0].x,h[0].y,h[0].r,0,7);ctx.fill();ctx.strokeStyle='#d9a08f';ctx.beginPath();ctx.arc(h[0].x,h[0].y,h[0].r-3,0,7);ctx.stroke();
+ctx.fillStyle='#e8dcd5';ctx.beginPath();ctx.arc(bx,by,9,0,7);ctx.fill();
+if(drag){const dx=bx-drag.x,dy=by-drag.y,dd=Math.sqrt(dx*dx+dy*dy);ctx.strokeStyle='#ffd84a';ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx+dx*Math.min(1,dd/90),by+dy*Math.min(1,dd/90));ctx.stroke();ctx.setLineDash([])}}
+function hit(dx,dy){const dd=Math.sqrt(dx*dx+dy*dy);if(dd<8)return;const p=Math.min(15,dd/7);bvx=dx/dd*p;bvy=dy/dd*p;st++;document.getElementById('st').textContent=st}
+function pos(e){const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)*(cv.width/r.width),y:(e.clientY-r.top)*(cv.height/r.height)}}
+cv.addEventListener('touchstart',e=>{drag=pos(e.touches[0])},{passive:true});
+cv.addEventListener('touchmove',e=>{drag=pos(e.touches[0])},{passive:true});
+cv.addEventListener('touchend',e=>{if(drag){hit(bx-drag.x,by-drag.y);drag=null}},{passive:true});
+cv.addEventListener('mousedown',e=>{drag=pos(e)});
+cv.addEventListener('mousemove',e=>{if(drag)drag=pos(e)});
+cv.addEventListener('mouseup',e=>{if(drag){hit(bx-drag.x,by-drag.y);drag=null}});
+document.getElementById('again').onclick=()=>{tot=0;hi=0;loadHole();document.querySelector('.over').classList.remove('show')};
+start();setInterval(tick,33);
+</script></body></html>

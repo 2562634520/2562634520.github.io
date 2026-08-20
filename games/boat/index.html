@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>龙舟竞渡</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#123a4a;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:68vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🛶 龙舟竞渡</h1><div class="hint">左右交替点击划桨 · 和 AI 龙舟比赛 400 米</div>
+<canvas id="c" width="360" height="480"></canvas>
+<div class="bar">你的船 <b id="my">0</b> 米 · AI <b id="ai">0</b> 米</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=360,H=480;
+let myD=0,aiD=0,mySpd=0,aiSpd=0,strokes=0,run=true,lastStroke=0;
+function setup(){myD=0;aiD=0;mySpd=0;aiSpd=0;strokes=0;run=true;lastStroke=0}
+function paddle(){
+  if(!run)return;
+  const now=Date.now();
+  if(now-lastStroke<90)return;
+  lastStroke=now;strokes++;
+  mySpd=Math.min(14,mySpd+2.4);
+}
+cv.addEventListener('pointerdown',paddle);
+window.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowLeft'||e.code==='ArrowRight'){e.preventDefault();paddle()}});
+function tick(){
+  if(!run)return;
+  mySpd*=.96;aiSpd=aiSpd*.97+(Math.random()<.5?1.1:.2);
+  mySpd=Math.max(1.2,mySpd);
+  myD+=mySpd/6;aiD+=Math.min(9,aiSpd)/6;
+  document.getElementById('my').textContent=myD|0;document.getElementById('ai').textContent=aiD|0;
+  if(myD>=400||aiD>=400){run=false;show(myD>=400?'🏆 你赢了！':'😔 AI 先到终点','用时 '+(strokes)+' 桨 · AI 成绩 '+aiD|0+' 米')}
+  draw();
+}
+function draw(){
+  ctx.fillStyle='#123a4a';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#2a6a8a';for(let i=0;i<W;i+=30){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,H);ctx.stroke()}
+  ctx.fillStyle='#ffd9c8';ctx.font='12px sans-serif';ctx.textAlign='center';
+  ctx.fillText('终点 →',W-58,16);
+  ctx.strokeStyle='#e0342e';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(W-110,0);ctx.lineTo(W-110,H);ctx.stroke();
+  const myX=30+myD/400*(W-160),aiX=30+aiD/400*(W-160);
+  ctx.fillStyle='#d64545';ctx.beginPath();ctx.moveTo(myX,180);ctx.lineTo(myX+34,180);ctx.lineTo(myX+20,210);ctx.lineTo(myX-14,210);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#ffd9c8';ctx.fillRect(myX+2,164,22,10);
+  ctx.fillStyle='#4a9ad8';ctx.beginPath();ctx.moveTo(aiX,330);ctx.lineTo(aiX+34,330);ctx.lineTo(aiX+20,360);ctx.lineTo(aiX-14,360);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#ffd9c8';ctx.fillRect(aiX+2,314,22,10);
+  ctx.fillStyle='#ffd9c8';ctx.font='11px sans-serif';
+  ctx.fillText('你(红)',myX-10,230);ctx.fillText('AI(蓝)',aiX-10,380);
+}
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup()}
+setup();setInterval(tick,16);
+</script></body></html>

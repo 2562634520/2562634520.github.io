@@ -1,0 +1,35 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>记忆翻牌</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.score{font-size:13px;color:#d9a08f}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;width:min(94vw,420px)}
+.card{aspect-ratio:1;border:1px solid #b02a2a55;border-radius:12px;background:linear-gradient(145deg,#2a1618,#170f12);display:grid;place-items:center;font-size:min(9vw,38px);cursor:pointer;transition:.2s;user-select:none}
+.card.up{background:#221417;border-color:#d64545;box-shadow:0 0 16px #b02a2a33}
+.card.matched{background:#1c2a1d;border-color:#2e8b57;box-shadow:0 0 16px #2e8b5733}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:block;margin:16px auto 0;padding:10px 30px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🃏 记忆翻牌</h1><div class="score">步数 <b id="mv">0</b> · 配对 <span id="pair">0 / 8</span></div><div class="grid" id="grid"></div><div class="hint">翻开两张相同的牌即可消除</div></div>
+<div class="over"><div class="panel"><b id="msg">全部配对成功！</b><button class="btn" onclick="start()">再来一局</button></div></div>
+<script>
+const EMOJI=['🐱','🐶','🦊','🐻','🐼','🐸','🐵','🐰'];
+let cards=[],open=[],moves=0,pairs=0,lock=false;
+const grid=document.getElementById('grid');
+function start(){const pool=[...EMOJI,...EMOJI];for(let i=pool.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[pool[i],pool[j]]=[pool[j],pool[i]]}
+cards=pool.map((e,i)=>({e,up:false,done:false}));open=[];moves=0;pairs=0;lock=false;document.querySelector('.over').classList.remove('show');render();sync()}
+function sync(){document.getElementById('mv').textContent=moves;document.getElementById('pair').textContent=pairs+' / 8'}
+function render(){grid.innerHTML='';cards.forEach((c,i)=>{const d=document.createElement('button');d.type='button';d.className='card'+(c.up?' up':'')+(c.done?' matched':'');d.textContent=c.up||c.done?c.e:'';d.onclick=()=>flip(i);grid.appendChild(d)})}
+function flip(i){if(lock||cards[i].up||cards[i].done||open.length>=2)return;
+cards[i].up=true;open.push(i);render();
+if(open.length===2){moves++;sync();const[a,b]=open;
+if(cards[a].e===cards[b].e){setTimeout(()=>{cards[a].done=cards[b].done=true;cards[a].up=cards[b].up=false;open=[];pairs++;sync();render();if(pairs===8)document.querySelector('.over').classList.add('show')},450)}
+else{lock=true;setTimeout(()=>{cards[a].up=cards[b].up=false;open=[];lock=false;render()},800)}}}
+start();
+</script></body></html>

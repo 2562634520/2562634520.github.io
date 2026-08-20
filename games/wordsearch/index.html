@@ -1,0 +1,35 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>单词连连看</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:18px}
+#bd{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;background:#120e11;border:2px solid #b02a2a66;border-radius:12px;padding:6px;box-shadow:0 0 24px #b02a2a2e;width:min(94vw,360px)}
+.cell{aspect-ratio:1;display:grid;place-items:center;background:#241a1c;border-radius:5px;font-size:12px;font-weight:700;cursor:pointer;user-select:none;text-transform:uppercase}
+.cell.sel{background:#b02a2a99}
+.cell.found{background:#1f3a24;color:#8fd98f}
+.words{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px;max-width:94vw}
+.word{font-size:12px;color:#d9a08f;padding:3px 10px;border:1px solid #b02a2a44;border-radius:999px}
+.word.done{color:#8fd98f;border-color:#3a5a3a;text-decoration:line-through}
+.hint{font-size:11px;color:#8f7f7b;margin-top:6px}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 34px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🔤 单词连连看</h1><div class="info"><span>已找到 <b id="found">0</b>/3</span></div><div id="bd"></div><div class="words" id="words"></div><div class="hint">拖动选择字母 · 找到隐藏单词</div></div>
+<div class="over"><div class="panel"><b>🎉 全部找到！</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const WORDS=['CAT','DOG','SUN','FUN','RED','BOX'];const bd=document.getElementById('bd'),wd=document.getElementById('words');
+let grid=[],wordList=[],found=0,selCells=[],dragging=false;
+const DIRS=[[1,0],[0,1],[1,1],[-1,1]];
+function restart(){found=0;selCells=[];dragging=false;document.getElementById('found').textContent=0;document.querySelector('.over').classList.remove('show');wordList=[];let n=3+Math.random()*3|0;let pool=WORDS.slice().sort(()=>Math.random()-0.5);for(let i=0;i<n;i++)wordList.push(pool[i]);grid=Array.from({length:8},()=>Array(8).fill(''));let placed=0;for(let w of wordList){for(let attempt=0;attempt<200;attempt++){let dir=DIRS[Math.random()*4|0],r=Math.random()*8|0,c=Math.random()*8|0;let ok=true;for(let k=0;k<w.length;k++){let nr=r+dir[0]*k,nc=c+dir[1]*k;if(nr<0||nc<0||nr>=8||nc>=8||(grid[nr][nc]&&grid[nr][nc]!==w[k])){ok=false;break}}if(ok){for(let k=0;k<w.length;k++)grid[r+dir[0]*k][c+dir[1]*k]=w[k];placed++;break}}}for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(!grid[r][c])grid[r][c]='ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.random()*26|0];render()}
+function render(){bd.innerHTML='';for(let r=0;r<8;r++)for(let c=0;c<8;c++){let d=document.createElement('div');d.className='cell';d.textContent=grid[r][c];d.dataset.r=r;d.dataset.c=c;d.addEventListener('pointerdown',()=>startSel(r,c,d));d.addEventListener('pointerenter',()=>{if(dragging)extend(r,c,d)});bd.appendChild(d)}wd.innerHTML='';wordList.forEach((w,i)=>{let s=document.createElement('span');s.className='word';s.textContent=w;wd.appendChild(s)})}
+function startSel(r,c,d){dragging=true;selCells=[];extend(r,c,d)}
+function extend(r,c,d){if(!dragging)return;let idx=selCells.findIndex(x=>x.r===r&&x.c===c);if(idx>=0){selCells=selCells.slice(0,idx+1)}else{selCells.push({r,c})}document.querySelectorAll('.cell').forEach(x=>x.classList.remove('sel'));selCells.forEach(x=>bd.children[x.r*8+x.c].classList.add('sel'));let txt=selCells.map(x=>grid[x.r][x.c]).join('');if(wordList.includes(txt)&&!wordList.includes(txt+'!')){
+wordList=wordList.map(w=>w===txt?w+'!':w);found++;document.getElementById('found').textContent=found;selCells.forEach(x=>bd.children[x.r*8+x.c].classList.add('found'));selCells.forEach(x=>bd.children[x.r*8+x.c].classList.remove('sel'));selCells=[];let els=wd.children;for(let i=0;i<els.length;i++)if(els[i].textContent===txt)els[i].classList.add('done');if(found===wordList.length)document.querySelector('.over').classList.add('show')}}
+document.addEventListener('pointerup',()=>{dragging=false});
+restart();
+</script></body></html>

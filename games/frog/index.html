@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>青蛙过河</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#171421;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:70vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0}
+.keys{display:flex;gap:8px;margin-bottom:8px}
+.key{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.key:active{transform:scale(.94)}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🐸 青蛙过河</h1><div class="hint">方向键/滑动控制青蛙 · 躲开车辆到达终点</div>
+<canvas id="c" width="360" height="440"></canvas>
+<div class="bar">得分 <b id="score">0</b> · 生命 <b id="life">3</b></div>
+<div class="keys"><button class="key" onclick="mv(0,-1)">▲</button><button class="key" onclick="mv(-1,0)">◀</button><button class="key" onclick="mv(1,0)">▶</button><button class="key" onclick="mv(0,1)">▼</button></div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=360,H=440;
+let fx=W/2,fy=H-40,cars=[],score=0,life=3,run=true;
+const ROWY=[40,100,160,220,280,340,400];
+function laneCfg(i){return[{dir:i%2?1:-1,sp:2.4+Math.abs(3.5-i)*.4,y:ROWY[i],len:60+i*8,color:['#b02a2a','#d64545','#c98a3a','#a23a8a','#3d7fd6','#3d9a5a','#8a6a3a'][i]}]}
+function setup(){fx=W/2;fy=H-40;cars=[];score=0;life=3;run=true}
+function mv(dx,dy){if(!run)return;fx=Math.max(14,Math.min(W-14,fx+dx*34));fy=Math.max(26,Math.min(H-20,fy+dy*34));
+if(fy<=40){score++;fx=W/2;fy=H-40}
+document.getElementById('score').textContent=score}
+function tick(){if(!run)return;
+cars.forEach(l=>l.cars.forEach(c=>c.x+=l.dir*l.sp));
+cars=cars.filter(l=>{l.cars=l.cars.filter(c=>c.x>-100&&c.x<W+100);return true});
+if(Math.random()<.02){let i=Math.floor(Math.random()*7),l=laneCfg(i);if(!cars[i])cars[i]=l;
+else cars[i].cars.push({x:l.dir>0?-40:W+40,y:l.y,len:l.len,color:l.color})}
+for(let l of cars)for(let c of l.cars){
+if(Math.abs(fy-(c.y+12))<28&&fx>c.x-14&&fx<c.x+c.len+14){life--;fx=W/2;fy=H-40;document.getElementById('life').textContent=life;
+if(life<=0){run=false;show('💥 被撞了','得分 '+score+' · 再接再厉');return}}}
+draw()}
+function draw(){ctx.fillStyle='#171421';ctx.fillRect(0,0,W,H);
+ctx.fillStyle='#2f6b3a';ctx.fillRect(0,32,W,20);
+cars.forEach(l=>l.cars.forEach(c=>{ctx.fillStyle=c.color;ctx.fillRect(c.x,c.y,c.len,24);ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(c.x+4,c.y+4,c.len-8,5)}));
+ctx.fillStyle='#ffd9c8';ctx.font='26px sans-serif';ctx.textAlign='center';ctx.fillText('🐸',fx,fy+8)}
+window.addEventListener('keydown',e=>{
+if(e.key==='ArrowUp'){e.preventDefault();mv(0,-1)}
+if(e.key==='ArrowDown'){e.preventDefault();mv(0,1)}
+if(e.key==='ArrowLeft'){e.preventDefault();mv(-1,0)}
+if(e.key==='ArrowRight'){e.preventDefault();mv(1,0)}});
+cv.addEventListener('pointerdown',e=>{let r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;mv(Math.abs(x-fx)>Math.abs(y-fy)?(x>fx?1:-1):0,Math.abs(x-fx)>Math.abs(y-fy)?0:(y>fy?1:-1))});
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup()}
+again();setInterval(tick,16);
+</script></body></html>

@@ -1,0 +1,42 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🌈 彩虹连线</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🌈 彩虹连线</h1><canvas id="cv"></canvas>
+<div class="info">得分 <b id="sc">0</b></div>
+<div class="hint">点击 2 个以上相邻同色方块消除，清空棋盘即胜</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let N=7,CELL=0,grid=[],score=0,moves=0,sel=null;
+const COLORS=['#d64545','#e8a13c','#e8d53c','#57c96e','#4a9ede','#9b6be0'];
+function size(){const w=Math.min(innerWidth-24,380);CELL=Math.floor(w/N);cv.style.width=(CELL*N)+'px';cv.style.height=(CELL*N)+'px';cv.width=CELL*N;cv.height=CELL*N}
+size();addEventListener('resize',()=>{size();draw()});
+function init(){score=0;moves=0;grid=[];for(let y=0;y<N;y++){const row=[];for(let x=0;x<N;x++)row.push(Math.floor(Math.random()*COLORS.length));grid.push(row)}sel=null;document.getElementById('sc').textContent='0';document.querySelector('.over').classList.remove('show');draw()}
+function neighbors(x,y){const out=[];if(x>0)out.push([x-1,y]);if(x<N-1)out.push([x+1,y]);if(y>0)out.push([x,y-1]);if(y<N-1)out.push([x,y+1]);return out}
+function flood(x,y){const c=grid[y][x];const seen=new Set([[x,y].join(',')]);const q=[[x,y]];while(q.length){const[a,b]=q.shift();for(const[nx,ny]of neighbors(a,b)){if(grid[ny][nx]===c&&!seen.has(nx+','+ny)){seen.add(nx+','+ny);q.push([nx,ny])}}}return [...seen].map(s=>s.split(',').map(Number))}
+cv.addEventListener('pointerdown',e=>{if(document.querySelector('.over').classList.contains('show'))return;const r=cv.getBoundingClientRect();const x=Math.floor((e.clientX-r.left)/CELL),y=Math.floor((e.clientY-r.top)/CELL);if(x<0||x>=N||y<0||y>=N)return;const group=flood(x,y);if(group.length<2)return;score+=group.length;moves++;document.getElementById('sc').textContent=score;
+const key=group.map(p=>p.join(',')).join(';');const flat=[];for(let yy=N-1;yy>=0;yy--)for(let xx=0;xx<N;xx++){const p=xx+','+yy;if(key.indexOf(p)===-1)flat.push(grid[yy][xx])}
+for(let i=0;i<group.length;i++)flat.unshift(Math.floor(Math.random()*COLORS.length));
+const ng=[];for(let yy=0;yy<N;yy++){const row=[];for(let xx=0;xx<N;xx++)row.push(flat.pop());ng.push(row)}
+grid=ng;sel=null;draw();check()});
+function check(){const all=new Set(grid.flat());if(all.size===1){document.querySelector('.over').classList.add('show');msg.textContent='彩虹全清！得分 '+score+'，用了 '+moves+' 步'}}
+function draw(){ctx.clearRect(0,0,cv.width,cv.height);for(let y=0;y<N;y++)for(let x=0;x<N;x++){ctx.fillStyle=COLORS[grid[y][x]];ctx.fillRect(x*CELL,y*CELL,CELL-2,CELL-2);ctx.strokeStyle='#0b090c';ctx.strokeRect(x*CELL+.5,y*CELL+.5,CELL-2,CELL-2)}
+ctx.fillStyle='#0b090c';ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.fillText('得分 '+score,cv.width/2,18)}
+function restart(){init()}
+init();
+
+</script></body></html>

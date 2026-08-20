@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>接蛋大师</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#171421;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:66vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🥚 接蛋大师</h1><div class="hint">移动篮子接鸡蛋 · 避开炸弹 · 漏蛋扣命</div>
+<canvas id="c" width="360" height="440"></canvas>
+<div class="bar">得分 <b id="score">0</b> · 生命 <b id="life">3</b> · 最高 <b id="best">0</b></div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=360,H=440;
+let bx=W/2,items=[],score=0,life=3,run=true,best=+(localStorage.getItem('eggBest')||0);
+document.getElementById('best').textContent=best;
+function setup(){bx=W/2;items=[];score=0;life=3;run=true}
+function tick(){
+if(!run)return;
+if(Math.random()<.035)items.push({x:20+Math.random()*(W-40),y:-16,bomb:Math.random()<.18,sp:2.6+Math.random()*1.6});
+items.forEach(o=>o.y+=o.sp);
+items=items.filter(o=>o.y<H+20);
+items.forEach(o=>{
+if(o.y+10>H-46&&o.y+10<H-16&&Math.abs(o.x-bx)<34){
+if(o.bomb){life--;o.hit=true}
+else{score+=10;o.hit=true}
+}
+if(o.y>H-24&&!o.hit&&!o.bomb){life--;o.hit=true}
+if(o.bomb&&o.y>H-10){life--}
+});
+items=items.filter(o=>!o.hit);
+if(life<=0){run=false;let b=score>best?score:best;if(score>best){best=score;localStorage.setItem('eggBest',best)}
+show('💥 游戏结束','得分 '+score+' · 最高 '+best);return}
+document.getElementById('score').textContent=score;document.getElementById('life').textContent=life;
+draw()}
+function draw(){ctx.fillStyle='#171421';ctx.fillRect(0,0,W,H);
+ctx.fillStyle='#2b1a1d';ctx.fillRect(0,H-48,W,48);
+items.forEach(o=>{
+if(o.bomb){ctx.fillStyle='#333';ctx.beginPath();ctx.arc(o.x,o.y,12,0,7);ctx.fill();ctx.fillStyle='#ff6b6b';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText('💣',o.x,o.y+4)}
+else{ctx.fillStyle='#f2e3d0';ctx.beginPath();ctx.ellipse(o.x,o.y,9,11,0,0,7);ctx.fill();ctx.fillStyle='#e0a63d';ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillText('🥚',o.x,o.y+4)}
+});
+ctx.fillStyle='#d64545';ctx.beginPath();ctx.moveTo(bx-32,H-44);ctx.lineTo(bx-20,H-16);ctx.lineTo(bx+20,H-16);ctx.lineTo(bx+32,H-44);ctx.closePath();ctx.fill()}
+cv.addEventListener('pointermove',e=>{let r=cv.getBoundingClientRect();bx=Math.max(30,Math.min(W-30,(e.clientX-r.left)*(W/r.width)))});
+cv.addEventListener('pointerdown',e=>{let r=cv.getBoundingClientRect();bx=Math.max(30,Math.min(W-30,(e.clientX-r.left)*(W/r.width)))});
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup();document.getElementById('best').textContent=best}
+again();setInterval(tick,16);
+</script></body></html>

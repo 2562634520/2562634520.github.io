@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>投篮高手</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:18px}
+#cv{background:linear-gradient(#1a1d24,#120e11);border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 34px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🏀 投篮高手</h1><div class="info"><span>得分 <b id="sc">0</b></span><span>连中 <b id="streak">0</b></span></div><canvas id="cv"></canvas><div class="hint">拖动调整方向松手投篮 · 力按时长控制</div></div>
+<div class="over"><div class="panel"><b>投进 <span id="finalsc">0</span> 球！</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),dpr=Math.min(devicePixelRatio||1,2);
+let W,H,ball,hoop,score=0,streak=0,alive,state='aim',dragStart=0,power=0,frame=0;
+function size(){W=Math.min(innerWidth-24,340);H=Math.min(innerHeight-150,540);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+size();addEventListener('resize',size);
+function restart(){score=0;streak=0;alive=true;state='aim';ball={x:W/2-12,y:H-34,r:12,vx:0,vy:0};hoop={x:W*0.68,y:H*0.18,w:58,h:6};document.getElementById('sc').textContent=0;document.getElementById('streak').textContent=0;document.querySelector('.over').classList.remove('show');requestAnimationFrame(loop)}
+restart();
+cv.addEventListener('pointerdown',e=>{if(state!=='aim')return;dragStart=Date.now();state='loading'});
+cv.addEventListener('pointerup',e=>{if(state!=='loading')return;power=Math.min(1.5,(Date.now()-dragStart)/650);let dx=hoop.x-ball.x,dy=hoop.y-ball.y,dist=Math.hypot(dx,dy),ang=Math.atan2(-dy,dx),v=dist*0.09*power+2;ball.vx=Math.cos(ang)*v;ball.vy=-Math.sin(ang)*v;state='fly'});
+function loop(){requestAnimationFrame(loop);if(!alive)return;frame++;if(state==='loading'){power=Math.min(1.5,(Date.now()-dragStart)/650);ctx.clearRect(0,0,W,H);drawScene();ctx.strokeStyle='#ffd9c8';ctx.lineWidth=3;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(ball.x+ball.r,ball.y);ctx.lineTo(ball.x+ball.r+power*140,ball.y);ctx.stroke();ctx.setLineDash([]);return}if(state==='fly'){ball.x+=ball.vx;ball.y+=ball.vy;ball.vy+=0.3;let rimY=hoop.y,rimL=hoop.x,rimR=hoop.x+hoop.w;if(ball.vy>0&&ball.y>rimY-4&&ball.y<rimY+8&&ball.x>rimL-4&&ball.x<rimR+4){score++;streak++;document.getElementById('sc').textContent=score;document.getElementById('streak').textContent=streak;ball.x=W/2-12;ball.y=H-34;ball.vx=0;ball.vy=0;state='aim';return}if(ball.y>H+20||ball.x<-20||ball.x>W+20){streak=0;document.getElementById('streak').textContent=0;if(score>=10){state='done';document.getElementById('finalsc').textContent=score;document.querySelector('.over').classList.add('show')}else{ball.x=W/2-12;ball.y=H-34;ball.vx=0;ball.vy=0;state='aim'}}}ctx.clearRect(0,0,W,H);drawScene();if(state==='fly'){ctx.fillStyle='#d6844a';ctx.shadowColor='#ffa060';ctx.shadowBlur=8;ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='#221417';ctx.lineWidth=2;ctx.stroke()}}
+function drawScene(){ctx.fillStyle='#0f1218';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#d9a08f';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(hoop.x-8,hoop.y);ctx.lineTo(hoop.x+hoop.w+8,hoop.y);ctx.stroke();ctx.strokeStyle='#b02a2a88';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(hoop.x,hoop.y);ctx.lineTo(hoop.x,hoop.y+10);ctx.moveTo(hoop.x+hoop.w,hoop.y);ctx.lineTo(hoop.x+hoop.w,hoop.y+10);ctx.stroke();ctx.fillStyle='#7a5a32';ctx.fillRect(0,H-16,W,16);if(state==='aim'||state==='loading'){ctx.fillStyle='#d6844a';ctx.shadowColor='#ffa060';ctx.shadowBlur=8;ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.fill();ctx.shadowBlur=0}}
+</script></body></html>

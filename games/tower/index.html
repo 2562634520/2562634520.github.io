@@ -1,0 +1,67 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>叠塔大师</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.bar{display:flex;gap:18px;font-size:13px;color:#d9a08f}
+.bar b{color:#ffd9c8;font-size:16px}
+canvas{max-width:100%;height:auto;touch-action:none;border-radius:12px}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8;display:block}
+.panel small{color:#8f7f7b;font-size:12px}
+.btn{display:block;margin:16px auto 0;padding:10px 30px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🗼 叠塔大师</h1><div class="bar">层数 <b id="lv">0</b> · 连击 <span id="combo">0</span> · 最佳 <span id="best">0</span></div><canvas id="cv"></canvas><div class="hint">点击 / 空格 / 触屏落块，完美居中加连击</div></div>
+<div class="over"><div class="panel"><b id="msg">塔倒了</b><small id="sub">本局 0 层</small><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0,dpr=Math.min(devicePixelRatio||1,2);
+function size(){W=Math.min(innerWidth-24,innerHeight-250,360);H=Math.floor(W*1.35);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+addEventListener('resize',size);size();
+const GROUND=H-24,COLORS=['#b02a2a','#c93a2f','#d64545','#8e2424','#e05a44','#7a1d1d'];
+let blocks=[],x=0,w=0,speed=0,dir=1,level=0,combo=0,best=+localStorage.getItem('towerBest')||0,over=false;
+const LV=document.getElementById('lv'),CB=document.getElementById('combo'),BS=document.getElementById('best');BS.textContent=best;
+function reset(){blocks=[];w=W*0.52;x=(W-w)/2;level=0;combo=0;over=false;speed=2.3;LV.textContent=0;CB.textContent=0}
+function drop(){
+  if(over)return;
+  const prev=blocks[blocks.length-1];
+  let left=prev?Math.max(x,prev.x0):x,right=prev?Math.min(x+w,prev.x1):x+w;
+  if(right-left<=0){over=true;end();return}
+  const y=prev?prev.y-22:GROUND-22;
+  blocks.push({x0:left,x1:right,y:y,color:(level+1)%COLORS.length});
+  level++;combo=(right-left<=6)?combo+1:0;
+  w=right-left;x=left;
+  speed=Math.min(5,2.3+level*0.08);
+  LV.textContent=level;CB.textContent=combo;
+}
+function end(){over=true;document.getElementById('msg').textContent='塔倒了';document.getElementById('sub').textContent='本局 '+level+' 层';
+  if(level>best){best=level;localStorage.setItem('towerBest',best);BS.textContent=best}
+  document.querySelector('.over').classList.add('show')}
+function restart(){document.querySelector('.over').classList.remove('show');reset()}
+function loop(){
+  if(!over){
+    x+=speed*dir;
+    if(x<0||x+w>W){dir*=-1;x=Math.max(0,Math.min(x,W-w))}
+  }
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#120e11';ctx.fillRect(0,0,W,H);
+  for(let i=0;i<blocks.length;i++){
+    const b=blocks[i];const c=COLORS[b.color%COLORS.length];
+    ctx.fillStyle=c;ctx.beginPath();ctx.roundRect(b.x0,b.y,b.x1-b.x0,20,4);ctx.fill();
+    ctx.strokeStyle='#ffd9c855';ctx.lineWidth=1;ctx.stroke();
+  }
+  if(!over){
+    const topY=blocks.length?blocks[blocks.length-1].y-20:GROUND-20;
+    ctx.fillStyle=COLORS[level%COLORS.length];ctx.beginPath();ctx.roundRect(x,topY,w,20,4);ctx.fill();
+    ctx.strokeStyle='#ffd9c899';ctx.lineWidth=1.5;ctx.stroke();
+  }
+  requestAnimationFrame(loop)
+}
+addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowDown'){e.preventDefault();drop()}});
+cv.addEventListener('pointerdown',drop);
+reset();loop();
+</script></body></html>

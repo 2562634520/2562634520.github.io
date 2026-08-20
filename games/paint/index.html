@@ -1,0 +1,36 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>创意涂鸦</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#fff;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:58vh;touch-action:none;cursor:crosshair}
+.tools{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap;justify-content:center}
+.sw{width:28px;height:28px;border-radius:50%;border:2px solid #3a2020;cursor:pointer}
+.sw.on{border-color:#ffd9c8;transform:scale(1.15)}
+.btn{display:inline-block;padding:8px 16px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:13px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+.bar{font-size:13px;margin:4px 0}
+</style></head><body>
+<h1>🎨 创意涂鸦</h1><div class="hint">鼠标/手指自由绘画 · 选色、调粗细、可保存作品</div>
+<canvas id="c" width="680" height="420"></canvas>
+<div class="tools" id="tools"></div>
+<div class="bar">
+  <button class="btn" onclick="clearAll()">清空</button>
+  <button class="btn" onclick="saveImg()">保存作品</button>
+  <input type="range" id="size" min="2" max="40" value="8" style="vertical-align:middle">
+</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const COLORS=['#ff6b6b','#e0a63d','#3d9a5a','#3d7fd6','#8a5fd6','#ff9ecb','#6a4a32','#222','#fff','#d64545'];
+let color='#ff6b6b',drawing=false;
+ctx.fillStyle='#fff';ctx.fillRect(0,0,680,420);ctx.lineCap='round';ctx.lineJoin='round';
+const tools=document.getElementById('tools');
+COLORS.forEach(c=>{let d=document.createElement('div');d.className='sw'+(c===color?' on':'');d.style.background=c;
+d.onclick=()=>{color=c;[...tools.children].forEach(x=>x.classList.remove('on'));d.classList.add('on')};tools.appendChild(d)});
+function pos(e){let r=cv.getBoundingClientRect();return[(e.clientX-r.left)*(680/r.width),(e.clientY-r.top)*(420/r.height)]}
+cv.addEventListener('pointerdown',e=>{drawing=true;ctx.beginPath();let p=pos(e);ctx.moveTo(p[0],p[1])});
+cv.addEventListener('pointermove',e=>{if(!drawing)return;let p=pos(e);ctx.strokeStyle=color;ctx.lineWidth=+document.getElementById('size').value;ctx.lineTo(p[0],p[1]);ctx.stroke()});
+window.addEventListener('pointerup',()=>drawing=false);
+function clearAll(){ctx.fillStyle='#fff';ctx.fillRect(0,0,680,420)}
+function saveImg(){let a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='emeng-doodle.png';a.click()}
+</script></body></html>

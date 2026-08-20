@@ -1,0 +1,62 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🎯 跳棋</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🎯 跳棋</h1><canvas id="cv"></canvas>
+<div class="hint">点击棋子选中（绿点可跳），把全部红子跳到对岸即胜 · 支持连续跳跃</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let CELL=0,OX=0,OY=0;
+function size(){const w=Math.min(innerWidth-24,innerHeight-220,420);CELL=w/9;cv.style.width=w+'px';cv.style.height=w+'px';cv.width=w;cv.height=w;OX=w/2;OY=w/2}
+size();addEventListener('resize',()=>{size();draw()});
+const cells=[],map={};let board={},sel=null,turn='r',over=false,thinking=false,chain=null;
+function initCells(){cells.length=0;for(let q=-4;q<=4;q++)for(let r=-4;r<=4;r++){const s=-q-r;if(Math.abs(s)>4)continue;const id=q+','+r;cells.push({q,r,id});map[id]={q,r}}}
+const HOME_A=[],HOME_B=[];function buildHomes(){HOME_A.length=0;HOME_B.length=0;
+[[4,-4],[3,-4],[4,-3],[2,-4],[3,-3],[4,-2],[2,-3],[3,-2],[2,-2],[1,-1]].forEach(p=>HOME_A.push(p[0]+','+p[1]));
+[[-4,4],[-3,4],[-4,3],[-2,4],[-3,3],[-4,2],[-2,3],[-3,2],[-2,2],[-1,1]].forEach(p=>HOME_B.push(p[0]+','+p[1]));}
+function px(q,r){return[OX+(q+r/2)*CELL*0.86,OY+r*CELL*0.86]}
+function neighbors(q,r){return[[q+1,r],[q-1,r],[q,r+1],[q,r-1],[q+1,r-1],[q-1,r+1]].filter(p=>map[p[0]+','+p[1]])}
+function init(){initCells();buildHomes();board={};for(const c of cells){board[c.id]=HOME_A.includes(c.id)?'r':(HOME_B.includes(c.id)?'b':null)}
+sel=null;turn='r';over=false;thinking=false;chain=null}
+function inHome(id,s){return s==='r'?HOME_B.includes(id):HOME_A.includes(id)}
+function won(){return HOME_B.every(id=>board[id]==='r')&&HOME_A.every(id=>board[id]==='b')}
+function steps(id){return neighbors(map[id].q,map[id].r).filter(n=>!board[n[0]+','+n[1]])}
+function jumps(id){const out=[];const{q,r}=map[id];for(const[nq,nr]of neighbors(q,r)){const nid=nq+','+nr;if(!board[nid])continue;const jq=nq+(nq-q),jr=nr+(nr-r);const jid=jq+','+jr;if(map[jid]&&!board[jid])out.push(jid)}return out}
+function aiMove(){const ms=[];for(const c of cells){const id=c.id;if(board[id]!=='b')continue;const js=jumps(id);if(js.length){const d=dist(id,js[0]);ms.push({id,to:js[0],d})}}
+if(!ms.length){for(const c of cells){const id=c.id;if(board[id]!=='b')continue;const ss=steps(id);if(ss.length){const d=dist(id,ss[0]);ms.push({id,to:ss[0],d})}}}
+if(!ms.length)return;ms.sort((a,b)=>b.d-a.d);const m=ms[Math.floor(Math.random()*Math.min(3,ms.length))];board[m.to]=board[m.id];board[m.id]=null;sel=null;turn='r';after()}
+function dist(from,to){const a=map[from],b=map[to];return Math.abs(a.q-b.q)+Math.abs(a.r-b.r)}
+function after(){if(won()){over=true;msg.textContent=turn==='r'?'你赢了！':'电脑赢了！';document.querySelector('.over').classList.add('show');return}
+if(turn==='b'){thinking=true;setTimeout(()=>{thinking=false;aiMove();draw()},400)}draw()}
+cv.addEventListener('click',e=>{if(over||thinking)return;const x=(e.clientX-cv.getBoundingClientRect().left),y=(e.clientY-cv.getBoundingClientRect().top);let best=null,bd=1e9;for(const c of cells){const p=px(c.q,c.r);const d=Math.hypot(p[0]-x,p[1]-y);if(d<bd){bd=d;best=c}}if(bd>CELL*.9)return;const id=best.id;
+if(turn!=='r')return;
+if(chain&&chain.to===id){board[id]=board[chain.from];board[chain.from]=null;const js=jumps(id);chain=js.length?{from:id}:null;sel=js.length?id:null;if(!chain){turn='b';after()}draw();return}
+if(sel&&jumps(sel).includes(id)){board[id]=board[sel];board[sel]=null;const js=jumps(id);chain=js.length?{from:id}:null;sel=js.length?id:null;if(!chain){turn='b';after()}draw();return}
+if(sel&&steps(sel).includes(id)){board[id]=board[sel];board[sel]=null;sel=null;chain=null;turn='b';after();draw();return}
+if(board[id]==='r'){sel=id;chain=null;draw()}else sel=null});
+function draw(){ctx.clearRect(0,0,cv.width,cv.height);
+for(const c of cells){const p=px(c.q,c.r);ctx.beginPath();for(let i=0;i<6;i++){const a=Math.PI/3*i+Math.PI/6;const x=p[0]+Math.cos(a)*CELL*.42,y=p[1]+Math.sin(a)*CELL*.42;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)}ctx.closePath();
+ctx.fillStyle=(HOME_A.includes(c.id)||HOME_B.includes(c.id))?'#2a1618':'#1a1113';ctx.fill();ctx.strokeStyle='#5c3a36';ctx.stroke()}
+for(const c of cells){const id=c.id;const v=board[id];if(!v)continue;const p=px(c.q,c.r);const g=ctx.createRadialGradient(p[0]-2,p[1]-2,2,p[0],p[1],CELL*.32);
+if(v==='r'){g.addColorStop(0,'#ff9b78');g.addColorStop(1,'#b02a2a')}else{g.addColorStop(0,'#9fb8ff');g.addColorStop(1,'#2c4a9e')}
+ctx.fillStyle=g;ctx.beginPath();ctx.arc(p[0],p[1],CELL*.3,0,7);ctx.fill();ctx.strokeStyle='#0005';ctx.stroke()}
+if(sel){const p=px(map[sel].q,map[sel].r);ctx.strokeStyle='#ffd9c8';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p[0],p[1],CELL*.34,0,7);ctx.stroke();for(const j of jumps(sel)){const p2=px(map[j].q,map[j].r);ctx.fillStyle='rgba(214,69,69,.35)';ctx.beginPath();ctx.arc(p2[0],p2[1],CELL*.18,0,7);ctx.fill()}}
+ctx.fillStyle='#8f7f7b';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText(turn==='r'?'轮到你（红）':'电脑思考中…',OX,OY+CELL*4.4)}
+function restart(){document.querySelector('.over').classList.remove('show');init();draw()}
+init();draw();
+
+</script></body></html>

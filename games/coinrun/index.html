@@ -1,0 +1,50 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🪙 金币跑酷</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🪙 金币跑酷</h1><canvas id="cv"></canvas>
+<div class="info">得分 <b id="sc">0</b></div>
+<div class="hint">点击/空格跳跃 · 吃金币躲障碍，速度会越来越快</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0;
+function size(){W=Math.min(innerWidth-24,420);H=Math.floor(W*.78);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W;cv.height=H}
+size();addEventListener('resize',()=>{size();if(!over)draw()});
+let over=false,score=0,ground=0,vy=0,y=0,onGround=true,t=0,items=[],speed=5.5,tick=0;
+function init(){over=false;score=0;ground=H-70;y=ground;vy=0;onGround=true;t=0;items=[];speed=5.5;tick=0;document.getElementById('sc').textContent='0';document.querySelector('.over').classList.remove('show');loop()}
+function jump(){if(over)return;if(onGround){vy=-11.5;onGround=false}}
+cv.addEventListener('pointerdown',jump);addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();jump()}});
+function spawn(){const r=Math.random();if(r<.45)items.push({type:'coin',x:W+30,y:ground-45,vx:speed,r:12});else if(r<.75)items.push({type:'box',x:W+30,y:ground-34,vx:speed,w:34,h:34});else items.push({type:'bird',x:W+30,y:ground-74,vx:speed,r:16})}
+function step(){if(over)return;t++;tick++;if(tick%38===0)spawn();
+vy+=.55;y+=vy;if(y>=ground){y=ground;vy=0;onGround=true}
+for(const it of items){it.x-=it.vx;if(it.type==='coin'){it.y=ground-45+Math.sin(t*.08+it.x)*8}
+const px=46,py=y-24;
+if(it.type==='coin'){if(Math.hypot(px+12-it.x,py+12-(it.y+12))<24){score++;document.getElementById('sc').textContent=score;it.dead=true}}
+else if(it.type==='box'){if(px<it.x+it.w&&px+26>it.x&&py<it.y+it.h&&py+40>it.y){end('撞到障碍，得分 '+score)}}
+else{if(Math.hypot(px+13-(it.x),py+20-(it.y))<30){end('被小鸟撞到，得分 '+score)}}}
+items=items.filter(i=>!i.dead&&i.x>-50);
+if(!over&&t%700===0)speed+=.4;
+draw();requestAnimationFrame(step)}
+function end(m){over=true;msg.textContent=m;document.querySelector('.over').classList.add('show')}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#1c0f12';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#5a2b2b';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,ground);ctx.lineTo(W,ground);ctx.stroke();
+ctx.fillStyle='#b02a2a';ctx.fillRect(24,ground-26,22,26);ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(35,ground-36,7,0,7);ctx.fill();ctx.fillStyle='#2a1a1c';ctx.fillRect(20,ground-30,10,10);
+for(const it of items){if(it.dead)continue;if(it.type==='coin'){ctx.fillStyle='#ffc93c';ctx.beginPath();ctx.arc(it.x,it.y,it.r,0,7);ctx.fill();ctx.strokeStyle='#b8860b';ctx.stroke()}else if(it.type==='box'){ctx.fillStyle='#7a4a2b';ctx.fillRect(it.x,it.y,it.w,it.h);ctx.strokeStyle='#4a2a15';ctx.strokeRect(it.x,it.y,it.w,it.h)}else{ctx.fillStyle='#4a6a9e';ctx.beginPath();ctx.arc(it.x,it.y,it.r,0,7);ctx.fill();ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(it.x+5,it.y-4,4,0,7);ctx.fill()}}
+ctx.fillStyle='#ffd9c8';ctx.font='bold 16px sans-serif';ctx.textAlign='left';ctx.fillText('金币 '+score,12,24)}
+function restart(){init()}
+init();
+
+</script></body></html>

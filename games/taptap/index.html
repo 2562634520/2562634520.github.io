@@ -1,0 +1,27 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>疯狂连点</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
+h1{font-size:22px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:20px}
+#pad{width:min(90vw,360px);aspect-ratio:1.15;border-radius:24px;display:grid;place-items:center;background:#1a1214;border:2px solid #b02a2a66;box-shadow:0 0 24px #b02a2a2e;font-size:40px;font-weight:800;color:#ffd9c8;cursor:pointer;user-select:none;position:relative;overflow:hidden}
+#pad.pulse{animation:pls .1s}
+@keyframes pls{0%{transform:scale(1)}50%{transform:scale(.97)}100%{transform:scale(1)}}
+.burst{position:absolute;font-size:18px;color:#ffd9c8;animation:rise .7s forwards;pointer-events:none}
+@keyframes rise{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-80px)}}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 38px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>👆 疯狂连点</h1><div class="info"><span>次数 <b id="cnt">0</b></span><span>时间 <b id="tm">10</b>s</span></div><div id="pad">连点我！</div><div class="hint">10 秒内疯狂点击</div></div>
+<div class="over"><div class="panel"><b>点中 <span id="finalc">0</span> 次！</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const pad=document.getElementById('pad');let cnt=0,time=10,timer=null,playing=false;
+function restart(){cnt=0;time=10;playing=true;document.getElementById('cnt').textContent=0;document.getElementById('tm').textContent=10;document.querySelector('.over').classList.remove('show');clearInterval(timer);timer=setInterval(()=>{time--;document.getElementById('tm').textContent=time;if(time<=0){clearInterval(timer);playing=false;document.getElementById('finalc').textContent=cnt;document.querySelector('.over').classList.add('show')}},1000)}
+pad.addEventListener('pointerdown',e=>{if(!playing)return;cnt++;document.getElementById('cnt').textContent=cnt;pad.classList.remove('pulse');void pad.offsetWidth;pad.classList.add('pulse');let b=document.createElement('span');b.className='burst';b.textContent='+1';let r=pad.getBoundingClientRect();b.style.left=(e.clientX-r.left)+'px';b.style.top=(e.clientY-r.top)+'px';pad.appendChild(b);setTimeout(()=>b.remove(),700)});
+restart();
+</script></body></html>

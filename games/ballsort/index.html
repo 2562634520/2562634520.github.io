@@ -1,0 +1,43 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>彩球排序</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.score{font-size:13px;color:#d9a08f}
+.tubes{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;width:min(94vw,460px)}
+.tube{width:min(17vw,74px);display:flex;flex-direction:column-reverse;gap:4px;padding:8px 6px;border:2px solid #33262a;border-radius:0 0 14px 14px;background:#171215;min-height:220px;cursor:pointer;transition:.18s}
+.tube.sel{border-color:#d64545;box-shadow:0 0 18px #b02a2a55;transform:translateY(-4px)}
+.ball{height:42px;border-radius:50%;box-shadow:inset -4px -6px 10px #0005}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:block;margin:16px auto 0;padding:10px 30px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🧪 彩球排序</h1><div class="score">步数 <b id="mv">0</b> · 关卡 <span id="lv">1</span></div><div class="tubes" id="tubes"></div><div class="hint">点选试管取顶部彩球，再点另一根放入</div></div>
+<div class="over"><div class="panel"><b id="msg">过关！</b><button class="btn" id="nextBtn" onclick="next()">下一关</button></div></div>
+<script>
+const COLORS=['#c0392b','#2e8b57','#2b5fd9','#d9a52b','#8e44ad','#16a2a0'];
+const TUBES=6,CAP=4;let tubes=[],sel=-1,moves=0,lv=1;
+const box=document.getElementById('tubes');
+function start(){moves=0;sel=-1;
+const used=COLORS.slice(0,TUBES-2);const pool=[];
+used.forEach(c=>{for(let i=0;i<CAP;i++)pool.push(c)});
+for(let i=pool.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[pool[i],pool[j]]=[pool[j],pool[i]]}
+tubes=[];for(let i=0;i<TUBES;i++)tubes.push(pool.splice(0,CAP));
+document.querySelector('.over').classList.remove('show');sync();render()}
+function sync(){document.getElementById('mv').textContent=moves;document.getElementById('lv').textContent=lv}
+function render(){box.innerHTML='';tubes.forEach((t,i)=>{const d=document.createElement('div');d.className='tube'+(i===sel?' sel':'');d.onclick=()=>tap(i);t.forEach(c=>{const b=document.createElement('div');b.className='ball';b.style.background=c;d.appendChild(b)});box.appendChild(d)})}
+function isDone(i){const t=tubes[i];return t.length===CAP&&t.every(c=>c===t[0])}
+function tap(i){const t=tubes[i];
+if(sel<0){if(t.length&&!isDone(i)){sel=i;render()}return}
+if(sel===i){sel=-1;render();return}
+const s=tubes[sel];const ball=s[s.length-1];
+if(t.length<CAP&&(!t.length||t[t.length-1]===ball)){s.pop();t.push(ball);moves++;sel=-1;sync();render();checkWin()}
+else{sel=-1;render()}}
+function checkWin(){if(tubes.every(isDone)){document.getElementById('msg').textContent='第 '+lv+' 关完成！';document.getElementById('nextBtn').textContent='下一关';document.querySelector('.over').classList.add('show')}}
+function next(){lv++;if(lv>3)lv=1;start()}
+start();
+</script></body></html>

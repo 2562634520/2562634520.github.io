@@ -1,0 +1,51 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🀄 连连看</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🀄 连连看</h1><canvas id="cv"></canvas>
+<div class="info">剩余 <b id="sc">36</b></div>
+<div class="hint">点击两张相同麻将牌，中间路线上无牌且最多拐两次即可消除</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let N=6,CELL=0,grid=[],sel=null,left=0;
+const TILES=['🀄','🀅','🀆','🀇','🀈','🀉','🀊','🀋','🀌','🀍','🀎','🀏','🀐','🀑','🀒','🀓','🀔','🀕'];
+function size(){const w=Math.min(innerWidth-24,390);CELL=Math.floor(w/N);cv.style.width=(CELL*N)+'px';cv.style.height=(CELL*N)+'px';cv.width=CELL*N;cv.height=CELL*N}
+size();addEventListener('resize',()=>{size();draw()});
+function init(){const pairs=[];const pool=[];for(let i=0;i<TILES.length&&pool.length<N*N;i++){for(let j=0;j<2;j++)pool.push(i)}
+while(pool.length<N*N)pool.push(Math.floor(Math.random()*TILES.length));
+for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
+grid=[];for(let y=0;y<N;y++){const row=[];for(let x=0;x<N;x++)row.push(pool[y*N+x]);grid.push(row)}
+left=N*N;sel=null;document.getElementById('sc').textContent=left;document.querySelector('.over').classList.remove('show');draw()}
+function lineClear(x1,y1,x2,y2){if(x1===x2){const a=Math.min(y1,y2),b=Math.max(y1,y2);for(let y=a+1;y<b;y++)if(grid[y][x1]!==null)return false;return true}
+if(y1===y2){const a=Math.min(x1,x2),b=Math.max(x1,x2);for(let x=a+1;x<b;x++)if(grid[y1][x]!==null)return false;return true}
+if(grid[y1][x2]===null&&lineClear(x1,y1,x1,y2)&&lineClear(x1,y2,x2,y2))return true;
+if(grid[y2][x1]===null&&lineClear(x1,y1,x2,y1)&&lineClear(x2,y1,x2,y2))return true;
+return false}
+function connectable(x1,y1,x2,y2){
+if(lineClear(x1,y1,x2,y2))return true;
+for(let x=0;x<N;x++){if(grid[y1][x]===null&&lineClear(x1,y1,x,y1)&&lineClear(x,y1,x,y2)&&lineClear(x,y2,x2,y2))return true}
+for(let y=0;y<N;y++){if(grid[y][x1]===null&&lineClear(x1,y1,x1,y)&&lineClear(x1,y,x2,y)&&lineClear(x2,y,x2,y2))return true}
+return false}
+cv.addEventListener('pointerdown',e=>{if(document.querySelector('.over').classList.contains('show'))return;const r=cv.getBoundingClientRect();const x=Math.floor((e.clientX-r.left)/CELL),y=Math.floor((e.clientY-r.top)/CELL);if(x<0||x>=N||y<0||y>=N)return;const v=grid[y][x];if(v===null)return;
+if(sel){const[sx,sy]=sel;if(sx===x&&sy===y){sel=null;draw();return}if(grid[sy][sx]===v&&connectable(sx,sy,x,y)){grid[sy][sx]=null;grid[y][x]=null;left-=2;document.getElementById('sc').textContent=left;sel=null;draw();if(left===0){document.querySelector('.over').classList.add('show');msg.textContent='全部消除，连连看通关！'}return}sel=[x,y]}else{sel=[x,y]}
+draw()});
+function draw(){ctx.clearRect(0,0,cv.width,cv.height);ctx.fillStyle='#141018';ctx.fillRect(0,0,cv.width,cv.height);for(let y=0;y<N;y++)for(let x=0;x<N;x++){const v=grid[y][x];if(v===null)continue;ctx.fillStyle=sel&&sel[0]===x&&sel[1]===y?'#3a2a4a':'#241a28';ctx.fillRect(x*CELL+2,y*CELL+2,CELL-4,CELL-4);ctx.strokeStyle='#5a3a6a';ctx.strokeRect(x*CELL+2,y*CELL+2,CELL-4,CELL-4);ctx.font=Math.floor(CELL*.52)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(TILES[v]||'🀫',x*CELL+CELL/2,y*CELL+CELL/2+2)}
+ctx.fillStyle='#ffd9c8';ctx.font='bold 14px sans-serif';ctx.textAlign='left';ctx.fillText('剩余 '+left,8,16)}
+function restart(){init()}
+init();
+
+</script></body></html>

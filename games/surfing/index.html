@@ -1,0 +1,45 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🏄 冲浪</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🏄 冲浪</h1><canvas id="cv"></canvas>
+<div class="info">冲浪 <b id="sc">0</b></div>
+<div class="hint">点击/空格跳跃越过涌来的浪花</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0;
+function size(){W=Math.min(innerWidth-24,460);H=Math.floor(W*.6);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W;cv.height=H}
+size();addEventListener('resize',()=>{size();draw()});
+let over=false,score=0,surfer={x:90,y:0,vy:0,onWave:true},waves=[],tick=0,speed=5.5;
+function init(){over=false;score=0;surfer={x:90,y:0,vy:0,onWave:true};waves=[];tick=0;speed=5.5;document.getElementById('sc').textContent='0';document.querySelector('.over').classList.remove('show');loop()}
+cv.addEventListener('pointerdown',()=>{if(over)return;surfer.vy=-10;surfer.onWave=false});
+addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();if(over)return;surfer.vy=-10;surfer.onWave=false}});
+function step(){if(over)return;tick++;score++;document.getElementById('sc').textContent=Math.floor(score/4);
+surfer.vy+=.55;surfer.y+=surfer.vy;if(surfer.y>=0){surfer.y=0;surfer.vy=0;surfer.onWave=true}
+if(tick%40===0)waves.push({x:W+60,h:18+Math.random()*16,up:Math.random()<.5});
+for(const wv of waves){wv.x-=speed;if(wv.x<surfer.x+28&&wv.x>surfer.x-20&&surfer.y<0&&Math.abs(surfer.y)<wv.h+14){over=true;msg.textContent='被浪打翻！冲浪 '+Math.floor(score/4);document.querySelector('.over').classList.add('show')}}
+waves=waves.filter(w=>w.x>-80);if(tick%500===0)speed+=.3;
+draw();requestAnimationFrame(step)}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#0f1f2a';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#3a8ab0';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,H*.72);ctx.quadraticCurveTo(W*.4,H*.64,W,H*.7);ctx.stroke();
+for(const wv of waves){if(wv.x<-80)continue;ctx.fillStyle='rgba(58,138,176,.45)';ctx.beginPath();ctx.moveTo(wv.x,H*.72);ctx.quadraticCurveTo(wv.x+wv.h,wv.up?H*.68:H*.74,wv.x+wv.h*2,H*.72);ctx.fill()}
+const y=H*.72+surfer.y;ctx.fillStyle='#e8dcd5';ctx.beginPath();ctx.ellipse(surfer.x,y-8,18,7,0,0,7);ctx.fill();ctx.fillStyle='#b02a2a';ctx.fillRect(surfer.x-4,y-26,10,18);ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(surfer.x+1,y-30,6,0,7);ctx.fill();
+ctx.fillStyle='#ffd9c8';ctx.font='bold 15px sans-serif';ctx.textAlign='left';ctx.fillText('冲浪 '+Math.floor(score/4),12,24)}
+function restart(){init()}
+let running=false;function loop(){if(running)return;running=true;step()}
+init();
+
+</script></body></html>

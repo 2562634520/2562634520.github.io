@@ -1,0 +1,49 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🔲 点点连方</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🔲 点点连方</h1><canvas id="cv"></canvas>
+<div class="info">比分 <b id="sc">0 : 0</b> · 谁完成方格归谁</div>
+<div class="hint">点击两点之间的线段画线 · 围成方格得分并继续</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let N=5,CELL=0,MARGIN=0,hline=[],vline=[],owner=[],turn=0,scoreP=0,scoreA=0,over=false,thinking=false;
+function size(){const w=Math.min(innerWidth-24,380);CELL=Math.floor(w/(N-1));MARGIN=20;cv.style.width=(CELL*(N-1)+MARGIN*2)+'px';cv.style.height=(CELL*(N-1)+MARGIN*2)+'px';cv.width=CELL*(N-1)+MARGIN*2;cv.height=CELL*(N-1)+MARGIN*2}
+size();addEventListener('resize',()=>{size();draw()});
+function pt(x,y){return[MARGIN+x*CELL,MARGIN+y*CELL]}
+function init(){hline=Array.from({length:N},()=>Array(N-1).fill(false));vline=Array.from({length:N-1},()=>Array(N).fill(false));owner=Array.from({length:N-1},()=>Array(N-1).fill(-1));turn=0;scoreP=0;scoreA=0;over=false;thinking=false;document.getElementById('sc').textContent='0 : 0';document.querySelector('.over').classList.remove('show');draw()}
+function findLine(x,y){let best=null,bd=1e9;for(let i=0;i<N;i++)for(let j=0;j<N-1;j++){if(hline[i][j])continue;const[x1,y1]=pt(j,i),[x2,y2]=pt(j+1,i);const d=distSeg(x,y,x1,y1,x2,y2);if(d<bd){bd=d;best={k:'h',i,j}}}for(let i=0;i<N-1;i++)for(let j=0;j<N;j++){if(vline[i][j])continue;const[x1,y1]=pt(j,i),[x2,y2]=pt(j,i+1);const d=distSeg(x,y,x1,y1,x2,y2);if(d<bd){bd=d;best={k:'v',i,j}}}return bd<14?best:null}
+function distSeg(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1;const t=Math.max(0,Math.min(1,((px-x1)*dx+(py-y1)*dy)/(dx*dx+dy*dy)));return Math.hypot(px-(x1+t*dx),py-(y1+t*dy))}
+cv.addEventListener('pointerdown',e=>{if(over||thinking)return;const r=cv.getBoundingClientRect();const x=e.clientX-r.left,y=e.clientY-r.top;const l=findLine(x,y);if(l)doMove(l);if(turn===1&&!over){thinking=true;setTimeout(()=>{aiMove();draw();thinking=false},350)}});
+function doMove(l){if(l.k==='h'){hline[l.i][l.j]=true}else{vline[l.i][l.j]=true}
+const gains=[0,0];for(let i=0;i<N-1;i++)for(let j=0;j<N-1;j++){if(owner[i][j]>=0)continue;if(hline[i][j]&&hline[i+1][j]&&vline[i][j]&&vline[i][j+1]){owner[i][j]=turn;gains[turn]++}}
+if(gains[turn]){scoreP+=gains[0];scoreA+=gains[1];document.getElementById('sc').textContent=scoreP+' : '+scoreA}else{turn=1-turn}
+if(scoreP+scoreA===(N-1)*(N-1)){over=true;msg.textContent=(scoreP>scoreA?'你赢了！':scoreA>scoreP?'电脑赢了！':'平局')+' '+scoreP+' : '+scoreA;document.querySelector('.over').classList.add('show')}
+draw()}
+function aiMove(){const opts=[];for(let i=0;i<N;i++)for(let j=0;j<N-1;j++)if(!hline[i][j])opts.push({k:'h',i,j});for(let i=0;i<N-1;i++)for(let j=0;j<N;j++)if(!vline[i][j])opts.push({k:'v',i,j});
+let safe=opts.filter(l=>{if(l.k==='h'){return !(l.i>0&&vline[l.i-1][l.j]&&vline[l.i-1][l.j+1]&&hline[l.i-1][l.j]&&vline[l.i][l.j]&&vline[l.i][l.j+1])&&!(l.i<N-1&&vline[l.i][l.j]&&vline[l.i][l.j+1]&&hline[l.i+1][l.j]&&vline[l.i+1][l.j]&&vline[l.i+1][l.j+1])}return !(l.j>0&&hline[l.i][l.j-1]&&hline[l.i+1][l.j-1]&&vline[l.i][l.j-1]&&hline[l.i][l.j]&&hline[l.i+1][l.j])&&!(l.j<N-1&&hline[l.i][l.j]&&hline[l.i+1][l.j]&&vline[l.i][l.j+1]&&hline[l.i][l.j+1]&&hline[l.i+1][l.j+1])});
+const pool=safe.length?safe:opts;if(pool.length)doMove(pool[Math.floor(Math.random()*pool.length)])}
+function draw(){ctx.clearRect(0,0,cv.width,cv.height);ctx.fillStyle='#141018';ctx.fillRect(0,0,cv.width,cv.height);
+for(let i=0;i<N;i++)for(let j=0;j<N;j++){const[x,y]=pt(j,i);ctx.fillStyle='#8a6a9a';ctx.beginPath();ctx.arc(x,y,4,0,7);ctx.fill()}
+for(let i=0;i<N;i++)for(let j=0;j<N-1;j++){const[x1,y1]=pt(j,i),[x2,y2]=pt(j+1,i);ctx.strokeStyle=hline[i][j]?'#d64545':'#3a2a3a';ctx.lineWidth=hline[i][j]?3:1.5;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
+for(let i=0;i<N-1;i++)for(let j=0;j<N;j++){const[x1,y1]=pt(j,i),[x2,y2]=pt(j,i+1);ctx.strokeStyle=vline[i][j]?'#d64545':'#3a2a3a';ctx.lineWidth=vline[i][j]?3:1.5;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
+for(let i=0;i<N-1;i++)for(let j=0;j<N-1;j++){if(owner[i][j]<0)continue;const[x,y]=pt(j,i);ctx.fillStyle=owner[i][j]===0?'#d6454566':'#4a6a9e66';ctx.fillRect(x+3,y+3,CELL-6,CELL-6)}
+ctx.fillStyle='#ffd9c8';ctx.font='bold 15px sans-serif';ctx.textAlign='left';ctx.fillText('你 '+scoreP+' : '+scoreA+' 电脑',12,24)}
+function restart(){init()}
+init();
+
+</script></body></html>

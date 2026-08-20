@@ -1,0 +1,40 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>📝 填字游戏</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style>
+.cr{display:flex;gap:3px;justify-content:center}
+.cc{width:38px;height:38px;border:1px solid #5a3a3a;border-radius:6px;text-align:center;font-size:18px;font-weight:700;color:#ffd9c8;background:#1c1214;text-transform:uppercase}
+.cc:focus{outline:2px solid #d64545}</head><body>
+<div class="wrap"><h1>📝 填字游戏</h1><div id="box" style="display:flex;flex-direction:column;gap:3px"></div>
+<div id="cl" class="info" style="max-width:420px;text-align:center;line-height:1.5"></div>
+<div class="hint">深色格子已给出 · 浅色格子输入英文答案</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const PUZZLE={words:[{a:0,b:0,dir:1,ans:'CAT',clue:'猫的英文'},{a:3,b:0,dir:1,ans:'DOG',clue:'狗的英文'},{a:0,b:1,dir:0,ans:'ART',clue:'艺术'},{a:0,b:2,dir:0,ans:'TEA',clue:'茶'}],N:6};
+let grid=[],focus=null,cells=[];
+function init(){grid=[];for(let y=0;y<PUZZLE.N;y++)grid.push(Array(PUZZLE.N).fill(''));
+for(const w of PUZZLE.words){for(let i=0;i<w.ans.length;i++){const x=w.a+(w.dir?i:0),y=w.b+(w.dir?0:i);grid[y][x]=w.ans[i].toLowerCase()}}
+const box=document.getElementById('box');box.innerHTML='';cells=[];for(let y=0;y<PUZZLE.N;y++){const row=document.createElement('div');row.className='cr';for(let x=0;x<PUZZLE.N;x++){const c=document.createElement('input');c.className='cc';c.maxLength=1;c.value=grid[y][x]?grid[y][x].toUpperCase():'';c.disabled=!!grid[y][x];c.dataset.x=x;c.dataset.y=y;c.style.background=grid[y][x]?'#3a2a2a':'#1c1214';c.oninput=()=>{const v=c.value.replace(/[^a-zA-Z]/g,'').toUpperCase();c.value=v;if(v){const n=next(x,y);if(n)cells[n.y][n.x].focus()}check()};c.onfocus=()=>{focus={x,y};draw()};row.appendChild(c);cells.push(row.children[x]||c)}box.appendChild(row)}
+document.getElementById('cl').textContent=PUZZLE.words.map(w=>'('+(w.dir?'横':'纵')+(w.b+1)+') '+(w.a+1)+' '+w.clue+'：'+w.ans.length+'字').join(' · ');draw()}
+function next(x,y){for(let i=0;i<PUZZLE.N;i++)for(let j=0;j<PUZZLE.N;j++){const c=document.querySelector('.cc[data-x="'+i+'"][data-y="'+j+'"]');if(c&&!c.disabled)return{x:i,y:j}}return null}
+function check(){const ok=PUZZLE.words.every(w=>{for(let i=0;i<w.ans.length;i++){const x=w.a+(w.dir?i:0),y=w.b+(w.dir?0:i);const c=cells[y][x];if(!c||c.value!==w.ans[i].toUpperCase())return false}return true});
+if(ok){document.querySelector('.over').classList.add('show');msg.textContent='全部填对，通关！'}}
+function draw(){if(!focus)return;const el=cells[focus.y]&&cells[focus.x];if(el){el.focus()}}
+function restart(){init()}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();if(focus){const n=next(focus.x,focus.y);if(n){cells[n.y][n.x].focus()}}}});
+init();
+
+</script></body></html>

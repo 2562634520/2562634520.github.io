@@ -1,0 +1,39 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🌊 洪水填色</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🌊 洪水填色</h1><canvas id="cv"></canvas>
+<div id="pal" style="display:flex;justify-content:center;flex-wrap:wrap;max-width:360px"></div>
+<div class="info">步数 <b id="sc">0 / 18</b></div>
+<div class="hint">点击颜色把左上角洪水区染满全盘，18 步内完成</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let N=8,CELL=0,grid=[],steps=0,limit=18;
+const COLORS=['#d64545','#e8a13c','#57c96e','#4a9ede','#9b6be0','#e8d53c'];
+function size(){const w=Math.min(innerWidth-24,360);CELL=Math.floor(w/N);cv.style.width=(CELL*N)+'px';cv.style.height=(CELL*N)+'px';cv.width=CELL*N;cv.height=CELL*N}
+size();addEventListener('resize',()=>{size();draw()});
+function init(){steps=0;grid=[];for(let y=0;y<N;y++){const row=[];for(let x=0;x<N;x++)row.push(Math.floor(Math.random()*COLORS.length));grid.push(row)}document.getElementById('sc').textContent='0 / '+limit;document.querySelector('.over').classList.remove('show');draw()}
+function paint(c){if(c===grid[0][0])return;const old=grid[0][0];const seen=new Set(['0,0']);const q=[[0,0]];while(q.length){const[x,y]=q.shift();grid[y][x]=c;for(const[nx,ny]of[[x-1,y],[x+1,y],[x,y-1],[x,y+1]]){if(nx>=0&&nx<N&&ny>=0&&ny<N&&grid[ny][nx]===old&&!seen.has(nx+','+ny)){seen.add(nx+','+ny);q.push([nx,ny])}}}
+steps++;document.getElementById('sc').textContent=steps+' / '+limit;draw();
+const all=new Set(grid.flat());if(all.size===1){document.querySelector('.over').classList.add('show');msg.textContent='成功了！用了 '+steps+' 步'}else if(steps>=limit){document.querySelector('.over').classList.add('show');msg.textContent='超过 '+limit+' 步，再试试！'}}
+function draw(){ctx.clearRect(0,0,cv.width,cv.height);for(let y=0;y<N;y++)for(let x=0;x<N;x++){ctx.fillStyle=COLORS[grid[y][x]];ctx.fillRect(x*CELL,y*CELL,CELL-2,CELL-2);ctx.strokeStyle='#0b090c';ctx.strokeRect(x*CELL+.5,y*CELL+.5,CELL-2,CELL-2)}}
+function restart(){init()}
+function pick(c){paint(c)}
+init();
+const bar=document.getElementById('pal');if(bar){bar.innerHTML='';COLORS.forEach((c,i)=>{const b=document.createElement('button');b.style.cssText='width:42px;height:42px;margin:5px;border-radius:10px;background:'+c+';border:2px solid #fff3;cursor:pointer';b.onclick=()=>pick(i);bar.appendChild(b)})}
+
+</script></body></html>

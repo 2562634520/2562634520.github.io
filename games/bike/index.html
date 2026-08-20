@@ -1,0 +1,67 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>山地单车</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#1c2218;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:68vh;touch-action:none}
+.btns{display:flex;gap:10px;margin:8px 0}
+.btn2{width:90px;padding:11px 0;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:10px;font-size:14px;cursor:pointer}
+.btn2:active{transform:scale(.95)}
+.bar{font-size:13px}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🚴 山地单车</h1><div class="hint">保持平衡骑行 · 越障碍 · 摔了就结束</div>
+<canvas id="c" width="360" height="480"></canvas>
+<div class="btns"><button class="btn2" id="left">⬅ 左倾</button><button class="btn2" id="jump">⬆ 跳跃</button><button class="btn2" id="right">右倾 ➡</button></div>
+<div class="bar">距离 <b id="ds">0</b> 米 · 最佳 <b id="best">0</b> 米</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=360,H=480;
+let tilt=0,y=0,vy=0,dist=0,speed=6,obs=[],run=true,best=+(localStorage.getItem('bikeBest')||0),jumpHeld=false;
+document.getElementById('best').textContent=best;
+function setup(){tilt=0;y=0;vy=0;dist=0;speed=6;obs=[];run=true;jumpHeld=false}
+function tick(){
+  if(!run)return;
+  speed=6+dist/200;dist+=speed/10;document.getElementById('ds').textContent=dist|0;
+  const lean=(keys.l?-1:0)+(keys.r?1:0);
+  tilt+=lean*.25-jumpHeld*0;tilt*=.985;
+  if(tilt>42||tilt<-42){run=false;const d=dist|0;if(d>best){best=d;localStorage.setItem('bikeBest',best);document.getElementById('best').textContent=best}show('💥 摔车了','骑了 '+d+' 米 · 最佳 '+best+' 米');return}
+  vy+=.55;y+=vy;if(y>0){y=0;vy=0}
+  if(keys.j&&y===0)vy=-9;
+  if(Math.random()<.012)obs.push({x:W+20,w:14+Math.random()*12,h:16+Math.random()*20});
+  obs.forEach(o=>o.x-=speed);
+  obs=obs.filter(o=>o.x>-30);
+  obs.forEach(o=>{if(y<4&&o.x<84&&o.x+o.w>40&&o.y+o.h>0){const d=dist|0;if(d>best){best=d;localStorage.setItem('bikeBest',best);document.getElementById('best').textContent=best}run=false;show('💥 撞上障碍','骑了 '+d+' 米 · 最佳 '+best+' 米')}});
+  draw();
+}
+const keys={l:false,r:false,j:false};
+function bind(id,k){const el=document.getElementById(id);el.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true});el.addEventListener('pointerup',()=>keys[k]=false);el.addEventListener('pointerleave',()=>keys[k]=false)}
+bind('left','l');bind('right','r');bind('jump','j');
+window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')keys.l=true;if(e.key==='ArrowRight')keys.r=true;if(e.key==='ArrowUp')keys.j=true});
+window.addEventListener('keyup',e=>{if(e.key==='ArrowLeft')keys.l=false;if(e.key==='ArrowRight')keys.r=false;if(e.key==='ArrowUp')keys.j=false});
+function draw(){
+  ctx.fillStyle='#1c2218';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#5a4a2a';ctx.fillRect(0,H-90,W,90);
+  ctx.fillStyle='#7a6a3a';for(let i=0;i<W;i+=36){const x=(i-dist*3)%(W+36)-18;ctx.beginPath();ctx.moveTo(x,H-90);ctx.lineTo(x+18,H-60);ctx.lineTo(x,H-30);ctx.closePath();ctx.fill()}
+  obs.forEach(o=>{ctx.fillStyle='#6a5a2a';ctx.fillRect(o.x,H-90-o.h,o.w,o.h);ctx.fillStyle='#8a7a3a';ctx.fillRect(o.x-3,H-90-o.h-8,o.w+6,8)});
+  const px=50,py=H-118-y;
+  ctx.save();ctx.translate(px,py);ctx.rotate(tilt*Math.PI/180);
+  ctx.strokeStyle='#222';ctx.lineWidth=3;
+  ctx.beginPath();ctx.arc(-10,8,8,0,7);ctx.stroke();ctx.beginPath();ctx.arc(12,8,8,0,7);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(-10,8);ctx.lineTo(0,-8);ctx.lineTo(12,8);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,-8);ctx.lineTo(0,-18);ctx.stroke();
+  ctx.fillStyle='#b02a2a';ctx.beginPath();ctx.arc(0,-22,6,0,7);ctx.fill();
+  ctx.restore();
+  ctx.fillStyle='#ffd9c8';ctx.font='11px sans-serif';ctx.textAlign='center';
+  ctx.fillText('倾斜 '+tilt|0+'°',180,H-96);
+}
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup()}
+setup();setInterval(tick,16);
+</script></body></html>

@@ -1,0 +1,25 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>反应力测试</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
+h1{font-size:22px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:20px}
+#pad{width:min(90vw,420px);aspect-ratio:1.2;border-radius:24px;display:grid;place-items:center;font-size:26px;font-weight:800;cursor:pointer;user-select:none;text-align:center;transition:background .12s;background:#1a1214;border:2px solid #b02a2a66;box-shadow:0 0 24px #b02a2a2e;padding:18px;color:#8f7f7b}
+#pad.go{background:#5a1f1f;color:#ffd9c8;font-size:34px;box-shadow:0 0 40px #b02a2a66}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 38px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>⚡ 反应力测试</h1><div class="info"><span>第 <b id="round">1</b>/5 轮</span><span>最佳 <b id="best">-</b>ms</span></div><div id="pad">点击开始<br>看到变色立刻点击</div><div class="hint">测 5 轮取最佳成绩</div></div>
+<div class="over"><div class="panel"><b>最佳 <span id="finalsc">0</span> ms</b><button class="btn" onclick="restart()">再测一次</button></div></div>
+<script>
+const pad=document.getElementById('pad');let round=1,best=Infinity,state='idle',startT=0,timer=null,results=[];
+function restart(){round=1;best=Infinity;results=[];document.getElementById('round').textContent=1;document.getElementById('best').textContent='-';document.querySelector('.over').classList.remove('show');idle()}
+function idle(){state='idle';pad.style.background='#1a1214';pad.textContent='等待变色…';timer=setTimeout(()=>{state='go';pad.style.background='#5a1f1f';pad.textContent='点击！';startT=performance.now()},1200+Math.random()*2600)}
+pad.addEventListener('pointerdown',()=>{if(state==='idle'){clearTimeout(timer);idle()}else if(state==='go'){let ms=performance.now()-startT;results.push(ms);best=Math.min(best,ms);document.getElementById('best').textContent=Math.round(best)+'ms';if(round>=5){state='done';document.getElementById('finalsc').textContent=Math.round(best);document.querySelector('.over').classList.add('show')}else{round++;document.getElementById('round').textContent=round;state='wait';pad.style.background='#1a1214';pad.textContent='太棒了！等待下一轮…';setTimeout(idle,900)}}else if(state==='wait'){clearTimeout(timer);idle()}});
+restart();
+</script></body></html>

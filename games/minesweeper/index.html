@@ -1,0 +1,30 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>扫雷</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:18px}
+#bd{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:3px;background:#120e11;border:2px solid #b02a2a66;border-radius:12px;padding:8px;box-shadow:0 0 24px #b02a2a2e;width:min(92vw,330px)}
+.cell{aspect-ratio:1;display:grid;place-items:center;background:#241a1c;border-radius:5px;font-size:14px;font-weight:700;cursor:pointer;user-select:none;transition:background .1s}
+.cell.open{background:#171215}
+.cell:active{transform:scale(.9)}
+.c1{color:#8faeff}.c2{color:#8fd98f}.c3{color:#ff8f8f}.c4{color:#c98fff}.c5{color:#ffcf8f}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 34px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>💣 扫雷</h1><div class="info"><span>剩余雷 <b id="left">10</b></span><span>用时 <b id="tm">0</b>s</span></div><div id="bd"></div><div class="hint">点击翻开 · 长按/右键插旗</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const R=9,C=9,M=10,bd=document.getElementById('bd');let grid=[],started=0,time=0,timer=null,flagCount=0;
+function restart(){flagCount=0;grid=[];started=0;time=0;clearInterval(timer);document.getElementById('tm').textContent=0;document.getElementById('left').textContent=M;document.querySelector('.over').classList.remove('show');bd.innerHTML='';for(let i=0;i<R*C;i++){let d=document.createElement('div');d.className='cell';d.dataset.i=i;d.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button===2){e.preventDefault();toggleFlag(i)}else if(e.pointerType==='mouse'){}else{longPress(i)}});d.addEventListener('contextmenu',e=>e.preventDefault());d.addEventListener('pointerup',e=>{if(e.pointerType!=='mouse'||e.button!==0)return;open(i)});bd.appendChild(d);grid.push({n:0,mine:false,open:false,flag:false,el:d})}for(let n=0;n<M;n++){let p;do{p=Math.random()*R*C|0}while(grid[p].mine);grid[p].mine=true}for(let i=0;i<R*C;i++){let r=i/C|0,c=i%C,n=0;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){let nr=r+dr,nc=c+dc;if(nr>=0&&nr<R&&nc>=0&&nc<C&&grid[nr*C+nc].mine)n++}grid[i].n=n}}
+function longPress(i){toggleFlag(i)}
+function toggleFlag(i){let g=grid[i];if(g.open)return;g.flag=!g.flag;flagCount+=g.flag?1:-1;g.el.textContent=g.flag?'🚩':'';g.el.style.background=g.flag?'#3a1f1f':'#241a1c';document.getElementById('left').textContent=M-flagCount}
+function open(i){if(!started){started=1;timer=setInterval(()=>{time++;document.getElementById('tm').textContent=time},1000)}let g=grid[i];if(g.open||g.flag)return;g.open=true;g.el.classList.add('open');if(g.mine){g.el.textContent='💣';end(false);return}g.el.textContent=g.n||'';if(g.n)g.el.className='cell open c'+g.n;if(!g.n){let r=i/C|0,c=i%C;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){let nr=r+dr,nc=c+dc;if(nr>=0&&nr<R&&nc>=0&&nc<C)open(nr*C+nc)}}if(grid.every(x=>x.open||x.mine))end(true)}
+function end(win){clearInterval(timer);document.getElementById('msg').textContent=win?'🎉 恭喜排雷成功！':'💥 踩雷了';document.querySelector('.over').classList.add('show')}
+restart();
+</script></body></html>

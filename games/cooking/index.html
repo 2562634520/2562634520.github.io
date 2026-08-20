@@ -1,0 +1,52 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>烘焙工坊</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+.wrap{width:96vw;max-width:420px;display:flex;flex-direction:column;gap:10px}
+.step{background:#1a0f12;border:1px solid #5a2424;border-radius:12px;padding:12px 16px;text-align:center;font-size:14px;min-height:48px;display:flex;align-items:center;justify-content:center}
+.ings{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.ing{width:72px;padding:8px 4px;background:linear-gradient(145deg,#3a2424,#241517);border:1px solid #6a2e2e;border-radius:10px;text-align:center;font-size:12px;cursor:pointer}
+.ing b{display:block;font-size:22px;margin-bottom:4px}
+.ing:active{transform:scale(.95)}
+.bar{font-size:13px;text-align:center}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🍰 烘焙工坊</h1><div class="hint">按配方顺序点原料 · 60 秒做出越多蛋糕越好</div>
+<div class="wrap">
+  <div class="bar">时间 <b id="time">60</b>s · 完成 <b id="cakes">0</b> 个 · 连对 <b id="combo">0</b></div>
+  <div class="step" id="step">点开始做蛋糕！</div>
+  <div class="ings" id="ings"></div>
+</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const RECIPES=[
+{name:'🍰 奶油蛋糕',steps:['🥚 鸡蛋','🌾 面粉','🥛 牛奶','🍬 糖','🧈 黄油']},
+{name:'🍪 曲奇',steps:['🌾 面粉','🍬 糖','🥚 鸡蛋','🍫 巧克力']},
+{name:'🥧 苹果派',steps:['🍎 苹果','🌾 面粉','🧈 黄油','🍬 糖']},
+{name:'🍩 甜甜圈',steps:['🌾 面粉','🥚 鸡蛋','🥛 牛奶','🍬 糖','🍫 巧克力']}];
+const POOL=['🥚 鸡蛋','🌾 面粉','🥛 牛奶','🍬 糖','🧈 黄油','🍫 巧克力','🍎 苹果'];
+let cur=0,step=0,cakes=0,combo=0,time=60,run=false,timer=null;
+function startRound(){cur=Math.floor(Math.random()*RECIPES.length);step=0;
+document.getElementById('step').textContent=RECIPES[cur].name+'：第 1 步 → '+RECIPES[cur].steps[0];renderIngs()}
+function renderIngs(){let box=document.getElementById('ings');box.innerHTML='';
+let need=RECIPES[cur].steps[step];
+let opts=[need];while(opts.length<4){let c=POOL[Math.floor(Math.random()*POOL.length)];if(!opts.includes(c))opts.push(c)}
+for(let i=opts.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));let t=opts[i];opts[i]=opts[j];opts[j]=t}
+opts.forEach(o=>{let d=document.createElement('div');d.className='ing';d.innerHTML='<b>'+o.split(' ')[0]+'</b>'+o.split(' ')[1];
+d.onclick=()=>{if(!run)return;if(o===need){step++;combo++;if(step>=RECIPES[cur].steps.length){cakes++;combo=0;startRound()}
+else{document.getElementById('step').textContent=RECIPES[cur].name+'：第 '+(step+1)+' 步 → '+RECIPES[cur].steps[step]}
+renderIngs()}else{combo=0}}
+document.getElementById('combo').textContent=combo;document.getElementById('cakes').textContent=cakes;box.appendChild(d)})}
+function tick(){time--;document.getElementById('time').textContent=time;if(time<=0){run=false;clearInterval(timer);
+show('⏰ 时间到','共完成 '+cakes+' 个蛋糕')}}
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');time=60;cakes=0;combo=0;run=true;clearInterval(timer);startRound();timer=setInterval(tick,1000)}
+document.getElementById('step').textContent='点击「再来一局」开始做蛋糕！';renderIngs();
+</script></body></html>

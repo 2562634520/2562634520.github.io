@@ -1,0 +1,71 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>UNO 卡牌</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+.wrap{width:96vw;max-width:420px;display:flex;flex-direction:column;gap:8px}
+.top{display:flex;justify-content:space-between;font-size:13px}
+.pile{background:#1a0f12;border:1px solid #5a2424;border-radius:12px;min-height:120px;display:flex;align-items:center;justify-content:center}
+.card{width:56px;height:84px;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4);flex:none}
+.card.on{outline:3px solid #ffd9c8}
+.hand{display:flex;gap:6px;flex-wrap:wrap;min-height:96px;align-items:center;justify-content:center;background:#141019;border:1px solid #3a2020;border-radius:12px;padding:8px}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer;margin:4px}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🃏 UNO 卡牌</h1><div class="hint">出同色或同数字的牌 · 先出完手牌获胜 · 无牌可出时抽牌</div>
+<div class="wrap">
+  <div class="top"><span>👤 你：<b id="myN">0</b> 张</span><span>🤖 电脑：<b id="aiN">0</b> 张</span></div>
+  <div class="pile"><div id="cur" class="card"></div></div>
+  <div class="hand" id="hand"></div>
+  <div style="text-align:center"><button class="btn" onclick="drawCard()">抽牌</button><button class="btn" onclick="again()">重开</button></div>
+</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const COL={R:'#d64545',Y:'#e0a63d',G:'#3d9a5a',B:'#3d7fd6'},COLN=['R','Y','G','B'];
+let deck=[],my=[],ai=[],cur={c:'R',v:0},turn=0,lock=false,run=true;
+function mkCard(c,v){return{c,v}}
+function build(){deck=[];
+for(let c of COLN){deck.push(mkCard(c,0));
+for(let v=1;v<=9;v++){deck.push(mkCard(c,v));deck.push(mkCard(c,v))}
+deck.push(mkCard(c,'S'));deck.push(mkCard(c,'S'));deck.push(mkCard(c,'+2'));deck.push(mkCard(c,'+2'))}
+for(let i=0;i<4;i++){deck.push(mkCard('W','W'));deck.push(mkCard('W','+4'))}
+for(let i=deck.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));let t=deck[i];deck[i]=deck[j];deck[j]=t}}
+function pop(){return deck.pop()||null}
+function deal(){build();my=[];ai=[];for(let i=0;i<5;i++){my.push(pop());ai.push(pop())}
+cur=pop()||mkCard('R',0);turn=0;lock=false;run=true}
+function can(c){if(!c)return false;if(c.c==='W')return true;return c.c===cur.c||c.v===cur.v}
+function playCard(i){if(lock||!run)return;let c=my[i];if(!can(c))return;my.splice(i,1);cur=c;turn=1;
+if(c.c==='W'){let cols=prompt('选颜色：R/Y/G/B','R');if(cols&&COLN.includes(cols.toUpperCase()))cur={c:cols.toUpperCase(),v:c.v};else cur={c:'R',v:c.v}}
+if(c.v==='+2'){for(let k=0;k<2;k++)ai.push(pop());lock=false;aiTurn();return}
+if(c.v==='+4'){for(let k=0;k<4;k++)ai.push(pop());lock=false;aiTurn();return}
+if(c.v==='S'){lock=false;render();return}
+lock=false;setTimeout(aiTurn,450)}
+function drawCard(){if(lock||!run||turn!==0)return;let c=pop();if(c)my.push(c);if(can(c))return;turn=1;lock=false;setTimeout(aiTurn,450)}
+function aiTurn(){if(!run)return;if(turn!==1){return}
+let idx=ai.findIndex(c=>can(c));
+if(idx<0){let c=pop();if(c)ai.push(c);idx=ai.findIndex(x=>can(x));if(idx<0){turn=0;render();return}}
+let c=ai[idx];ai.splice(idx,1);cur=c;turn=0;
+if(c.c==='W')cur={c:COLN[Math.floor(Math.random()*4)],v:c.v};
+if(c.v==='+2'){for(let k=0;k<2;k++)my.push(pop())}
+if(c.v==='+4'){for(let k=0;k<4;k++)my.push(pop())}
+check();render()}
+function check(){if(!my.length)end('🎉 你赢了','手牌先出完，UNO！');
+else if(!ai.length)end('🤖 电脑赢了','再接再厉，再来一局')}
+function end(t,s){run=false;lock=true;show(t,s)}
+function render(){document.getElementById('myN').textContent=my.length;document.getElementById('aiN').textContent=ai.length;
+let curEl=document.getElementById('cur');curEl.style.background=cur.c==='W'?'linear-gradient(135deg,#666,#222)':COL[cur.c];
+curEl.innerHTML='<span>'+cur.c+'</span><span>'+cur.v+'</span>';
+let handEl=document.getElementById('hand');handEl.innerHTML='';
+my.forEach((c,i)=>{let d=document.createElement('div');d.className='card'+(can(c)?' on':'');
+d.style.background=c.c==='W'?'linear-gradient(135deg,#666,#222)':COL[c.c];
+d.innerHTML='<span>'+c.c+'</span><span>'+c.v+'</span>';
+d.onclick=()=>playCard(i);handEl.appendChild(d)})}
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');deal();render()}
+deal();render();
+</script></body></html>

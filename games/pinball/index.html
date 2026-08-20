@@ -1,0 +1,54 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🕹️ 弹球机</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🕹️ 弹球机</h1><canvas id="cv"></canvas>
+<div class="info">得分 <b id="sc">0</b> · 球 <b id="lv">3</b></div>
+<div class="hint">点击左右两侧或方向键控制挡板 · 别让球漏到底部</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0;
+function size(){W=Math.min(innerWidth-24,380);H=Math.floor(W*1.5);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W;cv.height=H}
+size();addEventListener('resize',()=>{size();draw()});
+let over=false,score=0,lives=3,ball={x:0,y:0,vx:0,vy:0},flipL=false,flipR=false,bumpers=[],paddles=[{x:0,y:0},{x:0,y:0}],tick=0;
+function init(){over=false;score=0;lives=3;ball={x:W/2,y:H-140,vx:0,vy:0};bumpers=[];for(let i=0;i<4;i++)bumpers.push({x:60+i*75,y:120+Math.floor(i/2)*95,r:22});paddles=[{x:W/2-55,y:H-70,w:52},{x:W/2+3,y:H-70,w:52}];flipL=false;flipR=false;tick=0;document.getElementById('sc').textContent='0';document.getElementById('lv').textContent='3';document.querySelector('.over').classList.remove('show');loop()}
+cv.addEventListener('pointerdown',e=>{if(over)return;const r=cv.getBoundingClientRect();const x=e.clientX-r.left;if(x<W/2)flipL=true;else flipR=true});
+addEventListener('pointerup',()=>{flipL=false;flipR=false});
+addEventListener('keydown',e=>{if(e.code==='ArrowLeft')flipL=true;if(e.code==='ArrowRight')flipR=true;if(e.code==='Space')flipL=flipR=true});
+addEventListener('keyup',e=>{if(e.code==='ArrowLeft')flipL=false;if(e.code==='ArrowRight')flipR=false;if(e.code==='Space')flipL=flipR=false});
+function step(){if(over)return;tick++;
+if(Math.hypot(ball.vx,ball.vy)<.2&&tick<60){ball.x=W/2;ball.y=H-120;ball.vx=(Math.random()-.5)*2;ball.vy=-9}
+ball.x+=ball.vx;ball.y+=ball.vy;
+if(ball.x<10){ball.x=10;ball.vx=Math.abs(ball.vx)}if(ball.x>W-10){ball.x=W-10;ball.vx=-Math.abs(ball.vx)}if(ball.y<10){ball.y=10;ball.vy=Math.abs(ball.vy)}
+for(const b of bumpers){if(Math.hypot(ball.x-b.x,ball.y-b.y)<b.r+9){const a=Math.atan2(ball.y-b.y,ball.x-b.x);ball.vx=Math.cos(a)*7;ball.vy=Math.sin(a)*7;score+=5;document.getElementById('sc').textContent=score}}
+if(flipL){paddles[0].ang=Math.min(paddles[0].ang||0+12,45)}else{paddles[0].ang=Math.max((paddles[0].ang||0)-8,0)}
+if(flipR){paddles[1].ang=Math.min((paddles[1].ang||0)+12,45)}else{paddles[1].ang=Math.max((paddles[1].ang||0)-8,0)}
+const pl={x:paddles[0].x,y:paddles[0].y,w:paddles[0].w};const pr={x:paddles[1].x,y:paddles[1].y,w:paddles[1].w};
+if(ball.y>pl.y-8&&ball.y<pl.y+14&&ball.x>pl.x-20&&ball.x<pl.x+pl.w+24){ball.vy=-Math.abs(ball.vy)*1.02-2;ball.vx+=(ball.x-(pl.x+pl.w/2))*.08}
+if(ball.y>pr.y-8&&ball.y<pr.y+14&&ball.x>pr.x-24&&ball.x<pr.x+pr.w+20){ball.vy=-Math.abs(ball.vy)*1.02-2;ball.vx+=(ball.x-(pr.x+pr.w/2))*.08}
+if(ball.y>H-10){lives--;document.getElementById('lv').textContent=lives;tick=0;if(lives<=0){over=true;msg.textContent='球用完了！得分 '+score;document.querySelector('.over').classList.add('show')}else{ball.vx=0;ball.vy=0}}
+draw();requestAnimationFrame(step)}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#121016';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#b02a2a';ctx.lineWidth=3;ctx.strokeRect(2,2,W-4,H-4);
+for(const b of bumpers){const g=ctx.createRadialGradient(b.x-6,b.y-6,3,b.x,b.y,b.r);g.addColorStop(0,'#ff9b78');g.addColorStop(1,'#d64545');ctx.fillStyle=g;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,7);ctx.fill();ctx.strokeStyle='#ffd9c8';ctx.lineWidth=2;ctx.stroke()}
+ctx.strokeStyle='#e8dcd5';ctx.lineWidth=5;ctx.lineCap='round';ctx.beginPath();const a1=(paddles[0].ang||0)*Math.PI/180;ctx.moveTo(paddles[0].x+10,paddles[0].y);ctx.lineTo(paddles[0].x-20*Math.cos(a1)+10,paddles[0].y-20*Math.sin(a1));ctx.stroke();const a2=(paddles[1].ang||0)*Math.PI/180;ctx.beginPath();ctx.moveTo(paddles[1].x+paddles[1].w-10,paddles[1].y);ctx.lineTo(paddles[1].x+paddles[1].w+20*Math.cos(a2)-10,paddles[1].y-20*Math.sin(a2));ctx.stroke();
+ctx.fillStyle='#e8dcd5';ctx.beginPath();ctx.arc(ball.x,ball.y,9,0,7);ctx.fill();
+ctx.fillStyle='#ffd9c8';ctx.font='bold 15px sans-serif';ctx.textAlign='left';ctx.fillText('得分 '+score,12,24);ctx.textAlign='right';ctx.fillText('球 '+lives,W-12,24)}
+function restart(){init()}
+let running=false;function loop(){if(running)return;running=true;step()}
+init();
+
+</script></body></html>

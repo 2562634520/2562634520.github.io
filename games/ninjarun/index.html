@@ -1,0 +1,49 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🥷 忍者跑酷</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🥷 忍者跑酷</h1><canvas id="cv"></canvas>
+<div class="info">距离 <b id="sc">0</b></div>
+<div class="hint">空格/点击跳跃 · 下箭头下滑 · 躲开墙壁和飞镖</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0;
+function size(){W=Math.min(innerWidth-24,440);H=Math.floor(W*.7);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W;cv.height=H}
+size();addEventListener('resize',()=>{size();draw()});
+let over=false,score=0,player={y:0,vy:0,onGround:true,slide:false},obs=[],tick=0,speed=6;
+function init(){over=false;score=0;player={y:0,vy:0,onGround:true,slide:false};obs=[];tick=0;speed=6;document.getElementById('sc').textContent='0';document.querySelector('.over').classList.remove('show');loop()}
+cv.addEventListener('pointerdown',()=>{if(over)return;if(player.slide){player.slide=false;return}if(player.onGround){player.vy=-12.5;player.onGround=false}});
+addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();if(over)return;if(player.onGround){player.vy=-12.5;player.onGround=false}}if(e.code==='ArrowDown'){if(over)return;player.slide=true}});
+addEventListener('keyup',e=>{if(e.code==='ArrowDown')player.slide=false});
+function step(){if(over)return;tick++;score++;document.getElementById('sc').textContent=Math.floor(score/5);
+player.vy+=.6;player.y+=player.vy;if(player.y>=0){player.y=0;player.vy=0;player.onGround=true}
+if(tick%45===0){const r=Math.random();obs.push(r<.55?{type:'box',x:W+40,y:0}:{type:'high',x:W+40,y:-26})}
+for(const o of obs){o.x-=speed;const px=50,py=player.y;
+if(o.type==='box'){if(px+20>o.x&&px<o.x+30&&!player.slide&&py+42>H-70-32&&py+42<H-50){over=true;msg.textContent='撞墙了！得分 '+Math.floor(score/5);document.querySelector('.over').classList.add('show')}}
+else{if(!player.slide&&px+16>o.x&&px<o.x+32&&py+8>H-70-58&&py<H-50){over=true;msg.textContent='被飞镖击中！得分 '+Math.floor(score/5);document.querySelector('.over').classList.add('show')}}}
+obs=obs.filter(o=>o.x>-50);if(tick%600===0)speed+=.4;
+draw();requestAnimationFrame(step)}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#141019';ctx.fillRect(0,0,W,H);ctx.fillStyle='#2a1a2a';ctx.fillRect(0,H-50,W,50);ctx.strokeStyle='#8a7a9a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,H-50);ctx.lineTo(W,H-50);ctx.stroke();
+for(const o of obs){if(o.type==='box'){ctx.fillStyle='#5a4a7a';ctx.fillRect(o.x,H-82,30,32)}else{ctx.strokeStyle='#d64545';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(o.x+16,H-50);ctx.lineTo(o.x+2,H-74);ctx.stroke()}}
+const py=player.y;ctx.fillStyle='#2a2a3a';ctx.fillRect(34,H-50+py-42,26,42);ctx.fillStyle='#b02a2a';ctx.fillRect(30,H-50+py-52,34,10);ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(48,H-50+py-54,7,0,7);ctx.fill();
+if(player.slide){ctx.fillStyle='#2a2a3a';ctx.fillRect(30,H-50+py-20,34,20)}
+ctx.fillStyle='#ffd9c8';ctx.font='bold 15px sans-serif';ctx.textAlign='left';ctx.fillText('距离 '+Math.floor(score/5),12,24)}
+function restart(){init()}
+let running=false;function loop(){if(running)return;running=true;step()}
+init();
+
+</script></body></html>

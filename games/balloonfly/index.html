@@ -1,0 +1,49 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🎈 气球飞行</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🎈 气球飞行</h1><canvas id="cv"></canvas>
+<div class="info">距离 <b id="sc">0</b> · 星星 +10</div>
+<div class="hint">按住让气球上升，松开下降 · 躲避云朵收集星星</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0;
+function size(){W=Math.min(innerWidth-24,400);H=Math.floor(W*1.35);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W;cv.height=H}
+size();addEventListener('resize',()=>{size();draw()});
+let over=false,score=0,hold=false,ball={x:0,y:0,vy:0},clouds=[],stars=[],t=0,tick=0;
+function init(){over=false;score=0;hold=false;ball={x:W/2,y:H-80,vy:0};clouds=[];stars=[];t=0;tick=0;document.getElementById('sc').textContent='0';document.querySelector('.over').classList.remove('show');loop()}
+cv.addEventListener('pointerdown',()=>{hold=true});addEventListener('pointerup',()=>{hold=false});addEventListener('pointercancel',()=>{hold=false});
+addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();hold=true}});addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='ArrowUp')hold=false});
+function step(){if(over)return;t++;tick++;if(hold)ball.vy-=1.15;else ball.vy+=.65;ball.vy=Math.max(-7,Math.min(6,ball.vy));ball.y+=ball.vy;ball.y=Math.max(60,Math.min(H-60,ball.y));
+if(tick%46===0)clouds.push({x:W+50,y:40+Math.random()*(H-120),w:90+Math.random()*70,v:1+Math.random()*1.6});
+if(tick%140===0)stars.push({x:W+30,y:50+Math.random()*(H-140),v:2.4});
+for(const c of clouds){c.x-=c.v;if(Math.hypot(ball.x-c.x,ball.y-(c.y+18))<46&&c.y+34>ball.y){end('撞到云朵，飞了 '+Math.floor(score));return}}
+clouds=clouds.filter(c=>c.x>-120);
+for(const s of stars){s.x-=s.v;if(Math.hypot(ball.x-s.x,ball.y-s.y)<24){score+=10;document.getElementById('sc').textContent=Math.floor(score);s.dead=true}}
+stars=stars.filter(s=>!s.dead&&s.x>-20);score+=0.08;document.getElementById('sc').textContent=Math.floor(score);
+draw();requestAnimationFrame(step)}
+function end(m){over=true;msg.textContent=m;document.querySelector('.over').classList.add('show')}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#150d12';ctx.fillRect(0,0,W,H);
+for(const c of clouds){ctx.fillStyle='rgba(214,69,69,.25)';ctx.beginPath();ctx.arc(c.x,c.y,22,0,7);ctx.arc(c.x+30,c.y-4,26,0,7);ctx.arc(c.x+58,c.y+4,20,0,7);ctx.fill()}
+for(const s of stars){ctx.fillStyle='#ffc93c';ctx.beginPath();ctx.arc(s.x,s.y,8,0,7);ctx.fill()}
+const g=ctx.createRadialGradient(ball.x-8,ball.y-10,5,ball.x,ball.y,30);g.addColorStop(0,'#ff7b7b');g.addColorStop(1,'#b02a2a');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(ball.x,ball.y,28,34,0,0,7);ctx.fill();ctx.strokeStyle='#ffd9c8';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(ball.x,ball.y+34);ctx.lineTo(ball.x,ball.y+56);ctx.stroke();ctx.beginPath();ctx.moveTo(ball.x,ball.y+46);ctx.lineTo(ball.x-12,ball.y+62);ctx.moveTo(ball.x,ball.y+46);ctx.lineTo(ball.x+12,ball.y+62);ctx.stroke();
+ctx.fillStyle='#ffd9c8';ctx.font='bold 15px sans-serif';ctx.textAlign='left';ctx.fillText('距离 '+Math.floor(score),12,24)}
+function restart(){init()}
+let running=false;function loop(){if(running)return;running=true;step()}
+init();
+
+</script></body></html>

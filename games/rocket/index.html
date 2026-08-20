@@ -1,0 +1,54 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🚀 火箭发射</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:20px;letter-spacing:.18em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f}
+canvas{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px;box-shadow:0 0 40px #b02a2a2e}
+.panel b{font-size:26px;color:#ffd9c8}
+.btn{display:inline-block;margin:16px 6px 0;padding:10px 24px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn.small{padding:7px 16px;font-size:13px}
+
+</style></head><body>
+<div class="wrap"><h1>🚀 火箭发射</h1><canvas id="cv"></canvas>
+<div class="info">高度 <b id="sc">0</b> · 燃料 <b id="fu">100</b></div>
+<div class="hint">←→ 或点击左右转向 · 上箭头/按住 boost 喷燃料上升 · 吃绿色燃料</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let W=0,H=0;
+function size(){W=Math.min(innerWidth-24,420);H=Math.floor(W*1.2);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W;cv.height=H}
+size();addEventListener('resize',()=>{size();draw()});
+let over=false,score=0,fuel=100,rocket={x:0,y:0,vy:0},rocks=[],fuelP=[],tick=0,keyL=false,keyR=false;
+function init(){over=false;score=0;fuel=100;rocket={x:W/2,y:H-60,vy:0};rocks=[];fuelP=[];tick=0;keyL=false;keyR=false;document.getElementById('sc').textContent='0';document.getElementById('fu').textContent='100';document.querySelector('.over').classList.remove('show');loop()}
+cv.addEventListener('pointerdown',e=>{if(over)return;const r=cv.getBoundingClientRect();if(e.clientX-r.left<W/2)keyL=true;else keyR=true});
+addEventListener('pointerup',()=>{keyL=false;keyR=false});
+addEventListener('keydown',e=>{if(e.code==='ArrowLeft')keyL=true;if(e.code==='ArrowRight')keyR=true;if(e.code==='ArrowUp'){e.preventDefault();boost()}});
+addEventListener('keyup',e=>{if(e.code==='ArrowLeft')keyL=false;if(e.code==='ArrowRight')keyR=false});
+function boost(){if(over)return;fuel=Math.max(0,fuel-1);if(fuel>0){rocket.vy-=1.4;score+=1;document.getElementById('sc').textContent=Math.floor(score/3)}document.getElementById('fu').textContent=Math.floor(fuel)}
+function step(){if(over)return;tick++;if(keyL)rocket.x-=3.5;if(keyR)rocket.x+=3.5;if(fuel<=0)rocket.vy+=.5;rocket.y+=rocket.vy;rocket.x=Math.max(24,Math.min(W-24,rocket.x));
+if(tick%46===0&&rocket.y<H-200)rocks.push({x:Math.random()*W,y:-20,vy:2+Math.random()*2.5,r:8+Math.random()*10});
+if(tick%180===0&&fuelP.length<3)fuelP.push({x:Math.random()*W,y:-20,vy:1.8});
+for(const rk of rocks){rk.y+=rk.vy;if(Math.hypot(rocket.x-rk.x,rocket.y-rk.y)<rk.r+18){over=true;msg.textContent='撞上陨石！高度 '+Math.floor(score/3);document.querySelector('.over').classList.add('show')}}
+rocks=rocks.filter(r=>r.y<H+40);
+for(const fp of fuelP){fp.y+=fp.vy;if(Math.hypot(rocket.x-fp.x,rocket.y-fp.y)<24){fuel=Math.min(100,fuel+20);document.getElementById('fu').textContent=Math.floor(fuel);fp.dead=true}}
+fuelP=fuelP.filter(f=>!f.dead&&f.y<H+40);
+if(fuel<=0&&rocket.y>H+60){over=true;msg.textContent='燃料耗尽坠落！高度 '+Math.floor(score/3);document.querySelector('.over').classList.add('show')}
+if(rocket.y<30){score+=50;over=true;msg.textContent='冲出大气层，成功！得分 '+Math.floor(score/3);document.querySelector('.over').classList.add('show')}
+draw();requestAnimationFrame(step)}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#0b0d14';ctx.fillRect(0,0,W,H);for(let i=0;i<40;i++){ctx.fillStyle='#fff3';ctx.fillRect(Math.random()*W,Math.random()*H,1.5,1.5)}
+for(const rk of rocks){ctx.fillStyle='#6a5a4a';ctx.beginPath();ctx.arc(rk.x,rk.y,rk.r,0,7);ctx.fill()}
+for(const fp of fuelP){ctx.fillStyle='#57c96e';ctx.fillRect(fp.x-6,fp.y-8,12,16);ctx.fillStyle='#ffd9c8';ctx.font='9px sans-serif';ctx.textAlign='center';ctx.fillText('F',fp.x,fp.y+3)}
+const x=rocket.x,y=rocket.y;ctx.fillStyle='#e8dcd5';ctx.beginPath();ctx.moveTo(x,y-32);ctx.lineTo(x+12,y-8);ctx.lineTo(x+12,y+14);ctx.lineTo(x-12,y+14);ctx.lineTo(x-12,y-8);ctx.closePath();ctx.fill();ctx.fillStyle='#b02a2a';ctx.beginPath();ctx.moveTo(x,y-22);ctx.lineTo(x+8,y-2);ctx.lineTo(x-8,y-2);ctx.closePath();ctx.fill();ctx.fillStyle='#ffc93c';ctx.beginPath();ctx.moveTo(x-8,y+14);ctx.lineTo(x,y+28);ctx.lineTo(x+8,y+14);ctx.fill();
+if(fuel>0&&Math.random()<.7){ctx.fillStyle='#ffc93c';ctx.beginPath();ctx.arc(x,y+34,5+Math.random()*4,0,7);ctx.fill()}
+ctx.fillStyle='#ffd9c8';ctx.font='bold 15px sans-serif';ctx.textAlign='left';ctx.fillText('高度 '+Math.floor(score/3),12,24);ctx.textAlign='right';ctx.fillText('燃料 '+Math.floor(fuel),W-12,24)}
+function restart(){init()}
+let running=false;function loop(){if(running)return;running=true;step()}
+init();
+
+</script></body></html>

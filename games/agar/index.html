@@ -1,0 +1,28 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🦠 吞噬细胞</title><style>*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.score{font-size:13px;color:#d9a08f}.score b{color:#ffd9c8}
+canvas{background:#0c0a0d;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:26px 36px}.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:16px auto 0;padding:10px 30px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}</style></head><body>
+<div class="wrap"><h1>🦠 吞噬细胞</h1><div class="score">本局 <b id="sc">0</b></div><canvas id="cv"></canvas><div class="hint">点击/触屏操作</div></div>
+<div class="over"><div class="panel"><b id="msg">游戏结束</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');const dpr=Math.min(devicePixelRatio||1,2);cv.width=480*dpr;cv.height=360*dpr;cv.style.width=Math.min(480,innerWidth-24)+'px';cv.style.height='auto';ctx.setTransform(dpr,0,0,dpr,0,0);
+let me,foods,enemies,score,alive,raf;
+function rset(){me={x:240,y:180,r:14};foods=[];enemies=[];score=0;alive=true;for(let i=0;i<30;i++)foods.push({x:Math.random()*460+10,y:Math.random()*340+10,r:4,col:'hsl('+Math.random()*360+',70%,60%)'});for(let i=0;i<5;i++)enemies.push({x:Math.random()*460+10,y:Math.random()*340+10,r:Math.random()*20+10,vx:Math.random()*2-1,vy:Math.random()*2-1,col:'hsl('+Math.random()*360+',40%,40%)'});document.getElementById('sc').textContent=0;document.querySelector('.over').classList.remove('show');cancelAnimationFrame(raf);requestAnimationFrame(loop)}
+function loop(){if(!alive)return;me.x+=me.vx;me.y+=me.vy;me.x=Math.max(me.r,Math.min(480-me.r,me.x));me.y=Math.max(me.r,Math.min(360-me.r,me.y));
+for(const f of foods){const d=Math.hypot(me.x-f.x,me.y-f.y);if(d<me.r+f.r){me.r+=.4;score+=1;f.x=Math.random()*460+10;f.y=Math.random()*340+10}}
+for(const e of enemies){e.x+=e.vx;e.y+=e.vy;if(e.x<e.r||e.x>480-e.r)e.vx*=-1;if(e.y<e.r||e.y>360-e.r)e.vy*=-1;const d=Math.hypot(me.x-e.x,me.y-e.y);if(d<me.r+e.r){if(me.r>e.r+2){me.r+=e.r*.3;e.r=0;e.x=-100}else if(e.r>me.r+2){{document.getElementById('msg').textContent='得分 '+Math.floor(score);document.getElementById('bs').textContent=Math.max(parseInt(document.getElementById('bs').textContent||0),Math.floor(score));localStorage.setItem('agarBest',Math.max(parseInt(localStorage.getItem('agarBest')||0),Math.floor(score)));document.querySelector('.over').classList.add('show');alive=false};return}}}
+enemies=enemies.filter(e=>e.r>0);if(enemies.length<5)enemies.push({x:Math.random()*460+10,y:Math.random()*340+10,r:Math.random()*10+10,vx:Math.random()*2-1,vy:Math.random()*2-1,col:'hsl('+Math.random()*360+',40%,40%)'});
+document.getElementById('sc').textContent=Math.floor(score);
+ctx.fillStyle='#0c0a0d';ctx.fillRect(0,0,480,360);foods.forEach(f=>{ctx.fillStyle=f.col;ctx.beginPath();ctx.arc(f.x,f.y,f.r,0,7);ctx.fill()});enemies.forEach(e=>{ctx.fillStyle=e.col;ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,7);ctx.fill()});ctx.fillStyle='#b02a2a';ctx.beginPath();ctx.arc(me.x,me.y,me.r,0,7);ctx.fill();raf=requestAnimationFrame(loop)}
+function restart(){rset()}
+function aim(x,y){const dx=x-240,dy=y-180;const m=Math.hypot(dx,dy)||1;me.vx=dx/m*2.5;me.vy=dy/m*2.5}
+cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect();aim((e.clientX-r.left)*(480/r.width),(e.clientY-r.top)*(360/r.height))});
+rset();
+</script></body></html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>节奏打击</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#171421;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:66vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🎵 节奏打击</h1><div class="hint">音符落到判定线时点击对应轨道 · 键盘 1-4 或触摸</div>
+<canvas id="c" width="360" height="440"></canvas>
+<div class="bar">分数 <b id="score">0</b> · 连击 <b id="combo">0</b> · 进度 <b id="pct">0</b>%</div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=360,H=440,L=4;
+let notes=[],score=0,combo=0,maxc=0,hit=0,total=60,run=true,tickN=0,next=0;
+const LANES=[60,140,220,300];
+function gen(){next=0;notes=[];let gap=18;
+for(let i=0;i<total;i++){let n=Math.random()<.55?1:2;
+for(let k=0;k<n;k++){let lane=Math.floor(Math.random()*4);if(n===2&&k===1)lane=(lane+1+Math.floor(Math.random()*3))%4;
+notes.push({lane,y:-40-(i*gap+Math.random()*6),speed:5.6,id:i*10+k})}
+}}
+function tap(lane){if(!run)return;let best=null,by=999;
+notes.forEach(n=>{if(n.lane===lane&&n.y>300&&n.y<470&&Math.abs(n.y-390)<by){by=Math.abs(n.y-390);best=n}});
+if(!best)return;let d=Math.abs(best.y-390);notes.splice(notes.indexOf(best),1);hit++;
+if(d<18){score+=100;combo++;if(combo>maxc)maxc=combo}
+else if(d<40){score+=60;combo++}
+else{score+=20;combo=0}
+document.getElementById('score').textContent=score;document.getElementById('combo').textContent=combo;
+document.getElementById('pct').textContent=Math.round(hit/total*100)}
+function tick(){tickN++;
+notes.forEach(n=>n.y+=n.speed);
+notes=notes.filter(n=>n.y<480);
+let pct=Math.round(hit/total*100);document.getElementById('pct').textContent=pct;
+if(hit>=total){run=false;show('🎉 完美通关','得分 '+score+' · 最高连击 '+maxc);return}
+draw()}
+function draw(){ctx.fillStyle='#171421';ctx.fillRect(0,0,W,H);
+for(let i=0;i<L;i++){ctx.strokeStyle='#3a2020';ctx.strokeRect(LANES[i]-40,0,80,H)}
+ctx.strokeStyle='#d64545';ctx.beginPath();ctx.moveTo(0,390);ctx.lineTo(W,390);ctx.stroke();
+notes.forEach(n=>{ctx.fillStyle='#ffd9c8';ctx.beginPath();ctx.arc(LANES[n.lane],n.y,13,0,7);ctx.fill();
+ctx.fillStyle='#b02a2a';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('♪',LANES[n.lane],n.y+5)})}
+cv.addEventListener('pointerdown',e=>{let x=e.clientX-cv.getBoundingClientRect().left;
+let lane=LANES.reduce((a,v,i)=>Math.abs(x-v)<Math.abs(x-LANES[a])?i:a,0);tap(lane)});
+window.addEventListener('keydown',e=>{let k=+e.key;if(k>=1&&k<=4)tap(k-1)});
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');score=0;combo=0;maxc=0;hit=0;run=true;gen()}
+again();setInterval(tick,16);
+</script></body></html>

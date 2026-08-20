@@ -1,0 +1,98 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>数织画</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,'PingFang SC',sans-serif;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#ffd9c8;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+h1{font-size:19px;margin:10px 0 4px;letter-spacing:2px}
+.hint{font-size:12px;opacity:.7;margin-bottom:6px}
+canvas{background:#1a0f12;border:1px solid #5a2424;border-radius:12px;max-width:96vw;max-height:68vh;touch-action:none}
+.bar{font-size:13px;margin:8px 0}
+.over{position:fixed;inset:0;background:rgba(10,6,8,.86);display:none;align-items:center;justify-content:center;z-index:9}
+.over.show{display:flex}
+.panel{text-align:center;padding:26px 38px;background:#1a0f12;border:1px solid #b02a2a;border-radius:16px}
+.panel h2{font-size:24px;color:#ff6b6b;margin-bottom:8px}
+.panel p{font-size:14px;margin-bottom:16px}
+.btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;border:none;border-radius:999px;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.96)}
+</style></head><body>
+<h1>🎨 数织画</h1><div class="hint">根据行列数字提示涂色 · 第一下涂色第二下打叉</div>
+<canvas id="c" width="340" height="340"></canvas>
+<div class="bar">关卡 <b id="lv">1</b>/3 · 剩余错误 <b id="er">3</b></div>
+<div class="over" id="over"><div class="panel"><h2 id="t"></h2><p id="s"></p><button class="btn" onclick="again()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const N=6,S=52,O=28;
+const LEVELS=[
+  [[1,1,1],[5],[1,3,1],[1,1,1],[1,3,1],[1,1,1]],
+  [[3],[1,1],[5],[1,1],[3]],
+  [[2,2],[1,4],[5],[1,4],[2,2]]
+];
+const SOLS=[
+  [[0,2,4],[1,1,1,1,1],[0,2,4],[0,2,4],[0,2,4],[0,2,4]],
+  [[1,1,1],[0,0,0],[1,1,1,1,1],[0,0,0],[1,1,1]],
+  [[1,2,1],[0,1,1,1,0],[1,1,1,1,1],[0,1,1,1,0],[1,2,1]]
+];
+let level=0,grid=[],errors=0,run=true;
+function setup(){
+  level=0;errors=0;run=true;newLevel();
+}
+function newLevel(){
+  const n=N-(level===1?1:0);
+  grid=Array.from({length:n},()=>Array(n).fill(0));
+  document.getElementById('lv').textContent=(level+1)+'/3';
+  document.getElementById('er').textContent=3-errors;
+}
+function clues(arr){return arr.map(r=>r[0]||[0]).map(c=>c.join(' '))}
+function draw(){
+  const n=N-(level===1?1:0),g=Math.min(cv.width,cv.height)/n;
+  ctx.fillStyle='#1a0f12';ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillStyle='#ffd9c8';
+  for(let r=0;r<n;r++){
+    const cs=clues(SOLS[level])[r];
+    ctx.fillText(cs,26,r*g+g/2);
+  }
+  for(let r=0;r<n;r++){
+    const rowClue=[];
+    let runC=0;
+    for(let c=0;c<n;c++){if(SOLS[level][r][c])runC++;else{if(runC){rowClue.push(runC);runC=0}}}
+    if(runC)rowClue.push(runC);
+    ctx.fillText(rowClue.join(' ')||'0',26,r*g+g/2);
+  }
+  for(let c=0;c<n;c++){
+    const colClue=[];
+    let runC=0;
+    for(let r=0;r<n;r++){if(SOLS[level][r][c])runC++;else{if(runC){colClue.push(runC);runC=0}}}
+    if(runC)colClue.push(runC);
+    const lines=colClue.join(' ');
+    ctx.fillText(lines,c*g+g/2,16);
+  }
+  for(let r=0;r<n;r++)for(let c=0;c<n;c++){
+    const x=c*g,y=r*g;
+    ctx.strokeStyle='#5a2424';ctx.strokeRect(x,y,g,g);
+    if(grid[r][c]===1){ctx.fillStyle='#d64545';ctx.fillRect(x+3,y+3,g-6,g-6)}
+    if(grid[r][c]===2){ctx.strokeStyle='#ffd9c8';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x+6,y+6);ctx.lineTo(x+g-6,y+g-6);ctx.moveTo(x+g-6,y+6);ctx.lineTo(x+6,y+g-6);ctx.stroke();ctx.lineWidth=1}
+  }
+}
+cv.addEventListener('pointerdown',e=>{
+  if(!run)return;
+  const r=cv.getBoundingClientRect(),n=N-(level===1?1:0),g=cv.width/n;
+  const c=Math.floor((e.clientX-r.left)/g),row=Math.floor((e.clientY-r.top)/g);
+  if(c<0||c>=n||row<0||row>=n)return;
+  const expected=SOLS[level][row][c]?1:0;
+  if(grid[row][c]===0){
+    if(expected===1){grid[row][c]=1}
+    else{errors++;document.getElementById('er').textContent=3-errors;grid[row][c]=2;
+      if(errors>=3){run=false;show('😵 错误太多','再来一次，先看行列提示')}
+    }
+  }else if(grid[row][c]===1){grid[row][c]=2}
+  else{grid[row][c]=0}
+  const n2=N-(level===1?1:0);
+  const done=grid.every((rowArr,ri)=>rowArr.every((v,ci)=>v===1||(SOLS[level][ri][ci]?false:true)));
+  if(done&&errors<3){
+    if(level>=2){run=false;show('🎉 全部完成！','三幅数织画都画出来了')}
+    else{level++;newLevel()}
+  }
+  draw();
+});
+function show(t,s){document.getElementById('t').textContent=t;document.getElementById('s').textContent=s;document.getElementById('over').classList.add('show')}
+function again(){document.getElementById('over').classList.remove('show');setup()}
+setup();setInterval(draw,50);
+</script></body></html>

@@ -1,0 +1,32 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>接苹果</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:18px}
+#cv{background:linear-gradient(#1a2413,#120e11);border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 34px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🧺 接苹果</h1><div class="info"><span>得分 <b id="sc">0</b></span><span>漏掉 <b id="miss">0</b></span></div><canvas id="cv"></canvas><div class="hint">滑动篮子接住水果</div></div>
+<div class="over"><div class="panel"><b>篮子空空</b><button class="btn" onclick="restart()">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),dpr=Math.min(devicePixelRatio||1,2);
+let W,H,basket,drops=[],score,miss,alive,frame=0,lastX=null;
+const ITEMS=['🍎','🍊','🍉','🍇','🍓','🥝'];
+function size(){W=Math.min(innerWidth-24,340);H=Math.min(innerHeight-150,560);cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+size();addEventListener('resize',size);
+function restart(){score=0;miss=0;alive=true;drops=[];frame=0;basket={x:W/2-38,y:H-52,w:76,h:34};document.getElementById('sc').textContent=0;document.getElementById('miss').textContent=0;document.querySelector('.over').classList.remove('show');requestAnimationFrame(loop)}
+restart();
+addEventListener('keydown',e=>{if(e.key==='ArrowLeft')basket.x=Math.max(4,basket.x-42);if(e.key==='ArrowRight')basket.x=Math.min(W-basket.w-4,basket.x+42)});
+cv.addEventListener('pointerdown',e=>{lastX=e.clientX;cv.setPointerCapture(e.pointerId)});
+cv.addEventListener('pointermove',e=>{if(lastX!==null){basket.x=Math.max(4,Math.min(W-basket.w-4,basket.x+(e.clientX-lastX)*1.1));lastX=e.clientX}});
+cv.addEventListener('pointerup',()=>{lastX=null});
+function loop(){requestAnimationFrame(loop);if(!alive)return;frame++;if(frame%20===0)drops.push({x:20+Math.random()*(W-40),y:-20,r:12,s:2+Math.random()*2,text:ITEMS[Math.random()*ITEMS.length|0]});ctx.clearRect(0,0,W,H);ctx.fillStyle='#0f140d';ctx.fillRect(0,0,W,H);for(let i=drops.length-1;i>=0;i--){let d=drops[i];d.y+=d.s;ctx.font=d.r*2+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(d.text,d.x,d.y);if(d.y+d.r>basket.y&&d.y< basket.y+basket.h&&d.x>basket.x&&d.x<basket.x+basket.w){drops.splice(i,1);score++;document.getElementById('sc').textContent=score;continue}if(d.y>H+20){drops.splice(i,1);miss++;document.getElementById('miss').textContent=miss;if(miss>=5)return die()}}ctx.fillStyle='#7a5a32';ctx.beginPath();ctx.moveTo(basket.x,basket.y);ctx.lineTo(basket.x+basket.w,basket.y);ctx.lineTo(basket.x+basket.w-8,basket.y+basket.h);ctx.lineTo(basket.x+8,basket.y+basket.h);ctx.closePath();ctx.fill();ctx.strokeStyle='#b02a2a88';ctx.lineWidth=2;ctx.stroke()}
+function die(){alive=false;document.querySelector('.over').classList.add('show')}
+</script></body></html>

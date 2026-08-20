@@ -1,0 +1,32 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>迷宫探险</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px}
+h1{font-size:20px;letter-spacing:.16em;color:#ffd9c8}
+.info{font-size:13px;color:#d9a08f;display:flex;gap:18px}
+#cv{background:#120e11;border:2px solid #b02a2a66;border-radius:12px;box-shadow:0 0 24px #b02a2a2e;max-width:100%;touch-action:none}
+.hint{font-size:11px;color:#8f7f7b}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 34px}
+.panel b{font-size:24px;color:#ffd9c8}
+.btn{display:block;margin:14px auto 0;padding:9px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+</style></head><body>
+<div class="wrap"><h1>🌀 迷宫探险</h1><div class="info"><span>关卡 <b id="lv">1</b></span><span>步数 <b id="mv">0</b></span></div><canvas id="cv"></canvas><div class="hint">滑动/方向键移动 · 到达出口</div></div>
+<div class="over"><div class="panel"><b id="msg">🎉 通关！</b><button class="btn" onclick="nextLv()">下一关</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),dpr=Math.min(devicePixelRatio||1,2);
+let W,H,N=9,cell,wall=[],px=1,py=1,ex=0,ey=0,lv=0,mv=0,alive=true;
+function size(){W=Math.min(innerWidth-24,360);H=W;cv.style.width=W+'px';cv.style.height=W+'px';cv.width=W*dpr;cv.height=W*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+size();addEventListener('resize',size);
+function genMaze(){N=7+lv*2;cell=W/N;let grid=Array.from({length:N},()=>Array(N).fill(true));let visited=Array.from({length:N},()=>Array(N).fill(false));let stack=[[1,1]];visited[1][1]=true;grid[1][1]=false;while(stack.length){let [x,y]=stack[stack.length-1];let dirs=[[0,2],[2,0],[0,-2],[-2,0]].sort(()=>Math.random()-0.5);let moved=false;for(let [dx,dy] of dirs){let nx=x+dx,ny=y+dy;if(nx>0&&ny>0&&nx<N-1&&ny<N-1&&!visited[nx][ny]){visited[nx][ny]=true;grid[nx][ny]=false;grid[x+dx/2][y+dy/2]=false;stack.push([nx,ny]);moved=true;break}}if(!moved)stack.pop()}wall=grid;px=1;py=1;ex=N-2;ey=N-2;mv=0;document.getElementById('mv').textContent=0}
+function nextLv(){lv++;document.getElementById('lv').textContent=lv+1;document.querySelector('.over').classList.remove('show');genMaze();draw()}
+function draw(){ctx.clearRect(0,0,W,W);ctx.fillStyle='#1d1416';ctx.fillRect(0,0,W,W);ctx.fillStyle='#3a2224';for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(wall[x][y])ctx.fillRect(x*cell,y*cell,cell+0.5,cell+0.5);ctx.fillStyle='#d9a08f';ctx.beginPath();ctx.arc(ex*cell+cell/2,ey*cell+cell/2,cell*0.24,0,7);ctx.fill();ctx.fillStyle='#d64545';ctx.shadowColor='#ff6040';ctx.shadowBlur=8;ctx.beginPath();ctx.arc(px*cell+cell/2,py*cell+cell/2,cell*0.3,0,7);ctx.fill();ctx.shadowBlur=0}
+function move(dx,dy){if(!alive)return;let nx=px+dx,ny=py+dy;if(nx<0||ny<0||nx>=N||ny>=N||wall[nx][ny])return;px=nx;py=ny;mv++;document.getElementById('mv').textContent=mv;draw();if(px===ex&&py===ey){alive=false;document.getElementById('msg').textContent='🎉 通关！';document.querySelector('.over').classList.add('show')}}
+addEventListener('keydown',e=>{let k={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];if(k)move(k[0],k[1])});
+let sx=0,sy=0;
+cv.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY});
+cv.addEventListener('pointerup',e=>{let dx=e.clientX-sx,dy=e.clientY-sy;if(Math.hypot(dx,dy)<12)return;if(Math.abs(dx)>Math.abs(dy))move(Math.sign(dx),0);else move(0,Math.sign(dy))});
+genMaze();draw();
+</script></body></html>

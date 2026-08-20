@@ -1,0 +1,45 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>沙滩排球</title><style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:radial-gradient(ellipse at 50% 0%,#221417,#0b090c);color:#e8dcd5;font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;touch-action:none;user-select:none}
+.wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+h1{font-size:19px;letter-spacing:.16em;color:#ffd9c8}
+.hud{font-size:13px;color:#d9a08f;display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
+canvas{background:#120d10;border:1px solid #33262a;border-radius:12px;touch-action:none;display:block;max-width:96vw;max-height:68vh}
+.btn{display:inline-block;padding:9px 22px;border:0;border-radius:999px;background:linear-gradient(135deg,#b02a2a,#d64545);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin:4px}
+.over{position:fixed;inset:0;display:none;place-items:center;background:rgba(5,3,5,.82);z-index:9}
+.over.show{display:grid}
+.panel{text-align:center;background:#171215;border:1px solid #b02a2a55;border-radius:16px;padding:24px 30px;box-shadow:0 0 40px #b02a2a2e;max-width:86vw}
+.panel b{font-size:24px;color:#ffd9c8;display:block;margin-bottom:8px}
+.panel p{font-size:13px;color:#c9a89b;margin-bottom:12px}
+.tip{font-size:11px;color:#8f7f7b;text-align:center}
+</style></head><body>
+<div class="wrap"><h1>🏐 沙滩排球</h1><div class="hud"><b id="sc">0</b> : <span id="ai">0</span> · 先得 7 分</div><canvas id="cv"></canvas><div class="tip">拖动你（下方）的球员接球 · 球过网得分</div></div>
+<div class="over"><div class="panel"><b id="msg"></b><p id="sub"></p><button class="btn" id="again">再来一局</button></div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');cv.width=360;cv.height=460;
+let sc=0,ai=0,run=true,p={x:180,y:420},a={x:180,y:60},b={x:180,y:230,vx:0,vy:0,served:false},hold=null;
+function reset(){b={x:180,y:330,vx:0,vy:0,served:false};if(Math.random()<0.5)b.y=120;p.x=180;a.x=180}
+function tick(){if(!run)return;
+if(!b.served){if(b.y>250&&Math.random()<0.03){b.vx=(Math.random()*2-1)*2;b.vy=Math.random()<0.5?3.4:-3.4;b.served=true}}else{
+b.x+=b.vx;b.y+=b.vy;b.vy+=0.12;
+if(b.x<14||b.x>cv.width-14)b.vx*=-1;
+if(b.y<14){if(Math.abs(b.x-a.x)<30){b.vy=Math.abs(b.vy)+2.2;b.vx=(b.x-a.x)/8+(Math.random()*2-1)*1.2;b.served=true}else{sc++;document.getElementById('sc').textContent=sc;reset();check()}}
+if(b.y>440){if(Math.abs(b.x-p.x)<32){b.vy=-Math.abs(b.vy)-2;b.vx=(b.x-p.x)/7+(Math.random()*2-1)*1;b.served=true}else{ai++;document.getElementById('ai').textContent=ai;reset();check()}}}
+a.x+=((Math.random()<0.5?80:240)-a.x)*0.02;
+if(hold){p.x=Math.max(20,Math.min(cv.width-20,hold.x))}
+draw()}
+function check(){if(sc>=7||ai>=7){run=false;const m=sc>ai?'你赢啦！':'对手赢了';document.getElementById('msg').textContent=m;document.getElementById('sub').textContent='最终比分 '+sc+' : '+ai;document.querySelector('.over').classList.add('show')}}
+function draw(){ctx.fillStyle='#e0c7a0';ctx.fillRect(0,0,cv.width,cv.height);
+ctx.fillStyle='#f0dcc0';ctx.fillRect(0,0,cv.width,20);ctx.fillRect(0,440,cv.width,20);
+ctx.strokeStyle='#b02a2a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(180,0);ctx.lineTo(180,460);ctx.stroke();
+ctx.fillStyle='#222';ctx.fillRect(178,180,4,100);
+ctx.fillStyle='#2b5fd9';ctx.fillRect(a.x-16,a.y-12,32,24);ctx.fillStyle='#d64545';ctx.fillRect(p.x-16,p.y-12,32,24);
+ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(b.x,b.y,8,0,7);ctx.fill();ctx.lineWidth=1}
+function pos(e){const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)*(cv.width/r.width),y:(e.clientY-r.top)*(cv.height/r.height)}}
+cv.addEventListener('touchstart',e=>{hold=pos(e.touches[0])},{passive:true});
+cv.addEventListener('touchmove',e=>{hold=pos(e.touches[0])},{passive:true});
+cv.addEventListener('touchend',()=>{hold=null},{passive:true});
+cv.addEventListener('mousemove',e=>{hold=pos(e)});
+document.getElementById('again').onclick=()=>{sc=0;ai=0;document.getElementById('sc').textContent='0';document.getElementById('ai').textContent='0';reset();run=true;document.querySelector('.over').classList.remove('show')};
+reset();setInterval(tick,33);
+</script></body></html>
